@@ -282,6 +282,10 @@ STRINGS: dict[str, str] = {
     "flash.time_created": "زمان ثبت شد.",
     "flash.time_deleted": "ثبت زمان حذف شد.",
     "flash.note_added": "یادداشت افزوده شد.",
+    "flash.review_created": "ارزیابی ذخیره شد.",
+    "flash.review_updated": "ارزیابی به‌روزرسانی شد.",
+    "flash.achievement_created": "دستاورد ثبت شد.",
+    "error.ai_disabled": "هوش مصنوعی فعال نیست.",
 }
 
 

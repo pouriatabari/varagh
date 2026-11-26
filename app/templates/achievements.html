@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ t('achievements.title') }}{% endblock %}
+{% block content %}
+<h1>{{ t('achievements.title') }}</h1>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('achievements.new') }}</h2></div>
+  <form method="post" action="/achievements">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="grid-2">
+      <label>
+        {{ t('common.title') }}
+        <input type="text" name="title" dir="auto" required />
+      </label>
+      <label>
+        {{ t('achievements.kind') }}
+        <select name="kind">
+          {% for kind in ['technical', 'work', 'personal', 'learning'] %}
+          <option value="{{ kind }}">{{ t('achievements.kind.' + kind) }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        {{ t('common.date') }}
+        <input type="date" name="period_start" dir="ltr" />
+      </label>
+      <label>
+        {{ t('common.date') }}
+        <input type="date" name="period_end" dir="ltr" />
+      </label>
+    </div>
+    <div class="field">
+      <label for="description_md">{{ t('tasks.description') }}</label>
+      <textarea id="description_md" name="description_md" dir="auto"></textarea>
+    </div>
+    <div class="field">
+      <label for="impact_note">{{ t('achievements.impact') }}</label>
+      <input type="text" id="impact_note" name="impact_note" dir="auto" />
+    </div>
+    <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
+  </form>
+</div>
+
+{% if achievements %}
+{% for achievement in achievements %}
+<div class="card">
+  <div class="card-title">
+    <h2><bdi>{{ achievement.title }}</bdi></h2>
+    <span class="chip">{{ t('achievements.kind.' + achievement.kind) }}</span>
+    {% if achievement.confirmed %}
+    <span class="chip">{{ t('achievements.confirmed') }}</span>
+    {% endif %}
+  </div>
+  {% if achievement.description_md %}
+  <div class="markdown-body" dir="auto">{{ achievement.description_md | markdown }}</div>
+  {% endif %}
+  {% if achievement.impact_note %}
+  <p class="small muted"><bdi>{{ achievement.impact_note }}</bdi></p>
+  {% endif %}
+  {% if linked_tasks[achievement.id] %}
+  <p class="small muted">
+    {{ t('achievements.linked_tasks') }}:
+    {% for task_id in linked_tasks[achievement.id] %}<span class="chip">#{{ task_id }}</span>{% endfor %}
+  </p>
+  {% endif %}
+  <div class="row">
+    {% if not achievement.confirmed %}
+    <form method="post" action="/achievements/{{ achievement.id }}/confirm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <button class="btn btn-sm" type="submit">{{ t('common.confirm') }}</button>
+    </form>
+    {% endif %}
+    <a class="btn btn-sm" href="/achievements/{{ achievement.id }}/export.md">
+      {{ t('achievements.export') }}
+    </a>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<p class="muted">{{ t('achievements.empty') }}</p>
+{% endif %}
+{% endblock %}

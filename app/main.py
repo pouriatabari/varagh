@@ -61,13 +61,14 @@ def create_app() -> FastAPI:
             )
         return response
 
-    from app.api import board, notifications, tasks, timing, web
+    from app.api import board, notifications, reviews, tasks, timing, web
     from app.api import settings as settings_api
 
     app.include_router(web.router)
     app.include_router(tasks.router)
     app.include_router(timing.router)
     app.include_router(board.router)
+    app.include_router(reviews.router)
     app.include_router(notifications.router)
     app.include_router(settings_api.router)
 

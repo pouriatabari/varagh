@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reviews.title') }}{% endblock %}
+{% block content %}
+<div class="card-title">
+  <h1>{{ t('reviews.title') }}</h1>
+  <a class="btn btn-primary" href="/reviews/new">{{ t('reviews.new') }}</a>
+</div>
+
+{% if reviews %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>{{ t('reviews.period_type') }}</th>
+      <th>{{ t('reviews.period_range') }}</th>
+      <th>{{ t('reviews.rating') }}</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for review in reviews %}
+    <tr>
+      <td>{{ t('reviews.period_type.' + review.period_type) }}</td>
+      <td dir="ltr">{{ review.period_start }} → {{ review.period_end }}</td>
+      <td>{{ review.rating | digits if review.rating else '—' }}</td>
+      <td>
+        <a class="btn btn-sm" href="/reviews/{{ review.id }}">{{ t('common.edit') }}</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">{{ t('reviews.empty') }}</p>
+{% endif %}
+{% endblock %}

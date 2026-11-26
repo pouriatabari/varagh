@@ -186,7 +186,11 @@ def previous_period(
 ) -> tuple[dt.date, dt.date]:
     """Return the bounds of the period immediately before the given one."""
     if period_type == "custom":
-        return start, end
+        # A custom period has no calendar anchor: the previous one is the
+        # period of the same length that ends the day before it starts.
+        length = (end - start).days + 1
+        prev_end = start - dt.timedelta(days=1)
+        return prev_end - dt.timedelta(days=length - 1), prev_end
     if calendar_system == "gregorian":
         length = (end - start).days + 1
         prev_end = start - dt.timedelta(days=1)

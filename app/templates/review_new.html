@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reviews.new') }}{% endblock %}
+{% block content %}
+<h1>{{ t('reviews.new') }}</h1>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('reviews.period_type') }}</h2></div>
+  <div class="row" hx-get="/reviews/stats" hx-target="#review-stats" hx-swap="innerHTML" hx-trigger="change from:#period_type">
+    <label>
+      {{ t('reviews.period_type') }}
+      <select id="period_type" name="period_type">
+        {% for kind in period_types %}
+        <option value="{{ kind }}" {{ 'selected' if kind == period.period_type }}>
+          {{ t('reviews.period_type.' + kind) }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <div>
+      <span class="chip" dir="ltr">{{ period.start }} → {{ period.end }}</span>
+    </div>
+  </div>
+</div>
+
+<div id="review-stats">
+  {% include "partials/review_stats.html" %}
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('reviews.narrative') }}</h2></div>
+  {% if ai_enabled %}
+  <button
+    class="btn"
+    type="button"
+    hx-post="/reviews/draft"
+    hx-swap="none"
+  >
+    {{ t('reviews.generate_ai') }}
+  </button>
+  {% else %}
+  <p class="muted">{{ t('reviews.ai_disabled') }}</p>
+  {% endif %}
+
+  <form method="post" action="/reviews">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="period_type" value="{{ period.period_type }}" />
+    <div class="field">
+      <label for="user_final_md">{{ t('reviews.narrative') }}</label>
+      <textarea id="user_final_md" name="user_final_md" dir="auto"></textarea>
+    </div>
+    <div class="field">
+      <label for="rating">{{ t('reviews.rating') }}</label>
+      <input type="number" id="rating" name="rating" min="1" max="5" />
+    </div>
+    <button class="btn btn-primary" type="submit">{{ t('reviews.save') }}</button>
+  </form>
+</div>
+{% endblock %}
