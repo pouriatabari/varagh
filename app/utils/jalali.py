@@ -99,6 +99,14 @@ def week_start(value: dt.date) -> dt.date:
     return value - dt.timedelta(days=(value.weekday() - 5) % 7)
 
 
+def jalali_input_string(value: dt.date | None) -> str:
+    """Return a date as ``YYYY/MM/DD`` in Jalali form with Latin digits."""
+    if value is None:
+        return ""
+    jalali = jalali_of(value)
+    return f"{jalali.year:04d}/{jalali.month:02d}/{jalali.day:02d}"
+
+
 def week_start_jalali(value: jdatetime.date) -> jdatetime.date:
     """Return the Jalali Saturday that starts the week containing ``value``."""
     greg = value.togregorian()

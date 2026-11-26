@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}{{ t('calendar.title') }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    <h1>{{ t('calendar.title') }} — {{ month_name }} {{ year | digits }}</h1>
+    <div style="display: flex; gap: 0.4rem;">
+      <a class="btn btn-sm" href="/calendar?year={{ prev_year }}&month={{ prev_month }}">› {{ t('calendar.prev') }}</a>
+      <a class="btn btn-sm" href="/calendar?year={{ next_year }}&month={{ next_month }}">{{ t('calendar.next') }} ‹</a>
+    </div>
+  </div>
+
+  <div class="calendar-grid">
+    {% for name in weekday_names %}
+    <div class="dow">{{ name }}</div>
+    {% endfor %}
+    {% for week in weeks %}
+    {% for day in week %}
+    {% set j = jalali_of(day) %}
+    <a
+      class="cal-day {{ 'other' if j.month != month }} {{ 'today' if day == today }} {{ 'off' if day in off_days }}"
+      href="/calendar?year={{ year }}&month={{ month }}&day={{ j.year }}/{{ j.month }}/{{ j.day }}"
+      dir="ltr"
+    >
+      <span class="n">{{ j.day | digits }}</span>
+      {% if totals.get(day) %}
+      <span class="total">{{ totals.get(day) | duration }}</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+    {% endfor %}
+  </div>
+  <p class="small muted" style="margin-top: 0.6rem;">
+    {{ t('time.basis.measured') }}: {{ t('time.basis.explain') }}
+  </p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">
+      <h2>{{ t('time.add_entry') }}</h2>
+    </div>
+    <form method="post" action="/time/entries">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <div class="row">
+        <div class="field">
+          <label for="date">{{ t('common.date') }} (۱۴۰۴/۰۸/۰۵)</label>
+          <input type="text" id="date" name="date" dir="ltr" value="{{ selected_day | jalali_input if selected_day else '' }}" />
+        </div>
+        <div class="field">
+          <label for="start_time">{{ t('common.time') }}</label>
+          <input type="text" id="start_time" name="start_time" dir="ltr" placeholder="09:00" />
+        </div>
+        <div class="field">
+          <label for="duration_minutes">{{ t('time.duration') }} ({{ t('common.minutes') }})</label>
+          <input type="number" id="duration_minutes" name="duration_minutes" min="0" />
+        </div>
+        <div class="field">
+          <label for="kind">{{ t('time.kind') }}</label>
+          <select id="kind" name="kind">
+            <option value="work">{{ t('time.kind.work') }}</option>
+            <option value="overtime">{{ t('time.kind.overtime') }}</option>
+            <option value="study">{{ t('time.kind.study') }}</option>
+            <option value="learning">{{ t('time.kind.learning') }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="task_id">{{ t('common.tasks') }}</label>
+          <input type="number" id="task_id" name="task_id" min="1" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="reason">{{ t('time.kind.overtime') }} — {{ t('common.reason') }}</label>
+        <input type="text" id="reason" name="reason" dir="auto" />
+      </div>
+      <div class="field">
+        <label for="note">{{ t('common.note') }}</label>
+        <input type="text" id="note" name="note" dir="auto" />
+      </div>
+      <button class="btn btn-primary" type="submit">{{ t('time.add_entry') }}</button>
+    </form>
+
+    <div class="divider"></div>
+    <form method="post" action="/time/start" class="row">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <div class="field">
+        <label for="timer_kind">{{ t('time.kind') }}</label>
+        <select id="timer_kind" name="kind">
+          <option value="work">{{ t('time.kind.work') }}</option>
+          <option value="overtime">{{ t('time.kind.overtime') }}</option>
+          <option value="study">{{ t('time.kind.study') }}</option>
+          <option value="learning">{{ t('time.kind.learning') }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="timer_task">{{ t('common.tasks') }}</label>
+        <input type="number" id="timer_task" name="task_id" min="1" />
+      </div>
+      <div class="field">
+        <label for="timer_reason">{{ t('common.reason') }}</label>
+        <input type="text" id="timer_reason" name="reason" dir="auto" />
+      </div>
+      <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+        <button class="btn btn-primary" type="submit">{{ t('time.start_timer') }}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <h2>
+        {% if selected_day %}
+        {{ selected_day | jdate }}
+        {% else %}
+        {{ t('calendar.entries_for') }}
+        {% endif %}
+      </h2>
+    </div>
+    {% if selected_entries %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{{ t('common.time') }}</th>
+          <th>{{ t('time.kind') }}</th>
+          <th>{{ t('time.duration') }}</th>
+          <th>{{ t('common.reason') }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in selected_entries %}
+        <tr>
+          <td>{{ entry.started_at | jdatetime }}</td>
+          <td>
+            {{ t('time.kind.' + entry.kind) }}
+            {% if entry.is_off_day %}<span class="chip warn">{{ t('time.off_day') }}</span>{% endif %}
+          </td>
+          <td>{{ entry.duration_minutes | duration }}</td>
+          <td><bdi>{{ entry.reason or '—' }}</bdi></td>
+          <td>
+            <form method="post" action="/time/entries/{{ entry.id }}/delete">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button class="btn btn-sm btn-danger" type="submit">{{ t('common.delete') }}</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">{{ t('calendar.no_entries') }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

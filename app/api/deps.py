@@ -40,6 +40,9 @@ def flash_messages(request: Request) -> list[tuple[str, str]]:
 
 def base_context(request: Request, session: Session, **extra: Any) -> dict[str, Any]:
     """Build the template context shared by every page."""
+    from app.services import time_entries as time_service
+
+    running = time_service.running_entry(session)
     context: dict[str, Any] = {
         "request": request,
         "csrf_token": get_csrf_token(request),
@@ -48,6 +51,9 @@ def base_context(request: Request, session: Session, **extra: Any) -> dict[str, 
         "calendar_system": settings_service.calendar_system(session),
         "active_page": "",
         "messages": flash_messages(request),
+        "running_timer": (
+            {"started_at_iso": running.started_at.isoformat()} if running is not None else None
+        ),
     }
     context.update(extra)
     return context

@@ -39,6 +39,10 @@
   {% endif %}
 </div>
 
+{% if request.query_params.get('prompt') == 'hours' %}
+{% include "partials/done_prompt.html" %}
+{% endif %}
+
 <div class="grid-2">
   <div class="card">
     <div class="card-title"><h2>{{ t('tasks.description') }}</h2></div>
@@ -109,12 +113,44 @@
         </tbody>
       </table>
       <p class="small muted">{{ t('time.basis.explain') }}</p>
+      {% if entries %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{{ t('common.time') }}</th>
+            <th>{{ t('time.kind') }}</th>
+            <th>{{ t('time.duration') }}</th>
+            <th>{{ t('common.reason') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+          <tr>
+            <td>{{ entry.started_at | jdatetime }}</td>
+            <td>
+              {{ t('time.kind.' + entry.kind) }}
+              {% if entry.is_off_day %}<span class="chip warn">{{ t('time.off_day') }}</span>{% endif %}
+            </td>
+            <td>{{ entry.duration_minutes | duration }}</td>
+            <td><bdi>{{ entry.reason or '—' }}</bdi></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="muted">{{ t('time.no_entries') }}</p>
+      {% endif %}
       <p class="small muted">
         {{ t('tasks.created_at') }}: {{ task.created_at | jdatetime }}
         · {{ t('tasks.started_at') }}: {{ task.started_at | jdatetime }}
         · {{ t('tasks.completed_at') }}: {{ task.completed_at | jdatetime }}
         · {{ t('tasks.last_activity') }}: {{ task.last_activity_at | jdatetime }}
       </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h2>{{ t('tasks.time_entries') }}</h2></div>
+      {% include "partials/task_time_form.html" %}
     </div>
 
     <div class="card">

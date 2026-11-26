@@ -34,6 +34,13 @@ def build_off_day_policy(
     )
 
 
+def policy_from_settings(session: Session) -> OffDayPolicy:
+    """Build the off-day policy from the user's settings."""
+    from app.services import settings as settings_service
+
+    return build_off_day_policy(settings_service.weekend_weekdays(session))
+
+
 def compute_is_off_day(value: date, policy: OffDayPolicy) -> bool:
     """True when the date is a weekend day or a configured holiday."""
     if value in policy.holidays:

@@ -10,7 +10,7 @@ from jinja2 import pass_context
 from markupsafe import Markup
 
 from app.i18n import t
-from app.utils.jalali import PERSIAN_MONTHS
+from app.utils.jalali import PERSIAN_MONTHS, jalali_input_string, jalali_of
 from app.utils.markdown import render_markdown
 from app.utils.text import apply_digits, format_minutes, to_persian_digits
 from app.utils.time import format_date, format_datetime
@@ -21,6 +21,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals["t"] = t
 templates.env.globals["persian_months"] = PERSIAN_MONTHS
 templates.env.globals["app_name"] = "ورق"
+templates.env.globals["jalali_of"] = jalali_of
 
 
 @pass_context
@@ -59,3 +60,4 @@ templates.env.filters["nl2br"] = lambda value: Markup(str(value or "").replace("
 templates.env.filters["jdatetime"] = _datetime_filter
 templates.env.filters["jdate"] = _date_filter
 templates.env.filters["duration"] = _minutes_filter
+templates.env.filters["jalali_input"] = jalali_input_string

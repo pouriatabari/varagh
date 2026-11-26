@@ -73,9 +73,7 @@ def test_overdue_filter_ignores_finished_tasks(session: Session) -> None:
     finished = _make_task(session, title="تمام‌شده", due_at=NOW - timedelta(days=2))
     task_service.set_status(session, finished, "done", NOW)
 
-    overdue = task_service.list_tasks(
-        session, task_service.TaskFilters(due="overdue"), now=NOW
-    )
+    overdue = task_service.list_tasks(session, task_service.TaskFilters(due="overdue"), now=NOW)
     assert late in overdue
     assert finished not in overdue
 
@@ -100,9 +98,7 @@ def test_task_list_page_renders(client: TestClient) -> None:
 
 def test_quick_add_creates_a_task(client: TestClient, session: Session) -> None:
     """The quick-add bar creates a task and redirects to it."""
-    response = client.post(
-        "/tasks/quick-add", data={"title": "خرید نان"}, follow_redirects=False
-    )
+    response = client.post("/tasks/quick-add", data={"title": "خرید نان"}, follow_redirects=False)
     assert response.status_code == 303
     rows = task_service.list_tasks(session, task_service.TaskFilters(), now=NOW)
     assert [task.title for task in rows] == ["خرید نان"]
@@ -139,9 +135,7 @@ def test_soft_delete_route_hides_the_task(client: TestClient, session: Session) 
 
 def test_markdown_is_sanitised(client: TestClient, session: Session) -> None:
     """Raw HTML in a task description never reaches the page."""
-    task = _make_task(
-        session, title="ناامن", description_md="<script>alert(1)</script> **مهم**"
-    )
+    task = _make_task(session, title="ناامن", description_md="<script>alert(1)</script> **مهم**")
     response = client.get(f"/tasks/{task.id}")
     assert "<script>alert(1)</script>" not in response.text
     assert "<strong>مهم</strong>" in response.text

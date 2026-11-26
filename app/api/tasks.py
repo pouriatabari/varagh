@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import SessionDep, base_context
-from app.api.forms import form_datetime, form_int, form_optional_str, form_str
+from app.api.forms import form_bool, form_datetime, form_int, form_optional_str, form_str
 from app.security import validate_csrf
 from app.services import settings as settings_service
 from app.services import tasks as task_service
@@ -152,9 +152,7 @@ async def task_quick_add(request: Request, session: SessionDep) -> Response:
     now = utcnow()
     task = task_service.create_task(session, title=title, now=now)
     if request.headers.get("hx-request"):
-        context = _task_context(
-            request, session, task=task, now=now, domain_names_by_task={}
-        )
+        context = _task_context(request, session, task=task, now=now, domain_names_by_task={})
         return templates.TemplateResponse(request, "partials/task_item.html", context)
     return _redirect(f"/tasks/{task.id}", flash="flash.task_created")
 
@@ -231,6 +229,38 @@ async def task_status(request: Request, task_id: int, session: SessionDep) -> Re
         return _redirect(f"/tasks/{task.id}", error="error.validation")
     now = utcnow()
     task_service.set_status(session, task, status, now)
+    if status == "done":
+        return _redirect(f"/tasks/{task.id}?prompt=hours", flash="flash.task_updated")
+    return _redirect(f"/tasks/{task.id}", flash="flash.task_updated")
+
+
+@router.post("/tasks/{task_id}/estimate")
+async def task_estimate(request: Request, task_id: int, session: SessionDep) -> RedirectResponse:
+    """Store the rough duration reported when a task was completed."""
+    task = task_service.get_task(session, task_id)
+    if task is None:
+        return _redirect("/tasks", error="error.not_found")
+    form = await request.form()
+    minutes = form_int(form, "minutes")
+    if minutes is None or minutes < 0:
+        return _redirect(f"/tasks/{task.id}", error="error.validation")
+    note = form_optional_str(form, "note")
+    now = utcnow()
+    task_service.update_task(session, task, now, effort_minutes_estimate=minutes)
+    if note:
+        task_service.add_note(session, task, note, now)
+    if form_bool(form, "also_log_time"):
+        policy = time_service.policy_from_settings(session)
+        time_service.create_entry(
+            session,
+            kind="work",
+            started_at=now - timedelta(minutes=minutes),
+            now=now,
+            duration_minutes=minutes,
+            task_id=task.id,
+            note=note,
+            policy=policy,
+        )
     return _redirect(f"/tasks/{task.id}", flash="flash.task_updated")
 
 
@@ -314,8 +344,3 @@ async def api_tasks(request: Request, session: SessionDep) -> dict[str, object]:
         ],
         "count": len(rows),
     }
-
-
-def _utc(moment: datetime) -> datetime:
-    """Return an aware UTC datetime."""
-    return moment.astimezone(UTC)

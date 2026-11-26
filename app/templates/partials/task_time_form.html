@@ -1,0 +1,35 @@
+<div class="card" id="task-time">
+  <div class="card-title"><h2>{{ t('time.add_entry') }}</h2></div>
+  <form method="post" action="/time/entries">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="task_id" value="{{ task.id }}" />
+    <div class="row">
+      <div class="field">
+        <label for="tt_date">{{ t('common.date') }} (۱۴۰۴/۰۸/۰۵)</label>
+        <input type="text" id="tt_date" name="date" dir="ltr" value="" />
+      </div>
+      <div class="field">
+        <label for="tt_start_time">{{ t('common.time') }}</label>
+        <input type="text" id="tt_start_time" name="start_time" dir="ltr" placeholder="09:00" />
+      </div>
+      <div class="field">
+        <label for="tt_duration">{{ t('time.duration') }} ({{ t('common.minutes') }})</label>
+        <input type="number" id="tt_duration" name="duration_minutes" min="0" />
+      </div>
+      <div class="field">
+        <label for="tt_kind">{{ t('time.kind') }}</label>
+        <select id="tt_kind" name="kind">
+          <option value="work">{{ t('time.kind.work') }}</option>
+          <option value="overtime">{{ t('time.kind.overtime') }}</option>
+          <option value="study">{{ t('time.kind.study') }}</option>
+          <option value="learning">{{ t('time.kind.learning') }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="tt_reason">{{ t('common.reason') }}</label>
+      <input type="text" id="tt_reason" name="reason" dir="auto" />
+    </div>
+    <button class="btn btn-primary" type="submit">{{ t('time.add_entry') }}</button>
+  </form>
+</div>

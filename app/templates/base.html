@@ -60,6 +60,10 @@
             <span class="dot">●</span>
             <span id="timer-elapsed" data-started="{{ running_timer.started_at_iso }}">—</span>
           </span>
+          <form method="post" action="/time/stop">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-sm" type="submit">{{ t('time.stop_timer') }}</button>
+          </form>
           {% endif %}
           <button
             class="btn btn-ghost"

@@ -104,6 +104,7 @@ STRINGS: dict[str, str] = {
     "tasks.done_prompt_note": "یادداشت اختیاری",
     "tasks.done_prompt_skip": "رد کن",
     "tasks.done_prompt_save": "ثبت زمان",
+    "tasks.done_prompt.also_log": "همین مقدار به‌عنوان ثبت زمان هم حساب شود",
     "tasks.last_activity": "آخرین فعالیت",
     "tasks.created_at": "ساخته‌شده",
     "tasks.started_at": "شروع",

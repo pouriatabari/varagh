@@ -118,3 +118,22 @@ def parse_jalali_datetime(text: str, timezone: str) -> datetime | None:
             return None
     local = datetime(day.year, day.month, day.day, hour, minute, tzinfo=get_zone(timezone))
     return local.astimezone(UTC)
+
+
+def parse_jalali_date_and_time(date_text: str, time_text: str, timezone: str) -> datetime | None:
+    """Combine a Jalali date and a «HH:MM» time into an aware UTC datetime."""
+    day = parse_jalali_date(date_text)
+    if day is None:
+        return None
+    hour, minute = 0, 0
+    cleaned = (time_text or "").strip()
+    if cleaned:
+        raw_hour, _, raw_minute = cleaned.partition(":")
+        try:
+            hour, minute = int(raw_hour), int(raw_minute or 0)
+        except ValueError:
+            return None
+    if not (0 <= hour < 24 and 0 <= minute < 60):
+        return None
+    local = datetime(day.year, day.month, day.day, hour, minute, tzinfo=get_zone(timezone))
+    return local.astimezone(UTC)

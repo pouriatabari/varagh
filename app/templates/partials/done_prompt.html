@@ -1,0 +1,27 @@
+<div class="card" id="done-prompt" style="border-color: var(--warn);">
+  <div class="card-title">
+    <h2>{{ t('tasks.done_prompt_title') }}</h2>
+    <a class="btn btn-sm" href="/tasks/{{ task.id }}">{{ t('tasks.done_prompt_skip') }}</a>
+  </div>
+  <p class="muted small">{{ t('tasks.done_prompt_body') }}</p>
+  <form method="post" action="/tasks/{{ task.id }}/estimate">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="row">
+      <div class="field">
+        <label for="dp_minutes">{{ t('time.duration') }} ({{ t('common.minutes') }})</label>
+        <input type="number" id="dp_minutes" name="minutes" min="0" />
+      </div>
+      <div class="field">
+        <label for="dp_note">{{ t('tasks.done_prompt_note') }}</label>
+        <input type="text" id="dp_note" name="note" dir="auto" />
+      </div>
+      <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+        <button class="btn btn-primary" type="submit">{{ t('tasks.done_prompt_save') }}</button>
+      </div>
+    </div>
+    <label style="display: flex; gap: 0.4rem; align-items: center; color: var(--text);">
+      <input type="checkbox" name="also_log_time" value="1" style="width: auto;" />
+      <span>{{ t('tasks.done_prompt.also_log') }}</span>
+    </label>
+  </form>
+</div>
