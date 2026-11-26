@@ -1,0 +1,32 @@
+<li class="task-item {{ 'done' if task.status == 'done' }} {{ 'overdue' if task.due_at and task.status not in ('done', 'cancelled') and task.due_at < now }}">
+  <div class="head">
+    <span class="title"><bdi>{{ task.title }}</bdi></span>
+    {% if task.status == 'done' %}
+    <span class="chip accent">{{ t('tasks.status.done') }}</span>
+    {% elif task.status == 'doing' %}
+    <span class="chip info">{{ t('tasks.status.doing') }}</span>
+    {% elif task.status == 'cancelled' %}
+    <span class="chip">{{ t('tasks.status.cancelled') }}</span>
+    {% else %}
+    <span class="chip">{{ t('tasks.status.todo') }}</span>
+    {% endif %}
+  </div>
+  <div class="task-meta">
+    <span class="chip {{ 'accent' if task.origin == 'self_initiated' else 'warn' }}">
+      {{ t('tasks.origin.' + task.origin) }}
+    </span>
+    <span class="chip">{{ t('tasks.context.' + task.context) }}</span>
+    {% if task.due_at %}
+    <span class="chip {{ 'danger' if task.due_at < now and task.status not in ('done', 'cancelled') else '' }}">
+      {{ t('tasks.due_at') }}: <bdi>{{ task.due_at | digits }}</bdi>
+    </span>
+    {% endif %}
+    {% if task.assigned_by %}
+    <span class="chip">{{ t('tasks.assigned_by') }}: <bdi>{{ task.assigned_by }}</bdi></span>
+    {% endif %}
+    {% for name in domain_names_by_task.get(task.id, []) %}
+    <span class="chip info"><bdi>{{ name }}</bdi></span>
+    {% endfor %}
+    <a class="btn btn-sm" href="/tasks/{{ task.id }}">{{ t('common.edit') }}</a>
+  </div>
+</li>

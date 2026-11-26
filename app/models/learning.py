@@ -32,7 +32,6 @@ class LearningItem(Base, TimestampMixin):
     started_at: Mapped[date | None] = mapped_column(Date)
     finished_at: Mapped[date | None] = mapped_column(Date)
     notes_md: Mapped[str] = mapped_column(Text, default="", nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class LearningUnit(Base, TimestampMixin):
@@ -52,7 +51,6 @@ class LearningUnit(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     note: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class LearningLog(Base, TimestampMixin):
@@ -75,4 +73,3 @@ class LearningLog(Base, TimestampMixin):
     logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     minutes: Mapped[int | None] = mapped_column(Integer)
     note: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

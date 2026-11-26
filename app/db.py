@@ -29,9 +29,18 @@ def get_session_factory() -> sessionmaker[Session]:
 
 
 def get_session() -> Iterator[Session]:
-    """FastAPI dependency yielding a scoped session."""
+    """FastAPI dependency yielding a scoped session.
+
+    The session is committed when the request finished successfully and rolled
+    back when it raised, so routes never have to think about transactions.
+    """
     session = get_session_factory()()
     try:
         yield session
+    except Exception:
+        session.rollback()
+        raise
+    else:
+        session.commit()
     finally:
         session.close()

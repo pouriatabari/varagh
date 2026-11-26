@@ -27,7 +27,6 @@ class Setting(Base, TimestampMixin):
 
     key: Mapped[str] = mapped_column(String(100), primary_key=True)
     value: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=None)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class NotificationLog(Base, TimestampMixin):
@@ -48,7 +47,6 @@ class NotificationLog(Base, TimestampMixin):
     channel: Mapped[str] = mapped_column(String(30), nullable=False)
     window_key: Mapped[str] = mapped_column(String(60), default="", nullable=False)
     sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class AIRun(Base, TimestampMixin):
@@ -67,4 +65,3 @@ class AIRun(Base, TimestampMixin):
     completion_tokens: Mapped[int | None] = mapped_column(Integer)
     ok: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     error: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -61,9 +61,10 @@ def create_app() -> FastAPI:
             )
         return response
 
-    from app.api import web
+    from app.api import tasks, web
 
     app.include_router(web.router)
+    app.include_router(tasks.router)
 
     @app.get("/healthz", include_in_schema=False)
     async def healthz() -> JSONResponse:

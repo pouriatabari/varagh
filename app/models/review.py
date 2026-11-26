@@ -45,7 +45,6 @@ class Review(Base, TimestampMixin):
     ai_draft: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=None)
     user_final_md: Mapped[str] = mapped_column(Text, default="", nullable=False)
     rating: Mapped[int | None] = mapped_column(Integer)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
     )
@@ -70,7 +69,6 @@ class Achievement(Base, TimestampMixin):
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
     impact_note: Mapped[str | None] = mapped_column(Text)
     confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class AchievementTask(Base):

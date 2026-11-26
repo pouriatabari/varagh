@@ -62,7 +62,6 @@ class Domain(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("domains.id", ondelete="SET NULL"))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class TaskDomain(Base):
@@ -94,7 +93,6 @@ class TaskNote(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
     body_md: Mapped[str] = mapped_column(Text, default="", nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class BoardItem(Base, TimestampMixin):
@@ -111,4 +109,3 @@ class BoardItem(Base, TimestampMixin):
     y: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     color: Mapped[str] = mapped_column(String(20), default="yellow", nullable=False)
     payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=None)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}<bdi>{{ task.title }}</bdi>{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    <h1><bdi>{{ task.title }}</bdi></h1>
+    <div style="display: flex; gap: 0.4rem;">
+      <a class="btn btn-sm" href="/tasks">{{ t('common.back') }}</a>
+      <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('{{ t('tasks.delete_confirm') }}')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-sm btn-danger" type="submit">{{ t('common.delete') }}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="task-meta" style="margin-bottom: 0.8rem;">
+    <span class="chip">{{ t('tasks.status.' + task.status) }}</span>
+    <span class="chip {{ 'accent' if task.origin == 'self_initiated' else 'warn' }}">{{ t('tasks.origin.' + task.origin) }}</span>
+    <span class="chip">{{ t('tasks.context.' + task.context) }}</span>
+    {% if task.assigned_by %}<span class="chip">{{ t('tasks.assigned_by') }}: <bdi>{{ task.assigned_by }}</bdi></span>{% endif %}
+    {% if task.due_at %}<span class="chip">{{ t('tasks.due_at') }}: {{ task.due_at | jdatetime }}</span>{% endif %}
+    <span class="chip">{{ t('tasks.priority') }}: {{ task.priority | digits }}</span>
+  </div>
+
+  <div class="row" style="margin-bottom: 0.8rem;">
+    {% for value, label in [('todo', t('tasks.status.todo')), ('doing', t('tasks.status.doing')), ('done', t('tasks.status.done')), ('cancelled', t('tasks.status.cancelled'))] %}
+    <form method="post" action="/tasks/{{ task.id }}/status" style="flex: 0 0 auto;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="status" value="{{ value }}" />
+      <button class="btn btn-sm {{ 'btn-primary' if task.status == value }}" type="submit">{{ label }}</button>
+    </form>
+    {% endfor %}
+  </div>
+
+  {% if task.description_md %}
+  <div class="markdown-body" dir="auto">{{ task.description_md | markdown }}</div>
+  {% else %}
+  <p class="muted">{{ t('tasks.description') }}: —</p>
+  {% endif %}
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><h2>{{ t('tasks.description') }}</h2></div>
+    <form method="post" action="/tasks/{{ task.id }}/update">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <div class="field">
+        <label for="title">{{ t('common.title') }}</label>
+        <input type="text" id="title" name="title" dir="auto" value="{{ task.title }}" required />
+      </div>
+      <div class="field">
+        <label for="description_md">{{ t('tasks.description') }} (Markdown)</label>
+        <textarea id="description_md" name="description_md" dir="auto">{{ task.description_md }}</textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="origin">{{ t('tasks.origin.self_initiated') }}</label>
+          <select id="origin" name="origin">
+            <option value="self_initiated" {{ 'selected' if task.origin == 'self_initiated' }}>{{ t('tasks.origin.self_initiated') }}</option>
+            <option value="assigned" {{ 'selected' if task.origin == 'assigned' }}>{{ t('tasks.origin.assigned') }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="assigned_by">{{ t('tasks.assigned_by') }}</label>
+          <input type="text" id="assigned_by" name="assigned_by" dir="auto" value="{{ task.assigned_by or '' }}" />
+        </div>
+        <div class="field">
+          <label for="context">{{ t('tasks.context.personal') }}</label>
+          <select id="context" name="context">
+            <option value="company" {{ 'selected' if task.context == 'company' }}>{{ t('tasks.context.company') }}</option>
+            <option value="personal" {{ 'selected' if task.context == 'personal' }}>{{ t('tasks.context.personal') }}</option>
+            <option value="learning" {{ 'selected' if task.context == 'learning' }}>{{ t('tasks.context.learning') }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="priority">{{ t('tasks.priority') }}</label>
+          <input type="number" id="priority" name="priority" min="0" max="4" value="{{ task.priority }}" />
+        </div>
+        <div class="field">
+          <label for="due_at">{{ t('tasks.due_at') }} (۱۴۰۴/۰۸/۰۵ ۱۴:۳۰)</label>
+          <input type="text" id="due_at" name="due_at" dir="ltr" value="{{ task.due_at | jdatetime if task.due_at else '' }}" />
+        </div>
+        <div class="field">
+          <label for="effort_minutes_estimate">{{ t('tasks.estimate') }}</label>
+          <input type="number" id="effort_minutes_estimate" name="effort_minutes_estimate" min="0" value="{{ task.effort_minutes_estimate or '' }}" />
+        </div>
+      </div>
+      <button class="btn btn-primary" type="submit">{{ t('common.save') }}</button>
+    </form>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title"><h2>{{ t('tasks.time_entries') }}</h2></div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>{{ t('time.basis.measured') }}</th>
+            <td>{{ time_basis.measured_minutes | duration }}</td>
+          </tr>
+          <tr>
+            <th>{{ t('time.basis.estimated') }}</th>
+            <td>{{ time_basis.estimated_minutes | duration }}</td>
+          </tr>
+          <tr>
+            <th>{{ t('time.basis.elapsed') }}</th>
+            <td>{{ time_basis.elapsed_minutes | duration }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="small muted">{{ t('time.basis.explain') }}</p>
+      <p class="small muted">
+        {{ t('tasks.created_at') }}: {{ task.created_at | jdatetime }}
+        · {{ t('tasks.started_at') }}: {{ task.started_at | jdatetime }}
+        · {{ t('tasks.completed_at') }}: {{ task.completed_at | jdatetime }}
+        · {{ t('tasks.last_activity') }}: {{ task.last_activity_at | jdatetime }}
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h2>{{ t('tasks.domains') }}</h2></div>
+      <form method="post" action="/tasks/{{ task.id }}/domains">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        {% for domain in domains %}
+        <label style="display: flex; gap: 0.4rem; align-items: center; color: var(--text);">
+          <input type="checkbox" name="domain_ids" value="{{ domain.id }}" style="width: auto;" {{ 'checked' if domain.id in task_domain_ids }} />
+          <span><bdi>{{ domain.name }}</bdi></span>
+        </label>
+        {% else %}
+        <p class="muted">{{ t('tasks.no_domains') }}</p>
+        {% endfor %}
+        <button class="btn btn-sm btn-primary" type="submit">{{ t('common.save') }}</button>
+      </form>
+      <div class="divider"></div>
+      <form method="post" action="/domains" class="row">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div>
+          <label for="new_domain">{{ t('tasks.domains') }}</label>
+          <input type="text" id="new_domain" name="name" dir="auto" />
+        </div>
+        <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+          <button class="btn btn-sm" type="submit">{{ t('common.create') }}</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><h2>{{ t('tasks.notes') }}</h2></div>
+      {% if notes %}
+      <ul class="notes-timeline">
+        {% for note in notes %}
+        <li>
+          <div class="markdown-body" dir="auto">{{ note.body_md | markdown }}</div>
+          <div class="small muted">{{ note.created_at | jdatetime }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">{{ t('common.none_data') }}</p>
+      {% endif %}
+      <div class="divider"></div>
+      <form method="post" action="/tasks/{{ task.id }}/notes">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="field">
+          <label for="body_md">{{ t('tasks.add_note') }}</label>
+          <textarea id="body_md" name="body_md" dir="auto"></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

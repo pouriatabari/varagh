@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ t('tasks.new') }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    <h1>{{ t('tasks.new') }}</h1>
+    <a class="btn btn-sm" href="/tasks">{{ t('common.back') }}</a>
+  </div>
+  <form method="post" action="/tasks">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="field">
+      <label for="title">{{ t('common.title') }}</label>
+      <input type="text" id="title" name="title" dir="auto" required />
+    </div>
+    <div class="field">
+      <label for="description_md">{{ t('tasks.description') }} (Markdown)</label>
+      <textarea id="description_md" name="description_md" dir="auto"></textarea>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="origin">{{ t('tasks.origin.self_initiated') }}</label>
+        <select id="origin" name="origin">
+          <option value="self_initiated">{{ t('tasks.origin.self_initiated') }}</option>
+          <option value="assigned">{{ t('tasks.origin.assigned') }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="assigned_by">{{ t('tasks.assigned_by') }}</label>
+        <input type="text" id="assigned_by" name="assigned_by" dir="auto" />
+      </div>
+      <div class="field">
+        <label for="context">{{ t('tasks.context.personal') }}</label>
+        <select id="context" name="context">
+          <option value="company">{{ t('tasks.context.company') }}</option>
+          <option value="personal" selected>{{ t('tasks.context.personal') }}</option>
+          <option value="learning">{{ t('tasks.context.learning') }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="priority">{{ t('tasks.priority') }}</label>
+        <input type="number" id="priority" name="priority" min="0" max="4" value="2" />
+      </div>
+      <div class="field">
+        <label for="due_at">{{ t('tasks.due_at') }} (۱۴۰۴/۰۸/۰۵ ۱۴:۳۰)</label>
+        <input type="text" id="due_at" name="due_at" dir="ltr" />
+      </div>
+      <div class="field">
+        <label for="effort_minutes_estimate">{{ t('tasks.estimate') }}</label>
+        <input type="number" id="effort_minutes_estimate" name="effort_minutes_estimate" min="0" />
+      </div>
+    </div>
+    <div class="field">
+      <label>{{ t('tasks.domains') }}</label>
+      {% for domain in domains %}
+      <label style="display: flex; gap: 0.4rem; align-items: center; color: var(--text);">
+        <input type="checkbox" name="domain_ids" value="{{ domain.id }}" style="width: auto;" />
+        <span><bdi>{{ domain.name }}</bdi></span>
+      </label>
+      {% else %}
+      <p class="muted">{{ t('tasks.no_domains') }}</p>
+      {% endfor %}
+    </div>
+    <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
+  </form>
+</div>
+{% endblock %}

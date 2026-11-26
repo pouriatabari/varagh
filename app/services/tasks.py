@@ -258,6 +258,22 @@ def task_domains(session: Session, task_id: int) -> list[TaskDomain]:
     return list(session.scalars(query).all())
 
 
+def domain_names_for_tasks(session: Session, task_ids: list[int]) -> dict[int, list[str]]:
+    """Return the domain names of every given task, grouped by task id."""
+    if not task_ids:
+        return {}
+    query = (
+        select(TaskDomain.task_id, Domain.name)
+        .join(Domain, Domain.id == TaskDomain.domain_id)
+        .where(TaskDomain.task_id.in_(task_ids))
+        .order_by(Domain.name)
+    )
+    grouped: dict[int, list[str]] = {}
+    for task_id, name in session.execute(query).all():
+        grouped.setdefault(task_id, []).append(name)
+    return grouped
+
+
 def assign_domain(
     session: Session,
     task: Task,

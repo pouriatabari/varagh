@@ -9,6 +9,7 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from app.db import get_session
+from app.i18n import t
 from app.security import get_csrf_token
 from app.services import settings as settings_service
 from app.utils.clock import Clock, system_clock
@@ -25,6 +26,18 @@ def now() -> datetime:
     return utcnow()
 
 
+def flash_messages(request: Request) -> list[tuple[str, str]]:
+    """Build flash messages from the query string."""
+    messages: list[tuple[str, str]] = []
+    flash = request.query_params.get("flash")
+    if flash:
+        messages.append(("success", t(flash)))
+    error = request.query_params.get("error")
+    if error:
+        messages.append(("error", t(error)))
+    return messages
+
+
 def base_context(request: Request, session: Session, **extra: Any) -> dict[str, Any]:
     """Build the template context shared by every page."""
     context: dict[str, Any] = {
@@ -34,7 +47,7 @@ def base_context(request: Request, session: Session, **extra: Any) -> dict[str, 
         "timezone": settings_service.timezone_name(session),
         "calendar_system": settings_service.calendar_system(session),
         "active_page": "",
-        "messages": [],
+        "messages": flash_messages(request),
     }
     context.update(extra)
     return context

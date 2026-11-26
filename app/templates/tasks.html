@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ t('tasks.title') }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    <h1>{{ t('tasks.title') }}</h1>
+    <a class="btn btn-primary" href="/tasks/new" data-shortcut="new-task">{{ t('tasks.new') }}</a>
+  </div>
+
+  <form method="get" action="/tasks" class="row">
+    <div>
+      <label for="q">{{ t('common.search') }}</label>
+      <input type="search" id="q" name="q" dir="auto" value="{{ filters.q or '' }}" />
+    </div>
+    <div>
+      <label for="status">{{ t('common.status') }}</label>
+      <select id="status" name="status">
+        <option value="">{{ t('common.filter') }}: {{ t('tasks.filter_all') }}</option>
+        <option value="open" {{ 'selected' if filters.status == 'open' }}>{{ t('tasks.filter_open') }}</option>
+        <option value="todo" {{ 'selected' if filters.status == 'todo' }}>{{ t('tasks.status.todo') }}</option>
+        <option value="doing" {{ 'selected' if filters.status == 'doing' }}>{{ t('tasks.status.doing') }}</option>
+        <option value="done" {{ 'selected' if filters.status == 'done' }}>{{ t('tasks.status.done') }}</option>
+        <option value="cancelled" {{ 'selected' if filters.status == 'cancelled' }}>{{ t('tasks.status.cancelled') }}</option>
+      </select>
+    </div>
+    <div>
+      <label for="due">{{ t('common.date') }}</label>
+      <select id="due" name="due">
+        <option value="">{{ t('tasks.filter_all') }}</option>
+        <option value="today" {{ 'selected' if filters.due == 'today' }}>{{ t('tasks.filter_today') }}</option>
+        <option value="overdue" {{ 'selected' if filters.due == 'overdue' }}>{{ t('tasks.filter_overdue') }}</option>
+        <option value="this_week" {{ 'selected' if filters.due == 'this_week' }}>{{ t('tasks.filter_this_week') }}</option>
+      </select>
+    </div>
+    <div>
+      <label for="origin">{{ t('tasks.origin.self_initiated') }}</label>
+      <select id="origin" name="origin">
+        <option value="">{{ t('common.filter') }}: {{ t('common.none') }}</option>
+        <option value="self_initiated" {{ 'selected' if filters.origin == 'self_initiated' }}>{{ t('tasks.origin.self_initiated') }}</option>
+        <option value="assigned" {{ 'selected' if filters.origin == 'assigned' }}>{{ t('tasks.origin.assigned') }}</option>
+      </select>
+    </div>
+    <div>
+      <label for="context">{{ t('common.status') }}</label>
+      <select id="context" name="context">
+        <option value="">{{ t('common.filter') }}: {{ t('common.none') }}</option>
+        <option value="company" {{ 'selected' if filters.context == 'company' }}>{{ t('tasks.context.company') }}</option>
+        <option value="personal" {{ 'selected' if filters.context == 'personal' }}>{{ t('tasks.context.personal') }}</option>
+        <option value="learning" {{ 'selected' if filters.context == 'learning' }}>{{ t('tasks.context.learning') }}</option>
+      </select>
+    </div>
+    <div>
+      <label for="domain">{{ t('tasks.domains') }}</label>
+      <select id="domain" name="domain">
+        <option value="">{{ t('common.filter') }}: {{ t('common.none') }}</option>
+        {% for domain in domains %}
+        <option value="{{ domain.id }}" {{ 'selected' if filters.domain_id == domain.id }}>{{ domain.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex: 0 0 auto; display: flex; align-items: flex-end; gap: 0.4rem;">
+      <button class="btn btn-primary" type="submit">{{ t('common.filter') }}</button>
+      <a class="btn" href="/tasks">{{ t('common.clear') }}</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">
+    <h2>{{ tasks | length }} {{ t('common.tasks') }}</h2>
+  </div>
+  {% if tasks %}
+  <ul class="task-list">
+    {% for task in tasks %} {% include "partials/task_item.html" %} {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty">{{ t('tasks.empty') }}</div>
+  {% endif %}
+</div>
+{% endblock %}

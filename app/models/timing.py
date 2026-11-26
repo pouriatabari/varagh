@@ -57,7 +57,6 @@ class TimeEntry(Base, TimestampMixin):
     reason: Mapped[str | None] = mapped_column(Text)
     note: Mapped[str | None] = mapped_column(Text)
     is_off_day: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class DailyJournal(Base, TimestampMixin):
@@ -71,4 +70,3 @@ class DailyJournal(Base, TimestampMixin):
     raw_text: Mapped[str] = mapped_column(Text, default="", nullable=False)
     parsed: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=None)
     confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
