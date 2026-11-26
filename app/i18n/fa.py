@@ -17,6 +17,7 @@ STRINGS: dict[str, str] = {
     "nav.reviews": "ارزیابی‌ها",
     "nav.settings": "تنظیمات",
     "nav.quick_add": "ثبت سریع",
+    "nav.skip_to_content": "پرش به محتوای اصلی",
     "nav.toggle_theme": "تغییر پوسته",
     "nav.menu": "منو",
     # --- common ---

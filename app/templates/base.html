@@ -22,6 +22,7 @@
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">{{ t('nav.skip_to_content') }}</a>
     <div class="layout">
       <aside class="sidebar">
         <div class="brand">
@@ -80,7 +81,7 @@
           </button>
         </header>
 
-        <main class="content">
+        <main class="content" id="main-content">
           {% if messages %} {% for kind, message in messages %}
           <div class="flash {{ 'error' if kind == 'error' }}">{{ message }}</div>
           {% endfor %} {% endif %} {% block content %}{% endblock %}

@@ -34,9 +34,11 @@
       }
     } else if (event.key === "n") {
       const link = document.querySelector("[data-shortcut='new-task']");
+      event.preventDefault();
       if (link) {
-        event.preventDefault();
         link.click();
+      } else {
+        window.location.href = "/tasks/new";
       }
     }
   });
