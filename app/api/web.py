@@ -5,8 +5,8 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
+from app.ai.config import load_config
 from app.api.deps import SessionDep, base_context
-from app.config import get_settings
 from app.i18n import t
 from app.services import dashboard as dashboard_service
 from app.services import settings as settings_service
@@ -42,6 +42,6 @@ async def dashboard(request: Request, session: SessionDep) -> HTMLResponse:
         stats=stats,
         chart_labels=[t(KIND_LABELS[kind]) for kind in kinds],
         chart_values=[stats.hours_by_kind[kind] for kind in kinds],
-        ai_enabled=get_settings().ai_enabled,
+        ai_enabled=load_config(session).usable,
     )
     return templates.TemplateResponse(request, "dashboard.html", context)

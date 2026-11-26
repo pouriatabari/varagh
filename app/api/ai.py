@@ -48,7 +48,7 @@ def _no_provider() -> JSONResponse:
 @router.get("/api/ai/daily-plan")
 async def ai_daily_plan(session: SessionDep) -> JSONResponse:
     """The plan the AI proposes for today."""
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return _no_provider()
     timezone = settings_service.timezone_name(session)
@@ -83,7 +83,7 @@ async def ai_daily_plan(session: SessionDep) -> JSONResponse:
 @router.post("/api/ai/parse-quick-add")
 async def ai_parse_quick_add(request: Request, session: SessionDep) -> JSONResponse:
     """Parse a quick-add string into a task draft; nothing is created."""
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return _no_provider()
     form = await request.form()
@@ -100,7 +100,7 @@ async def ai_parse_quick_add(request: Request, session: SessionDep) -> JSONRespo
 @router.post("/api/ai/classify-task/{task_id}")
 async def ai_classify_task(request: Request, task_id: int, session: SessionDep) -> JSONResponse:
     """Suggest the domains of a task; the user's choice always wins."""
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return _no_provider()
     task = task_service.get_task(session, task_id)
@@ -123,7 +123,7 @@ async def ai_classify_task(request: Request, task_id: int, session: SessionDep) 
 @router.post("/api/ai/journal")
 async def ai_journal(request: Request, session: SessionDep) -> JSONResponse:
     """Propose the entries of a journal; nothing is written before confirmation."""
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return _no_provider()
     form = await request.form()
@@ -145,7 +145,7 @@ async def ai_parse_syllabus(
     item = learning_service.get_item(session, item_id)
     if item is None:
         return _redirect("/learning", error="error.not_found")
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return _redirect(f"/learning/{item.id}", error="error.ai_disabled")
     form = await request.form()
@@ -168,7 +168,7 @@ async def ai_review_draft(
     review = review_service.get_review(session, review_id)
     if review is None:
         return _redirect("/reviews", error="error.not_found")
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return _redirect(f"/reviews/{review.id}", error="error.ai_disabled")
     try:
@@ -211,7 +211,7 @@ async def ask_page(request: Request, session: SessionDep) -> HTMLResponse:
 @router.post("/ask", response_class=HTMLResponse)
 async def ask_submit(request: Request, session: SessionDep) -> HTMLResponse:
     """Answer a question about the personal data."""
-    provider = get_provider()
+    provider = get_provider(session)
     form = await request.form()
     question = form_str(form, "question")
     answer: dict[str, Any] | None = None

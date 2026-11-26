@@ -24,8 +24,8 @@ from typing import Any
 
 import httpx
 
+from app.ai.config import AIConfig
 from app.ai.provider import AIError, extract_json
-from app.config import get_settings
 
 logger = logging.getLogger("varagh.ai")
 
@@ -35,14 +35,16 @@ class CustomProvider:
 
     name = "custom"
 
-    def __init__(self) -> None:
-        settings = get_settings()
-        self._url = settings.ai_custom_url or settings.ai_base_url
-        self._model = settings.ai_model
-        self._api_key = settings.ai_api_key
-        self._timeout = settings.ai_timeout_seconds
-        self._method = settings.ai_custom_method
-        self._headers = _parse_headers(settings.ai_custom_headers)
+    def __init__(self, config: AIConfig) -> None:
+        self._url = config.custom_url or config.base_url
+        self.model = config.model
+        self._api_key = config.api_key
+        self._timeout = config.timeout_seconds
+        self._max_tokens = config.max_output_tokens
+        self._method = config.custom_method
+        self._headers = _parse_headers(config.custom_headers)
+        if config.auth_header in {"bearer", "both"} and self._api_key:
+            self._headers.setdefault("authorization", f"Bearer {self._api_key}")
 
     def complete_json(self, feature: str, system: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Ask the endpoint for a JSON object."""
@@ -63,7 +65,7 @@ class CustomProvider:
         user_text = json.dumps(payload, ensure_ascii=False)
         if self._method == "openai":
             return {
-                "model": self._model,
+                "model": self.model,
                 "messages": [
                     {"role": "system", "content": system},
                     {"role": "user", "content": user_text},
@@ -73,15 +75,15 @@ class CustomProvider:
             }
         if self._method == "anthropic":
             return {
-                "model": self._model,
-                "max_tokens": 2048,
+                "model": self.model,
+                "max_tokens": self._max_tokens,
                 "system": system,
                 "messages": [{"role": "user", "content": user_text}],
             }
         if self._method == "prompt":
-            return {"model": self._model, "prompt": f"{system}\n\n{user_text}"}
+            return {"model": self.model, "prompt": f"{system}\n\n{user_text}"}
         return {
-            "model": self._model,
+            "model": self.model,
             "system": system,
             "messages": [
                 {"role": "system", "content": system},

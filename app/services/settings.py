@@ -17,6 +17,19 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "digits": "persian",
     "weekly_hour_target": 40,
     "weekend_weekdays": [6],
+    "ai": {
+        "enabled": False,
+        "provider": "",
+        "api_key": "",
+        "model": "",
+        "base_url": "",
+        "timeout_seconds": 30,
+        "max_output_tokens": 2048,
+        "auth_header": "both",
+        "custom_url": "",
+        "custom_method": "json",
+        "custom_headers": "",
+    },
     "notifications": {
         "due_soon_minutes": 30,
         "overdue_enabled": True,
@@ -59,6 +72,14 @@ def get_all_settings(session: Session) -> dict[str, Any]:
         if key in MUTABLE_KEYS:
             merged[key] = _deep_merge(merged[key], value) if isinstance(value, dict) else value
     return merged
+
+
+def get_stored_setting(session: Session, key: str) -> Any:
+    """Return a stored setting without the defaults; ``None`` when it was never set."""
+    row = session.get(Setting, key)
+    if row is None:
+        return None
+    return row.value
 
 
 def get_setting(session: Session, key: str, default: Any = None) -> Any:

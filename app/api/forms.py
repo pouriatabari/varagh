@@ -34,6 +34,17 @@ def form_int(form: FormData, key: str, default: int | None = None) -> int | None
         return default
 
 
+def form_float(form: FormData, key: str, default: float | None = None) -> float | None:
+    """Return a float field, or ``default`` when it is missing or invalid."""
+    raw = form_str(form, key)
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
 def form_bool(form: FormData, key: str) -> bool:
     """Return True when a checkbox is checked."""
     return form_str(form, key).lower() in {"1", "true", "on", "yes"}

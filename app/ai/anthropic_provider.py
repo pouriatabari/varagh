@@ -7,8 +7,8 @@ from typing import Any
 
 import httpx
 
+from app.ai.config import AIConfig
 from app.ai.provider import AIError, extract_json
-from app.config import get_settings
 
 logger = logging.getLogger("varagh.ai")
 
@@ -21,25 +21,26 @@ class AnthropicProvider:
 
     name = "anthropic"
 
-    def __init__(self) -> None:
-        settings = get_settings()
-        self._api_key = settings.ai_api_key
-        self._model = settings.ai_model
-        self._base_url = (settings.ai_base_url or DEFAULT_BASE_URL).rstrip("/")
-        self._timeout = settings.ai_timeout_seconds
+    def __init__(self, config: AIConfig) -> None:
+        self._api_key = config.api_key
+        self.model = config.model
+        self._base_url = (config.base_url or DEFAULT_BASE_URL).rstrip("/")
+        self._timeout = config.timeout_seconds
+        self._max_tokens = config.max_output_tokens
+        self._auth_header = config.auth_header
 
     def complete_json(self, feature: str, system: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Ask the model for a JSON object."""
         body = {
-            "model": self._model,
-            "max_tokens": 2048,
+            "model": self.model,
+            "max_tokens": self._max_tokens,
             "system": system,
             "messages": [{"role": "user", "content": _as_text(payload)}],
         }
         headers = {
-            "x-api-key": self._api_key,
             "anthropic-version": API_VERSION,
             "content-type": "application/json",
+            **_auth_headers(self._api_key, self._auth_header),
         }
         try:
             response = httpx.post(
@@ -53,6 +54,22 @@ class AnthropicProvider:
         except (httpx.HTTPError, ValueError) as exc:
             raise AIError(f"the Anthropic call failed: {exc}") from exc
         return extract_json(_first_text(data))
+
+
+def _auth_headers(api_key: str, mode: str) -> dict[str, str]:
+    """Build the authentication headers of the configured mode.
+
+    The official API wants ``x-api-key``; a Claude Code compatible proxy wants
+    ``Authorization: Bearer``; ``both`` satisfies either of them.
+    """
+    headers: dict[str, str] = {}
+    if not api_key:
+        return headers
+    if mode in {"x-api-key", "both"}:
+        headers["x-api-key"] = api_key
+    if mode in {"bearer", "both"}:
+        headers["authorization"] = f"Bearer {api_key}"
+    return headers
 
 
 def _as_text(payload: dict[str, Any]) -> str:

@@ -133,3 +133,16 @@ together with its rationale.
   JSON object or in one of the two vendor shapes.
 - **Why:** The user may run a local model, a gateway or a proxy. The whole
   application must keep working without touching the vendor-specific code.
+
+## D17 — The AI configuration lives in the database, the environment is the fallback
+
+- **Decision:** The provider, the key, the model, the base URL, the timeout,
+  the maximum number of output tokens and the authentication header are written
+  by the settings page into the `settings` table. As soon as the user saves
+  that form, the stored document wins as a whole; otherwise the `AI_*`
+  environment variables decide. The key is never sent back to the browser and
+  is redacted from `/export.json`.
+- **Why:** The application is used by one person who should be able to switch
+  provider, model or gateway without editing a file and restarting a
+  container. A stored document that wins as a whole also allows a field to be
+  cleared on purpose, which a per-field fallback would not allow.

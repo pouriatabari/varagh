@@ -8,8 +8,8 @@ from typing import Any
 
 import httpx
 
+from app.ai.config import AIConfig
 from app.ai.provider import AIError, extract_json
-from app.config import get_settings
 
 logger = logging.getLogger("varagh.ai")
 
@@ -21,17 +21,16 @@ class OpenAICompatibleProvider:
 
     name = "openai-compatible"
 
-    def __init__(self) -> None:
-        settings = get_settings()
-        self._api_key = settings.ai_api_key
-        self._model = settings.ai_model
-        self._base_url = (settings.ai_base_url or DEFAULT_BASE_URL).rstrip("/")
-        self._timeout = settings.ai_timeout_seconds
+    def __init__(self, config: AIConfig) -> None:
+        self._api_key = config.api_key
+        self.model = config.model
+        self._base_url = (config.base_url or DEFAULT_BASE_URL).rstrip("/")
+        self._timeout = config.timeout_seconds
 
     def complete_json(self, feature: str, system: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Ask the model for a JSON object."""
         body = {
-            "model": self._model,
+            "model": self.model,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},

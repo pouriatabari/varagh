@@ -1,9 +1,9 @@
 """The provider-agnostic AI interface.
 
 Every AI feature goes through this interface, so the application never talks
-to a vendor SDK directly. The provider is selected with the environment
-(``AI_PROVIDER``, ``AI_API_KEY``, ``AI_MODEL``, ``AI_BASE_URL``) and the whole
-layer stays optional: without a provider every non-AI feature keeps working.
+to a vendor SDK directly. The provider is configured in the settings page (or
+with the ``AI_*`` environment variables); the whole layer stays optional:
+without a provider every non-AI feature keeps working.
 """
 
 from __future__ import annotations
@@ -12,7 +12,9 @@ import json
 import logging
 from typing import Any, Protocol
 
-from app.config import get_settings
+from sqlalchemy.orm import Session
+
+from app.ai.config import AIConfig, load_config
 
 logger = logging.getLogger("varagh.ai")
 
@@ -50,21 +52,25 @@ def extract_json(text: str) -> dict[str, Any]:
     return parsed
 
 
-def get_provider() -> AIProvider | None:
-    """Return the configured provider, or ``None`` when the AI is disabled."""
+def build_provider(config: AIConfig) -> AIProvider | None:
+    """Build the provider of a configuration, or ``None`` when it cannot be used."""
     from app.ai.anthropic_provider import AnthropicProvider
     from app.ai.custom_provider import CustomProvider
     from app.ai.openai_provider import OpenAICompatibleProvider
 
-    settings = get_settings()
-    if not settings.ai_enabled:
+    if not config.usable:
         return None
-    provider_name = settings.ai_provider.lower()
+    provider_name = config.provider.lower()
     if provider_name == "anthropic":
-        return AnthropicProvider()
+        return AnthropicProvider(config)
     if provider_name in {"openai", "openai-compatible", "compatible"}:
-        return OpenAICompatibleProvider()
+        return OpenAICompatibleProvider(config)
     if provider_name == "custom":
-        return CustomProvider()
-    logger.warning("unknown AI provider %r; the AI stays disabled", settings.ai_provider)
+        return CustomProvider(config)
+    logger.warning("unknown AI provider %r; the AI stays disabled", config.provider)
     return None
+
+
+def get_provider(session: Session | None = None) -> AIProvider | None:
+    """Return the configured provider, or ``None`` when the AI is disabled."""
+    return build_provider(load_config(session))

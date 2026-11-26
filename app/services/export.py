@@ -20,6 +20,22 @@ def _iso(value: datetime | date | None) -> str | None:
     return value.isoformat() if value is not None else None
 
 
+def _redact(key: str, value: Any) -> Any:
+    """Remove the secrets from the exported settings."""
+    if key == "ai" and isinstance(value, dict):
+        data = dict(value)
+        if data.get("api_key"):
+            data["api_key"] = "***"
+        return data
+    if key == "notifications" and isinstance(value, dict):
+        data = dict(value)
+        email = data.get("email")
+        if isinstance(email, dict) and email.get("password"):
+            data["email"] = {**email, "password": "***"}
+        return data
+    return value
+
+
 def export_all(session: Session) -> dict[str, Any]:
     """Return the whole database as a JSON-serialisable document."""
     tasks = session.scalars(select(Task).order_by(Task.id.asc())).all()
@@ -180,7 +196,7 @@ def export_all(session: Session) -> dict[str, Any]:
             }
             for achievement in achievements
         ],
-        "settings": {row.key: row.value for row in settings},
+        "settings": {row.key: _redact(row.key, row.value) for row in settings},
         "notification_log": [
             {
                 "id": row.id,

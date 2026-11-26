@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     ai_model: str = ""
     ai_base_url: str = ""
     ai_timeout_seconds: float = 30.0
+    ai_max_output_tokens: int = 2048
+    # How the key is sent: "x-api-key", "bearer" or "both".
+    ai_auth_header: Literal["x-api-key", "bearer", "both"] = "both"
     # Custom provider: the full endpoint URL and extra headers.
     ai_custom_url: str = ""
     ai_custom_headers: str = ""

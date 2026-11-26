@@ -82,7 +82,7 @@ def _ai_quick_add_changes(session: Session, title: str, now: datetime) -> dict[s
     from app.ai import service as ai_service
     from app.ai.provider import AIError, get_provider
 
-    provider = get_provider()
+    provider = get_provider(session)
     if provider is None:
         return {}
     try:
