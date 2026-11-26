@@ -92,6 +92,24 @@ def save_holidays(holidays: list[Holiday]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def replace_holidays(items: list[object]) -> list[Holiday]:
+    """Replace the holiday list with the given raw items (strings or dicts)."""
+    holidays: list[Holiday] = []
+    for item in items:
+        if isinstance(item, str):
+            raw_date, title = item, ""
+        elif isinstance(item, dict):
+            raw_date, title = str(item.get("date", "")), str(item.get("title", ""))
+        else:
+            continue
+        normalised = _normalise(raw_date)
+        if normalised is not None:
+            holidays.append(Holiday(jalali_date=normalised, title=title.strip()))
+    holidays.sort(key=lambda item: item.jalali_date)
+    save_holidays(holidays)
+    return holidays
+
+
 def _normalise(jalali_date: str) -> str | None:
     """Return the canonical ``YYYY/MM/DD`` Jalali form of a date string."""
     parsed = parse_jalali_date(jalali_date)

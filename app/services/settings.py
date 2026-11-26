@@ -88,7 +88,6 @@ def update_settings(session: Session, values: dict[str, Any]) -> dict[str, Any]:
             continue
         current[key] = _deep_merge(current[key], value) if isinstance(value, dict) else value
         set_setting(session, key, current[key])
-    session.commit()
     return current
 
 

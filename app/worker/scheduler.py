@@ -37,13 +37,27 @@ def build_scheduler() -> BackgroundScheduler:
 
 
 def run_scheduled_jobs() -> None:
-    """Job executed on every tick — implemented fully in the notification milestone."""
+    """Evaluate the notification rules and deliver what is due."""
     from app.db import get_session_factory
+    from app.notify import rules as rule_module
+    from app.utils.time import utcnow
 
     session = get_session_factory()()
     try:
         configured = settings_service.get_all_settings(session)
-        logger.debug("scheduled jobs tick (timezone=%s)", configured.get("timezone"))
+        now = utcnow()
+        sent = rule_module.dispatch(
+            session,
+            now=now,
+            timezone=str(configured.get("timezone", "Asia/Tehran")),
+            config=settings_service.notification_settings(session),
+            calendar_system=str(configured.get("calendar_system", "jalali")),
+        )
+        session.commit()
+        logger.info("scheduled jobs tick: %s notification(s) sent", sent)
+    except Exception:
+        session.rollback()
+        logger.exception("scheduled jobs tick failed")
     finally:
         session.close()
 

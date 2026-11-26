@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings.title') }}{% endblock %}
+{% block content %}
+<h1>{{ t('settings.title') }}</h1>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('settings.title') }}</h2></div>
+  <form hx-post="/settings/general" hx-swap="none" hx-on::after-request="this.reset()">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="grid-2">
+      <label>
+        {{ t('settings.timezone') }}
+        <input type="text" name="timezone" value="{{ settings.timezone }}" dir="ltr" />
+      </label>
+      <label>
+        {{ t('settings.calendar_system') }}
+        <select name="calendar_system">
+          <option value="jalali" {{ 'selected' if settings.calendar_system == 'jalali' }}>
+            {{ t('settings.calendar_system.jalali') }}
+          </option>
+          <option
+            value="gregorian"
+            {{ 'selected' if settings.calendar_system == 'gregorian' }}
+          >
+            {{ t('settings.calendar_system.gregorian') }}
+          </option>
+        </select>
+      </label>
+      <label>
+        {{ t('settings.digits') }}
+        <select name="digits">
+          <option value="persian" {{ 'selected' if settings.digits == 'persian' }}>
+            {{ t('settings.digits.persian') }}
+          </option>
+          <option value="latin" {{ 'selected' if settings.digits == 'latin' }}>
+            {{ t('settings.digits.latin') }}
+          </option>
+        </select>
+      </label>
+      <label>
+        {{ t('settings.weekly_hour_target') }}
+        <input
+          type="number"
+          name="weekly_hour_target"
+          min="0"
+          max="168"
+          value="{{ settings.weekly_hour_target }}"
+        />
+      </label>
+    </div>
+    <fieldset class="weekend">
+      <legend>{{ t('settings.weekend') }}</legend>
+      {% set names = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'] %}
+      {% for index in range(7) %}
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="weekend_{{ index }}"
+          value="1"
+          {{ 'checked' if index in settings.weekend_weekdays }}
+        />
+        {{ names[index] }}
+      </label>
+      {% endfor %}
+    </fieldset>
+    <button class="btn btn-primary" type="submit">{{ t('common.save') }}</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('notifications.title') }}</h2></div>
+  <p class="small muted">{{ t('notifications.browser_hint') }}</p>
+  <button class="btn" type="button" id="enable-notifications">
+    {{ t('notifications.enable_browser') }}
+  </button>
+
+  <form hx-post="/settings/notifications" hx-swap="none" hx-on::after-request="this.reset()">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="grid-2">
+      <label>
+        {{ t('notifications.due_soon_minutes') }}
+        <input
+          type="number"
+          name="due_soon_minutes"
+          min="0"
+          max="1440"
+          value="{{ notification_config.due_soon_minutes }}"
+        />
+      </label>
+      <label>
+        {{ t('notifications.digest_time') }}
+        <input type="time" name="digest_time" value="{{ notification_config.digest_time }}" />
+      </label>
+      <label>
+        {{ t('notifications.journal_nudge_time') }}
+        <input
+          type="time"
+          name="journal_nudge_time"
+          value="{{ notification_config.journal_nudge_time }}"
+        />
+      </label>
+      <label>
+        {{ t('learning.stale') }} ({{ t('common.days') }})
+        <input
+          type="number"
+          name="stale_learning_days"
+          min="0"
+          max="365"
+          value="{{ notification_config.stale_learning_days }}"
+        />
+      </label>
+    </div>
+
+    <fieldset>
+      <legend>{{ t('notifications.channel_browser') }}</legend>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="channel_browser"
+          value="1"
+          {{ 'checked' if notification_config.channels.browser }}
+        />
+        {{ t('notifications.channel_browser') }}
+      </label>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="overdue_enabled"
+          value="1"
+          {{ 'checked' if notification_config.overdue_enabled }}
+        />
+        {{ t('notifications.due_now') }}
+      </label>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="digest_enabled"
+          value="1"
+          {{ 'checked' if notification_config.digest_enabled }}
+        />
+        {{ t('notifications.daily_digest') }}
+      </label>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="journal_nudge_enabled"
+          value="1"
+          {{ 'checked' if notification_config.journal_nudge_enabled }}
+        />
+        {{ t('notifications.journal_nudge') }}
+      </label>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="review_reminder_enabled"
+          value="1"
+          {{ 'checked' if notification_config.review_reminder_enabled }}
+        />
+        {{ t('notifications.review_reminder') }}
+      </label>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="stale_learning_enabled"
+          value="1"
+          {{ 'checked' if notification_config.stale_learning_enabled }}
+        />
+        {{ t('notifications.stale_learning') }}
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ t('notifications.channel_email') }}</legend>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="channel_email"
+          value="1"
+          {{ 'checked' if notification_config.channels.email }}
+        />
+        {{ t('notifications.channel_email') }}
+      </label>
+      <div class="grid-2">
+        <label>
+          {{ t('notifications.email_address') }}
+          <input
+            type="email"
+            name="email_to"
+            dir="ltr"
+            value="{{ notification_config.email.to if notification_config.email else '' }}"
+          />
+        </label>
+        <label>
+          SMTP host
+          <input
+            type="text"
+            name="email_host"
+            dir="ltr"
+            value="{{ notification_config.email.host if notification_config.email else '' }}"
+          />
+        </label>
+        <label>
+          SMTP port
+          <input
+            type="number"
+            name="email_port"
+            dir="ltr"
+            value="{{ notification_config.email.port if notification_config.email else 587 }}"
+          />
+        </label>
+        <label>
+          SMTP user
+          <input
+            type="text"
+            name="email_user"
+            dir="ltr"
+            value="{{ notification_config.email.user if notification_config.email else '' }}"
+          />
+        </label>
+        <label>
+          SMTP password
+          <input
+            type="password"
+            name="email_password"
+            dir="ltr"
+            value="{{ notification_config.email.password if notification_config.email else '' }}"
+          />
+        </label>
+        <label>
+          From
+          <input
+            type="text"
+            name="email_from"
+            dir="ltr"
+            value="{{ notification_config.email.from if notification_config.email else '' }}"
+          />
+        </label>
+      </div>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="email_use_tls"
+          value="1"
+          {{ 'checked' if notification_config.email.use_tls if notification_config.email else '' }}
+        />
+        TLS
+      </label>
+      <button
+        class="btn btn-sm"
+        type="button"
+        hx-post="/api/notifications/test/email"
+        hx-swap="none"
+      >
+        {{ t('notifications.send_test') }}
+      </button>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ t('notifications.channel_webhook') }}</legend>
+      <label class="inline">
+        <input
+          type="checkbox"
+          name="channel_webhook"
+          value="1"
+          {{ 'checked' if notification_config.channels.webhook }}
+        />
+        {{ t('notifications.channel_webhook') }}
+      </label>
+      <div class="grid-2">
+        <label>
+          URL
+          <input
+            type="url"
+            name="webhook_url"
+            dir="ltr"
+            value="{{ notification_config.webhook.url if notification_config.webhook else '' }}"
+          />
+        </label>
+        <label>
+          Format
+          <select name="webhook_format">
+            <option value="slack" {{ 'selected' if notification_config.webhook.format == 'slack' }}>
+              slack
+            </option>
+            <option value="json" {{ 'selected' if notification_config.webhook.format == 'json' }}>
+              json
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        class="btn btn-sm"
+        type="button"
+        hx-post="/api/notifications/test/webhook"
+        hx-swap="none"
+      >
+        {{ t('notifications.send_test') }}
+      </button>
+    </fieldset>
+
+    <button class="btn btn-primary" type="submit">{{ t('common.save') }}</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('settings.holidays') }}</h2></div>
+  <p class="small muted">{{ t('settings.holidays_hint') }}</p>
+  <table class="table">
+    <tbody>
+      {% for holiday in holidays %}
+      <tr>
+        <td dir="ltr">{{ holiday.jalali_date }}</td>
+        <td><bdi>{{ holiday.title }}</bdi></td>
+        <td>
+          <form hx-post="/settings/holidays/remove" hx-swap="none">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="date" value="{{ holiday.jalali_date }}" />
+            <button class="btn btn-sm" type="submit">{{ t('settings.holidays_remove') }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <form hx-post="/settings/holidays/add" hx-swap="none">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="grid-2">
+      <label>
+        {{ t('common.date') }}
+        <input type="text" name="date" dir="ltr" placeholder="1404/01/01" />
+      </label>
+      <label>
+        {{ t('common.title') }}
+        <input type="text" name="title" dir="auto" />
+      </label>
+    </div>
+    <button class="btn btn-primary" type="submit">{{ t('settings.holidays_add') }}</button>
+  </form>
+</div>
+{% endblock %}

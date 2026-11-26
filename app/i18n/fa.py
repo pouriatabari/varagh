@@ -39,6 +39,7 @@ STRINGS: dict[str, str] = {
     "common.loading": "در حال بارگذاری…",
     "common.optional": "اختیاری",
     "common.minutes": "دقیقه",
+    "common.days": "روز",
     "common.hours": "ساعت",
     "common.tasks": "تسک",
     "common.filter": "فیلتر",
@@ -170,6 +171,8 @@ STRINGS: dict[str, str] = {
     "notifications.test_sent": "پیام تست ارسال شد.",
     "notifications.test_failed": "ارسال تست ناموفق بود.",
     "notifications.email_address": "نشانی ایمیل",
+    "notify.test.title": "پیام آزمایشی",
+    "notify.test.body": "این یک پیام آزمایشی از ورق است.",
     # --- learning ---
     "learning.title": "یادگیری",
     "learning.new_item": "مورد جدید",

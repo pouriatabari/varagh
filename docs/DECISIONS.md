@@ -94,3 +94,23 @@ together with its rationale.
   `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`.
 - **Why:** The simplest possible local setup; multi-user support is on the
   roadmap.
+
+## D13 — `notification_log` is both the ledger and the browser queue
+
+- **Decision:** The unique constraint on `(kind, ref_id, channel, window_key)`
+  de-duplicates every channel, and the rows of the `browser` channel double as
+  the queue the page polls. A nullable `delivered_at` marks the rows the
+  browser has already shown, and the payload of the message is stored as JSON
+  in the same row.
+- **Why:** One table keeps the de-duplication and the queue consistent; a
+  notification can never be sent twice, and the browser never misses one.
+
+## D14 — Notifications are decided by the worker, delivered by the page
+
+- **Decision:** The worker evaluates the rules every five minutes and writes
+  to `notification_log`. The browser polls `/api/notifications/due` every 45
+  seconds and raises the OS notification itself. The email and webhook
+  channels deliver immediately from the worker.
+- **Why:** Docker cannot reach the host notification daemon, but the browser
+  can; keeping the decision in the worker means the rules run even when no
+  page is open.

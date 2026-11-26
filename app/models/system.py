@@ -39,6 +39,7 @@ class NotificationLog(Base, TimestampMixin):
         ),
         Index("ix_notification_log_sent_at", "sent_at"),
         Index("ix_notification_log_kind", "kind"),
+        Index("ix_notification_log_channel", "channel"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -47,6 +48,8 @@ class NotificationLog(Base, TimestampMixin):
     channel: Mapped[str] = mapped_column(String(30), nullable=False)
     window_key: Mapped[str] = mapped_column(String(60), default="", nullable=False)
     sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=None)
 
 
 class AIRun(Base, TimestampMixin):

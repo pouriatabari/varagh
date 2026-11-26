@@ -57,4 +57,59 @@
     tickTimer();
     setInterval(tickTimer, 1000);
   }
+
+  /* ------------------------------------------------------------------
+   * Browser notifications.
+   *
+   * The container cannot reach the host operating system, so the worker
+   * queues the notifications in the database and this page polls for them
+   * and raises the real OS notification through the Web Notifications API.
+   * ------------------------------------------------------------------ */
+  const POLL_INTERVAL_MS = 45000;
+
+  function csrfToken() {
+    const input = document.querySelector("input[name='csrf_token']");
+    return input ? input.value : "";
+  }
+
+  function markRead(id) {
+    return fetch("/api/notifications/" + id + "/read", {
+      method: "POST",
+      headers: { "X-CSRF-Token": csrfToken() },
+    });
+  }
+
+  function showNotification(item) {
+    if (!("Notification" in window)) return;
+    if (window.Notification.permission === "granted") {
+      new Notification(item.title, { body: item.body, tag: "varagh-" + item.id });
+    }
+    markRead(item.id);
+  }
+
+  function pollNotifications() {
+    fetch("/api/notifications/due", { headers: { Accept: "application/json" } })
+      .then(function (response) {
+        return response.ok ? response.json() : { notifications: [] };
+      })
+      .then(function (data) {
+        (data.notifications || []).forEach(showNotification);
+      })
+      .catch(function () {
+        /* offline: try again on the next tick */
+      });
+  }
+
+  const notifyButton = document.getElementById("enable-notifications");
+  if (notifyButton && "Notification" in window) {
+    notifyButton.addEventListener("click", function () {
+      window.Notification.requestPermission().then(function () {
+        pollNotifications();
+      });
+    });
+  }
+
+  if ("Notification" in window) {
+    setInterval(pollNotifications, POLL_INTERVAL_MS);
+  }
 })();
