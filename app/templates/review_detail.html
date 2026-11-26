@@ -60,6 +60,29 @@
 
 <div class="card">
   <div class="card-title"><h2>{{ t('reviews.narrative') }}</h2></div>
+  <form method="post" action="/reviews/{{ review.id }}/ai-draft">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <button class="btn" type="submit">{{ t('reviews.generate_ai') }}</button>
+  </form>
+  {% if review.ai_draft %}
+  <div class="divider"></div>
+  <h3>{{ t('reviews.bottlenecks') }}</h3>
+  <ul>
+    {% for item in review.ai_draft.bottlenecks %}
+    <li><bdi>{{ item }}</bdi></li>
+    {% endfor %}
+  </ul>
+  <h3>{{ t('reviews.suggestions') }}</h3>
+  <ul>
+    {% for item in review.ai_draft.suggestions %}
+    <li><bdi>{{ item }}</bdi></li>
+    {% endfor %}
+  </ul>
+  {% if review.ai_draft.narrative_fa %}
+  <div class="markdown-body" dir="auto">{{ review.ai_draft.narrative_fa }}</div>
+  {% endif %}
+  {% endif %}
+  <div class="divider"></div>
   <form method="post" action="/reviews/{{ review.id }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div class="field">

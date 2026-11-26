@@ -16,16 +16,6 @@ from app.config import get_settings
 
 logger = logging.getLogger("varagh.ai")
 
-FEATURES = (
-    "parse_quick_add",
-    "parse_daily_journal",
-    "classify_task",
-    "parse_syllabus",
-    "daily_plan",
-    "review_draft",
-    "ask_my_data",
-)
-
 
 class AIProvider(Protocol):
     """The interface every provider implements."""

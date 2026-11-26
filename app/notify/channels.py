@@ -7,7 +7,6 @@ cannot notify the host operating system.
 
 from __future__ import annotations
 
-import json
 import logging
 import smtplib
 from email.message import EmailMessage
@@ -195,18 +194,3 @@ def build_channels(session: Session, now: Any, config: dict[str, Any]) -> list[C
         payload_format = webhook.get("format") or get_settings().webhook_format
         channels.append(WebhookChannel(session, now, url, payload_format))
     return channels
-
-
-def dump_payload(notification: Notification) -> str:
-    """Return a JSON representation of a notification (used by the test button)."""
-    return json.dumps(
-        {
-            "kind": notification.kind,
-            "ref_id": notification.ref_id,
-            "title": notification.title,
-            "body": notification.body,
-            "window_key": notification.window_key,
-            "url": notification.url,
-        },
-        ensure_ascii=False,
-    )

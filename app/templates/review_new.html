@@ -28,18 +28,7 @@
 
 <div class="card">
   <div class="card-title"><h2>{{ t('reviews.narrative') }}</h2></div>
-  {% if ai_enabled %}
-  <button
-    class="btn"
-    type="button"
-    hx-post="/reviews/draft"
-    hx-swap="none"
-  >
-    {{ t('reviews.generate_ai') }}
-  </button>
-  {% else %}
-  <p class="muted">{{ t('reviews.ai_disabled') }}</p>
-  {% endif %}
+  <p class="muted">{{ t('reviews.ai_draft_hint') }}</p>
 
   <form method="post" action="/reviews">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />

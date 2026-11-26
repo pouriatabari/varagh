@@ -239,6 +239,7 @@ STRINGS: dict[str, str] = {
     "reviews.suggestions": "پیشنهادها",
     "reviews.narrative": "روایت",
     "reviews.empty": "هنوز ارزیابی‌ای ثبت نشده.",
+    "reviews.ai_draft_hint": "پس از ذخیرهٔ ارزیابی می‌توانی پیش‌نویس هوش مصنوعی را بسازی.",
     "reviews.ai_disabled": "هوش مصنوعی فعال نیست؛ می‌توانی آمار را ببینی و متن را دستی بنویسی.",
     # --- stats keys ---
     "stats.completion_rate": "نرخ تکمیل",
@@ -272,6 +273,8 @@ STRINGS: dict[str, str] = {
     "settings.holiday_invalid": "تاریخ تعطیلی نامعتبر است.",
     "settings.weekend": "روزهای تعطیل هفتگی",
     "settings.saved": "تنظیمات ذخیره شد.",
+    "settings.export_hint": "خروجی JSON شامل همهٔ داده‌های برنامه است.",
+    "settings.export_json": "دانلود خروجی JSON",
     # --- errors / flash ---
     "error.not_found": "یافت نشد.",
     "error.forbidden": "دسترسی مجاز نیست.",

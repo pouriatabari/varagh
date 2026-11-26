@@ -6,10 +6,12 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_bool, form_datetime, form_int, form_optional_str, form_str
+from app.schemas.tasks import TaskCreate, TaskOut, TaskUpdate
 from app.security import validate_csrf
 from app.services import settings as settings_service
 from app.services import tasks as task_service
@@ -147,25 +149,24 @@ async def task_create(request: Request, session: SessionDep) -> RedirectResponse
     form = await request.form()
     timezone = settings_service.timezone_name(session)
     now = utcnow()
-    title = form_str(form, "title")
-    if not title:
-        return _redirect("/tasks/new", error="error.validation")
     status_value = form_str(form, "status")
     origin_value = form_str(form, "origin")
     context_value = form_str(form, "context")
-    task = task_service.create_task(
-        session,
-        title=title,
-        now=now,
-        description_md=form_str(form, "description_md"),
-        status=status_value if status_value in VALID_STATUSES else "todo",
-        priority=form_int(form, "priority", 2) or 0,
-        origin=origin_value if origin_value in VALID_ORIGINS else "self_initiated",
-        assigned_by=form_optional_str(form, "assigned_by"),
-        context=context_value if context_value in VALID_CONTEXTS else "personal",
-        due_at=form_datetime(form, "due_at", timezone),
-        effort_minutes_estimate=form_int(form, "effort_minutes_estimate"),
-    )
+    try:
+        payload = TaskCreate(
+            title=form_str(form, "title"),
+            description_md=form_str(form, "description_md"),
+            status=status_value if status_value in VALID_STATUSES else "todo",
+            priority=form_int(form, "priority", 2) or 0,
+            origin=origin_value if origin_value in VALID_ORIGINS else "self_initiated",
+            assigned_by=form_optional_str(form, "assigned_by"),
+            context=context_value if context_value in VALID_CONTEXTS else "personal",
+            due_at=form_datetime(form, "due_at", timezone),
+            effort_minutes_estimate=form_int(form, "effort_minutes_estimate"),
+        )
+    except ValidationError:
+        return _redirect("/tasks/new", error="error.validation")
+    task = task_service.create_task(session, now=now, **payload.model_dump())
     domain_ids = [int(value) for value in form.getlist("domain_ids") if str(value).isdigit()]
     if domain_ids:
         task_service.set_task_domains(session, task, domain_ids, now)
@@ -183,6 +184,7 @@ async def task_quick_add(request: Request, session: SessionDep) -> Response:
     changes: dict[str, object] = {}
     if form_bool(form, "ai"):
         changes = _ai_quick_add_changes(session, title, now)
+        title = str(changes.pop("title", title))
     task = task_service.create_task(session, title=title, now=now, **changes)
     if request.headers.get("hx-request"):
         context = _task_context(request, session, task=task, now=now, domain_names_by_task={})
@@ -225,27 +227,28 @@ async def task_update(request: Request, task_id: int, session: SessionDep) -> Re
     form = await request.form()
     timezone = settings_service.timezone_name(session)
     now = utcnow()
-    changes: dict[str, object] = {}
+    values: dict[str, object] = {}
     if "title" in form:
-        title = form_str(form, "title")
-        if title:
-            changes["title"] = title
+        values["title"] = form_str(form, "title")
     if "description_md" in form:
-        changes["description_md"] = form_str(form, "description_md")
+        values["description_md"] = form_str(form, "description_md")
     if "priority" in form:
-        changes["priority"] = form_int(form, "priority", task.priority)
+        values["priority"] = form_int(form, "priority", task.priority)
     if "origin" in form:
-        origin = form_str(form, "origin")
-        changes["origin"] = origin if origin in VALID_ORIGINS else task.origin
+        values["origin"] = form_str(form, "origin")
     if "assigned_by" in form:
-        changes["assigned_by"] = form_optional_str(form, "assigned_by")
+        values["assigned_by"] = form_optional_str(form, "assigned_by")
     if "context" in form:
-        context = form_str(form, "context")
-        changes["context"] = context if context in VALID_CONTEXTS else task.context
+        values["context"] = form_str(form, "context")
     if "due_at" in form:
-        changes["due_at"] = form_datetime(form, "due_at", timezone)
+        values["due_at"] = form_datetime(form, "due_at", timezone)
     if "effort_minutes_estimate" in form:
-        changes["effort_minutes_estimate"] = form_int(form, "effort_minutes_estimate")
+        values["effort_minutes_estimate"] = form_int(form, "effort_minutes_estimate")
+    try:
+        payload = TaskUpdate.model_validate(values)
+    except ValidationError:
+        return _redirect(f"/tasks/{task.id}", error="error.validation")
+    changes = payload.model_dump(exclude_unset=True)
     task_service.update_task(session, task, now, **changes)
     return _redirect(f"/tasks/{task.id}", flash="flash.task_updated")
 
@@ -403,19 +406,6 @@ async def api_tasks(request: Request, session: SessionDep) -> dict[str, object]:
     filters = _filters_from_request(request)
     rows = task_service.list_tasks(session, filters, now=utcnow(), timezone=timezone)
     return {
-        "items": [
-            {
-                "id": task.id,
-                "title": task.title,
-                "status": task.status,
-                "origin": task.origin,
-                "context": task.context,
-                "due_at": task.due_at.isoformat() if task.due_at else None,
-                "last_activity_at": (
-                    task.last_activity_at.isoformat() if task.last_activity_at else None
-                ),
-            }
-            for task in rows
-        ],
+        "items": [TaskOut.model_validate(task).model_dump(mode="json") for task in rows],
         "count": len(rows),
     }
