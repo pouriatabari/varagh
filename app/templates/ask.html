@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ t('ai.ask_title') }}{% endblock %}
+{% block content %}
+<h1>{{ t('ai.ask_title') }}</h1>
+
+<div class="card">
+  <form method="post" action="/ask">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="field">
+      <label for="question">{{ t('ai.ask_question') }}</label>
+      <input type="text" id="question" name="question" dir="auto" value="{{ question or '' }}" />
+    </div>
+    {% if not ai_enabled %}
+    <p class="muted">{{ t('ai.disabled') }}</p>
+    {% endif %}
+    <button class="btn btn-primary" type="submit">{{ t('common.confirm') }}</button>
+  </form>
+</div>
+
+{% if error %}
+<div class="flash error">{{ t(error) }}</div>
+{% endif %}
+
+{% if answer %}
+<div class="card">
+  <div class="card-title"><h2>{{ t('ai.answer') }}</h2></div>
+  <div class="markdown-body" dir="auto">{{ answer.answer_fa }}</div>
+  {% if answer.used_task_ids %}
+  <p class="small muted">
+    {{ t('ai.used_tasks') }}:
+    {% for task_id in answer.used_task_ids %}<span class="chip">#{{ task_id }}</span>{% endfor %}
+  </p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

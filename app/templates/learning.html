@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ t('learning.title') }}{% endblock %}
+{% block content %}
+<div class="card-title">
+  <h1>{{ t('learning.title') }}</h1>
+  <a class="btn btn-primary" href="/learning/new">{{ t('learning.new_item') }}</a>
+</div>
+
+{% if stale %}
+<div class="card">
+  <div class="card-title"><h2>{{ t('learning.stale') }}</h2></div>
+  <ul>
+    {% for item in stale %}
+    <li>
+      <bdi>{{ item.title }}</bdi>
+      <a class="btn btn-sm" href="/learning/{{ item.id }}">{{ t('common.edit') }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if items %}
+{% for item in items %}
+<div class="card">
+  <div class="card-title">
+    <h2><bdi>{{ item.title }}</bdi></h2>
+    <span class="chip">{{ t('learning.kind.' + item.kind) }}</span>
+    <span class="chip">{{ t('learning.status.' + item.status) }}</span>
+  </div>
+  {% set item_progress = progress[item.id] %}
+  <div class="progress">
+    <span style="width: {{ item_progress.percent }}%"></span>
+  </div>
+  <p class="small muted">
+    {{ item_progress.percent | digits }}٪ —
+    {{ item_progress.done_units | digits }}/{{ item_progress.total_units | digits }}
+    {{ t('learning.units') }} —
+    {{ item_progress.minutes | duration }}
+  </p>
+  <a class="btn btn-sm" href="/learning/{{ item.id }}">{{ t('common.edit') }}</a>
+</div>
+{% endfor %}
+{% else %}
+<p class="muted">{{ t('learning.empty') }}</p>
+{% endif %}
+{% endblock %}

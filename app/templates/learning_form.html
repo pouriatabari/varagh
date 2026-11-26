@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ t('learning.new_item') }}{% endblock %}
+{% block content %}
+<h1>{{ t('learning.new_item') }}</h1>
+<div class="card">
+  <form method="post" action="/learning">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="grid-2">
+      <label>
+        {{ t('common.title') }}
+        <input type="text" name="title" dir="auto" required />
+      </label>
+      <label>
+        {{ t('learning.kind') }}
+        <select name="kind">
+          {% for kind in ['book', 'course', 'article', 'other'] %}
+          <option value="{{ kind }}">{{ t('learning.kind.' + kind) }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        {{ t('common.title') }}
+        <input type="text" name="author_or_provider" dir="auto" />
+      </label>
+    </div>
+    <div class="field">
+      <label for="notes_md">{{ t('common.note') }}</label>
+      <textarea id="notes_md" name="notes_md" dir="auto"></textarea>
+    </div>
+    <div class="field">
+      <label for="syllabus">{{ t('learning.syllabus') }}</label>
+      <textarea id="syllabus" name="syllabus" dir="auto" placeholder="{{ t('learning.syllabus') }}"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
+  </form>
+</div>
+{% endblock %}

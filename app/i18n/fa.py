@@ -157,6 +157,7 @@ STRINGS: dict[str, str] = {
     "journal.confirm": "تأیید و ثبت",
     "journal.empty": "برای این روز ژورنالی ثبت نشده.",
     "journal.suggestions": "پیشنهادهای استخراج‌شده",
+    "journal.ai_hint": "متن ژورنال تحلیل می‌شود؛ تا وقتی تأیید نکنی چیزی ثبت نمی‌شود.",
     # --- notifications ---
     "notifications.title": "اعلان‌ها",
     "notifications.enable_browser": "فعال‌سازی اعلان‌های مرورگر",
@@ -286,6 +287,18 @@ STRINGS: dict[str, str] = {
     "flash.review_updated": "ارزیابی به‌روزرسانی شد.",
     "flash.achievement_created": "دستاورد ثبت شد.",
     "error.ai_disabled": "هوش مصنوعی فعال نیست.",
+    "error.ai_failed": "پاسخ هوش مصنوعی معتبر نبود؛ دوباره تلاش کنید.",
+    "flash.learning_created": "مورد یادگیری ثبت شد.",
+    "flash.learning_updated": "مورد یادگیری به‌روزرسانی شد.",
+    "ai.ask_title": "از داده‌هایم بپرس",
+    "ai.ask_question": "سؤالت چیست؟",
+    "ai.answer": "پاسخ",
+    "ai.used_tasks": "تسک‌های استفاده‌شده",
+    "ai.disabled": "برای استفاده از این بخش، هوش مصنوعی باید فعال باشد.",
+    "ai.plan_empty": "برنامه‌ای پیشنهاد نشد.",
+    "ai.classify": "پیشنهاد حوزه با هوش مصنوعی",
+    "ai.classified": "حوزه‌های پیشنهادی:",
+    "ai.apply": "اعمال حوزه‌های پیشنهادی",
 }
 
 

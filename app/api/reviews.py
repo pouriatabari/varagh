@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
@@ -155,22 +155,6 @@ async def review_update(request: Request, review_id: int, session: SessionDep) -
         user_final_md=form_str(form, "user_final_md"),
         rating=form_int(form, "rating"),
     )
-    return _redirect(f"/reviews/{review.id}", flash="flash.review_updated")
-
-
-@router.post("/reviews/{review_id}/ai-draft")
-async def review_ai_draft(request: Request, review_id: int, session: SessionDep) -> Response:
-    """Ask the AI provider for a draft; without a provider the user writes it."""
-    review = review_service.get_review(session, review_id)
-    if review is None:
-        return _redirect("/reviews", error="error.not_found")
-    from app.ai.provider import get_provider
-
-    provider = get_provider()
-    if provider is None:
-        return _redirect(f"/reviews/{review.id}", error="error.ai_disabled")
-    draft = provider.review_draft(review.stats or {})
-    review_service.update_review(session, review, ai_draft=draft)
     return _redirect(f"/reviews/{review.id}", flash="flash.review_updated")
 
 

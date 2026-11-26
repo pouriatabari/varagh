@@ -6,6 +6,7 @@
     <div class="card-title"><h1>{{ t('journal.title') }}</h1></div>
     <form method="post" action="/journal">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="mode" value="manual" />
       <div class="field">
         <label for="date">{{ t('common.date') }} (۱۴۰۴/۰۸/۰۵)</label>
         <input type="text" id="date" name="date" dir="ltr" value="{{ today | jalali_input }}" />
@@ -16,6 +17,37 @@
       </div>
       <button class="btn btn-primary" type="submit">{{ t('journal.save') }}</button>
     </form>
+
+    <div class="divider"></div>
+
+    <div x-data="journalAI()">
+      <h2>{{ t('journal.parse') }}</h2>
+      <p class="small muted">{{ t('journal.ai_hint') }}</p>
+      <button class="btn" type="button" @click="parse()">{{ t('journal.parse') }}</button>
+      <p class="small muted" x-show="error" x-text="error"></p>
+      <template x-if="proposal">
+        <div>
+          <h3>{{ t('journal.suggestions') }}</h3>
+          <ul>
+            <template x-for="(entry, index) in proposal.entries" :key="index">
+              <li>
+                <span x-text="entry.text"></span>
+                <span class="chip" x-text="entry.minutes ? entry.minutes + ' دقیقه' : ''"></span>
+              </li>
+            </template>
+          </ul>
+          <form method="post" action="/journal">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="mode" value="ai" />
+            <input type="hidden" name="raw_text" :value="rawText" />
+            <input type="hidden" name="entries" :value="JSON.stringify(proposal.entries)" />
+            <input type="hidden" name="summary" :value="proposal.summary_fa || ''" />
+            <input type="hidden" name="date" value="{{ today | jalali_input }}" />
+            <button class="btn btn-primary" type="submit">{{ t('journal.confirm') }}</button>
+          </form>
+        </div>
+      </template>
+    </div>
   </div>
 
   <div class="card">
@@ -26,6 +58,13 @@
       <li>
         <div class="small muted">{{ entry.date | jdate }}</div>
         <div class="user-text" dir="auto">{{ entry.raw_text }}</div>
+        {% if entry.parsed and entry.parsed.entries %}
+        <ul class="small muted">
+          {% for item in entry.parsed.entries %}
+          <li><bdi>{{ item.text }}</bdi></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -34,4 +73,41 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function journalAI() {
+    return {
+      proposal: null,
+      error: "",
+      rawText: "",
+      async parse() {
+        this.error = "";
+        this.proposal = null;
+        const textarea = document.getElementById("raw_text");
+        this.rawText = textarea ? textarea.value : "";
+        if (!this.rawText.trim()) {
+          this.error = "متنی برای تحلیل وارد کنید.";
+          return;
+        }
+        const token = document.querySelector('input[name="csrf_token"]').value;
+        const body = new URLSearchParams();
+        body.append("raw_text", this.rawText);
+        body.append("csrf_token", token);
+        const response = await fetch("/api/ai/journal", {
+          method: "POST",
+          headers: { "X-CSRF-Token": token },
+          body: body,
+        });
+        const data = await response.json();
+        if (!data.ok) {
+          this.error = data.error || "خطا";
+          return;
+        }
+        this.proposal = data.proposal;
+      },
+    };
+  }
+</script>
 {% endblock %}

@@ -74,8 +74,20 @@
     <h2>{{ t('dashboard.ai_plan') }}</h2>
   </div>
   {% if ai_enabled %}
-  <div id="ai-plan" hx-get="/api/ai/daily-plan" hx-trigger="load" hx-swap="innerHTML">
-    {{ t('common.loading') }}
+  <div id="ai-plan" x-data="dailyPlan()" x-init="load()">
+    <p class="muted" x-show="loading">{{ t('common.loading') }}</p>
+    <p class="muted" x-show="error" x-text="error"></p>
+    <template x-if="plan && plan.length">
+      <ol>
+        <template x-for="(item, index) in plan" :key="index">
+          <li>
+            <span x-text="item.title"></span>
+            <span class="chip" x-show="item.minutes" x-text="item.minutes + ' دقیقه'"></span>
+          </li>
+        </template>
+      </ol>
+    </template>
+    <p class="muted" x-show="plan && !plan.length">{{ t('ai.plan_empty') }}</p>
   </div>
   {% else %}
   <p class="muted">{{ t('dashboard.ai_plan_hint') }}</p>
@@ -84,6 +96,31 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+  function dailyPlan() {
+    return {
+      plan: [],
+      loading: true,
+      error: "",
+      async load() {
+        this.loading = true;
+        try {
+          const response = await fetch("/api/ai/daily-plan");
+          const data = await response.json();
+          if (!data.ok) {
+            this.error = data.error || "";
+          } else {
+            this.plan = data.plan.plan || [];
+          }
+        } catch (error) {
+          this.error = "";
+        } finally {
+          this.loading = false;
+        }
+      },
+    };
+  }
+</script>
 <script>
   (function () {
     const canvas = document.getElementById("hours-chart");

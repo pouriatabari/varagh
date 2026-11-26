@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Request
@@ -208,21 +209,46 @@ async def journal_page(request: Request, session: SessionDep) -> HTMLResponse:
 
 @router.post("/journal")
 async def journal_create(request: Request, session: SessionDep) -> RedirectResponse:
-    """Store a free-form journal entry (manual mode: nothing is parsed)."""
+    """Store a journal entry.
+
+    In manual mode the text is stored as it is. In AI mode the proposals the
+    user confirmed are stored next to it; nothing is ever written before the
+    confirmation.
+    """
     form = await request.form()
     raw_text = form_str(form, "raw_text")
     if not raw_text:
         return _redirect("/journal", error="error.validation")
+    mode = form_str(form, "mode") or "manual"
+    parsed = None
+    if mode == "ai":
+        parsed = {
+            "entries": _parse_entries(form_str(form, "entries")),
+            "summary_fa": form_str(form, "summary"),
+        }
     day = parse_jalali_date(form_str(form, "date")) or _today(session)
     entry = session.scalars(select(DailyJournal).where(DailyJournal.date == day)).first()
     if entry is None:
-        entry = DailyJournal(date=day, raw_text=raw_text, parsed=None, confirmed=True)
+        entry = DailyJournal(date=day, raw_text=raw_text, parsed=parsed, confirmed=True)
         session.add(entry)
     else:
         entry.raw_text = raw_text
-        entry.parsed = None
+        entry.parsed = parsed
         entry.confirmed = True
     return _redirect("/journal", flash="flash.time_created")
+
+
+def _parse_entries(raw: str) -> list[dict[str, object]]:
+    """Parse the confirmed entries of a journal."""
+    if not raw:
+        return []
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(data, list):
+        return []
+    return [item for item in data if isinstance(item, dict)]
 
 
 @router.get("/tasks/{task_id}/time", response_class=HTMLResponse)

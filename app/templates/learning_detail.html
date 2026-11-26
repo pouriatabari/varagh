@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ t('learning.title') }}{% endblock %}
+{% block content %}
+<div class="card-title">
+  <h1><bdi>{{ item.title }}</bdi></h1>
+  <span class="chip">{{ t('learning.kind.' + item.kind) }}</span>
+  <span class="chip">{{ t('learning.status.' + item.status) }}</span>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('learning.progress') }}</h2></div>
+  <div class="progress">
+    <span style="width: {{ progress.percent }}%"></span>
+  </div>
+  <p class="small muted">
+    {{ progress.percent | digits }}٪ —
+    {{ progress.done_units | digits }}/{{ progress.total_units | digits }}
+    {{ t('learning.units') }} —
+    {{ progress.minutes | duration }}
+  </p>
+  <form method="post" action="/learning/{{ item.id }}/status" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <select name="status">
+      {% for status in ['not_started', 'in_progress', 'done', 'dropped'] %}
+      <option value="{{ status }}" {{ 'selected' if status == item.status }}>
+        {{ t('learning.status.' + status) }}
+      </option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-sm" type="submit">{{ t('common.save') }}</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('learning.units') }}</h2></div>
+  {% if units %}
+  <ul class="units">
+    {% for unit in units %}
+    <li>
+      <form
+        class="row"
+        method="post"
+        action="/learning/{{ item.id }}/units/{{ unit.id }}/toggle"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="inline">
+          <input type="checkbox" checked disabled />
+          <bdi>{{ unit.title }}</bdi>
+        </label>
+        <button class="btn btn-sm" type="submit">
+          {{ t('common.edit') if unit.done_at else t('common.confirm') }}
+        </button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="/learning/{{ item.id }}/read-up-to" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label>
+      {{ t('learning.read_up_to') }}
+      <select name="position">
+        {% for unit in units %}
+        <option value="{{ unit.position }}">#{{ unit.position + 1 }} — {{ unit.title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-sm" type="submit">{{ t('common.save') }}</button>
+  </form>
+  {% else %}
+  <p class="muted">{{ t('common.none_data') }}</p>
+  {% endif %}
+
+  <div class="divider"></div>
+  <form method="post" action="/learning/{{ item.id }}/units" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label>
+      {{ t('learning.add_unit') }}
+      <input type="text" name="title" dir="auto" />
+    </label>
+    <button class="btn btn-sm" type="submit">{{ t('common.create') }}</button>
+  </form>
+
+  <div class="divider"></div>
+  <form method="post" action="/learning/{{ item.id }}/syllabus" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label>
+      {{ t('learning.parse_syllabus') }}
+      <input type="text" name="syllabus" dir="auto" />
+    </label>
+    <button class="btn btn-sm" type="submit">{{ t('common.confirm') }}</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('learning.log_study') }}</h2></div>
+  <form method="post" action="/learning/{{ item.id }}/log" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label>
+      {{ t('common.minutes') }}
+      <input type="number" name="minutes" min="0" max="1440" />
+    </label>
+    <label>
+      {{ t('common.note') }}
+      <input type="text" name="note" dir="auto" />
+    </label>
+    <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
+  </form>
+</div>
+{% endblock %}

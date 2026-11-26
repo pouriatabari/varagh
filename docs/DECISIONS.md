@@ -114,3 +114,22 @@ together with its rationale.
 - **Why:** Docker cannot reach the host notification daemon, but the browser
   can; keeping the decision in the worker means the rules run even when no
   page is open.
+
+## D15 — The AI may only speak about tasks it was given
+
+- **Decision:** Every AI feature builds its payload out of the database, and
+  the answers are validated against strict Pydantic schemas that refuse
+  unknown fields. The review draft is rejected when it cites a task id that is
+  not part of the statistics snapshot.
+- **Why:** The AI must never invent a number or a task. The validation makes
+  that a hard failure instead of a silent mistake.
+
+## D16 — A custom AI provider is a first-class option
+
+- **Decision:** Besides `anthropic` and `openai`, the provider `custom` calls
+  any endpoint configured with `AI_CUSTOM_URL`, `AI_CUSTOM_METHOD` and
+  `AI_CUSTOM_HEADERS`. The request shape is chosen by the method (`json`,
+  `openai`, `anthropic` or `prompt`) and the answer may come back as a bare
+  JSON object or in one of the two vendor shapes.
+- **Why:** The user may run a local model, a gateway or a proxy. The whole
+  application must keep working without touching the vendor-specific code.
