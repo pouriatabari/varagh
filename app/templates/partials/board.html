@@ -1,0 +1,100 @@
+<div class="board" id="board" data-task-id="{{ task_id }}">
+  {% for item in board_items %}
+  <div
+    class="sticky c-{{ item.color }}"
+    style="left: {{ item.x }}px; top: {{ item.y }}px;"
+    data-item-id="{{ item.id }}"
+  >
+    <div class="sticky-body" dir="auto"><bdi>{{ item.content }}</bdi></div>
+    <div class="sticky-actions">
+      <form
+        hx-post="/tasks/{{ task_id }}/board/{{ item.id }}/delete"
+        hx-target="#board"
+        hx-swap="outerHTML"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="icon-btn" type="submit" title="{{ t('common.delete') }}">×</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+
+  <form
+    class="board-add"
+    hx-post="/tasks/{{ task_id }}/board"
+    hx-target="#board"
+    hx-swap="outerHTML"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input
+      type="text"
+      name="content"
+      dir="auto"
+      placeholder="{{ t('tasks.board_add') }}"
+      aria-label="{{ t('tasks.board_add') }}"
+    />
+    <select name="color" aria-label="{{ t('tasks.board_color') }}">
+      <option value="yellow">{{ t('tasks.board_color.yellow') }}</option>
+      <option value="green">{{ t('tasks.board_color.green') }}</option>
+      <option value="blue">{{ t('tasks.board_color.blue') }}</option>
+      <option value="pink">{{ t('tasks.board_color.pink') }}</option>
+      <option value="grey">{{ t('tasks.board_color.grey') }}</option>
+    </select>
+    <button class="btn btn-sm" type="submit">{{ t('common.create') }}</button>
+  </form>
+</div>
+
+<script>
+  (function () {
+    const board = document.getElementById("board");
+    if (!board || board.dataset.dragReady === "1") return;
+    board.dataset.dragReady = "1";
+
+    const csrf = board.querySelector('input[name="csrf_token"]');
+    const token = csrf ? csrf.value : "";
+
+    board.querySelectorAll(".sticky").forEach(function (sticky) {
+      let startX = 0;
+      let startY = 0;
+      let originLeft = 0;
+      let originTop = 0;
+      let moved = false;
+
+      sticky.addEventListener("pointerdown", function (event) {
+        if (event.target.closest("form") || event.target.closest("button")) return;
+        startX = event.clientX;
+        startY = event.clientY;
+        originLeft = parseFloat(sticky.style.left) || 0;
+        originTop = parseFloat(sticky.style.top) || 0;
+        moved = false;
+        sticky.setPointerCapture(event.pointerId);
+        sticky.classList.add("dragging");
+      });
+
+      sticky.addEventListener("pointermove", function (event) {
+        if (!sticky.hasPointerCapture(event.pointerId)) return;
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+        if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) moved = true;
+        sticky.style.left = originLeft + deltaX + "px";
+        sticky.style.top = originTop + deltaY + "px";
+      });
+
+      sticky.addEventListener("pointerup", function (event) {
+        sticky.classList.remove("dragging");
+        if (!moved) return;
+        const x = parseFloat(sticky.style.left) || 0;
+        const y = parseFloat(sticky.style.top) || 0;
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = "/tasks/" + board.dataset.taskId + "/board/" + sticky.dataset.itemId + "/move";
+        form.innerHTML =
+          '<input name="csrf_token" value="' + token + '">' +
+          '<input name="x" value="' + x + '">' +
+          '<input name="y" value="' + y + '">';
+        document.body.appendChild(form);
+        form.submit();
+      });
+    });
+  })();
+</script>
