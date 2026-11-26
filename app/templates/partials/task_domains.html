@@ -1,0 +1,81 @@
+<div id="task-domains">
+  <form method="post" action="/tasks/{{ task.id }}/domains">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    {% for domain in domains %}
+    <label style="display: flex; gap: 0.4rem; align-items: center; color: var(--text);">
+      <input
+        type="checkbox"
+        name="domain_ids"
+        value="{{ domain.id }}"
+        style="width: auto;"
+        {{ 'checked' if domain.id in task_domain_ids }}
+      />
+      <span><bdi>{{ domain.name }}</bdi></span>
+    </label>
+    {% else %}
+    <p class="muted">{{ t('tasks.no_domains') }}</p>
+    {% endfor %}
+    <button class="btn btn-sm btn-primary" type="submit">{{ t('common.save') }}</button>
+  </form>
+
+  <div class="divider"></div>
+
+  <div x-data="classifyDomains({{ task.id }})">
+    <button class="btn btn-sm" type="button" @click="suggest()">{{ t('ai.classify') }}</button>
+    <p class="small muted" x-show="error" x-text="error"></p>
+    <template x-if="suggestions.length">
+      <div>
+        <p class="small muted">{{ t('ai.classified') }}</p>
+        <form
+          method="post"
+          action="/tasks/{{ task.id }}/domains/apply-ai"
+          hx-post="/tasks/{{ task.id }}/domains/apply-ai"
+          hx-target="#task-domains"
+          hx-swap="outerHTML"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="hidden" name="domain_names" :value="suggestions.join(',')" />
+          <span class="chip" x-text="suggestions.join('، ')"></span>
+          <button class="btn btn-sm btn-primary" type="submit">{{ t('ai.apply') }}</button>
+        </form>
+      </div>
+    </template>
+  </div>
+
+  <div class="divider"></div>
+
+  <form method="post" action="/domains" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div>
+      <label for="new_domain">{{ t('tasks.domains') }}</label>
+      <input type="text" id="new_domain" name="name" dir="auto" />
+    </div>
+    <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+      <button class="btn btn-sm" type="submit">{{ t('common.create') }}</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function classifyDomains(taskId) {
+    return {
+      suggestions: [],
+      error: "",
+      async suggest() {
+        this.error = "";
+        this.suggestions = [];
+        const token = document.querySelector('input[name="csrf_token"]').value;
+        const response = await fetch("/api/ai/classify-task/" + taskId, {
+          method: "POST",
+          headers: { "X-CSRF-Token": token },
+        });
+        const data = await response.json();
+        if (!data.ok) {
+          this.error = data.error || "";
+          return;
+        }
+        this.suggestions = data.domains || [];
+      },
+    };
+  }
+</script>

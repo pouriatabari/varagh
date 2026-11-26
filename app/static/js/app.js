@@ -67,6 +67,15 @@
    * ------------------------------------------------------------------ */
   const POLL_INTERVAL_MS = 45000;
 
+  /* Register the service worker so the app can be installed as a PWA. */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").catch(function () {
+        /* the app works without the service worker */
+      });
+    });
+  }
+
   function csrfToken() {
     const input = document.querySelector("input[name='csrf_token']");
     return input ? input.value : "";

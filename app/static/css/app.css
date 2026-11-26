@@ -857,3 +857,16 @@ html[data-theme="dark"] .heatmap .cell.l3 {
 .board-add input[type="text"] {
   min-width: 220px;
 }
+
+.ai-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ai-toggle input {
+  width: auto;
+}

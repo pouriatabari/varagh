@@ -52,6 +52,10 @@
               aria-label="{{ t('nav.quick_add') }}"
               required
             />
+            <label class="inline ai-toggle" title="{{ t('ai.quick_add_hint') }}">
+              <input type="checkbox" name="ai" value="1" />
+              {{ t('ai.quick_add') }}
+            </label>
             <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
           </form>
           <div id="quick-add-result"></div>

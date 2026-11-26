@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_bool, form_int, form_str
+from app.services import export as export_service
 from app.services import holidays as holiday_service
 from app.services import settings as settings_service
 from app.templating import templates
@@ -84,3 +85,13 @@ async def settings_holidays(request: Request, session: SessionDep) -> JSONRespon
         return JSONResponse({"ok": False, "error": "invalid payload"}, status_code=400)
     holidays = holiday_service.replace_holidays(items)
     return JSONResponse({"ok": True, "holidays": len(holidays)})
+
+
+@router.get("/export.json")
+async def export_json(session: SessionDep) -> JSONResponse:
+    """Export the whole database as JSON."""
+    payload = export_service.export_all(session)
+    return JSONResponse(
+        payload,
+        headers={"Content-Disposition": 'attachment; filename="varagh-export.json"'},
+    )

@@ -155,29 +155,7 @@
 
     <div class="card">
       <div class="card-title"><h2>{{ t('tasks.domains') }}</h2></div>
-      <form method="post" action="/tasks/{{ task.id }}/domains">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        {% for domain in domains %}
-        <label style="display: flex; gap: 0.4rem; align-items: center; color: var(--text);">
-          <input type="checkbox" name="domain_ids" value="{{ domain.id }}" style="width: auto;" {{ 'checked' if domain.id in task_domain_ids }} />
-          <span><bdi>{{ domain.name }}</bdi></span>
-        </label>
-        {% else %}
-        <p class="muted">{{ t('tasks.no_domains') }}</p>
-        {% endfor %}
-        <button class="btn btn-sm btn-primary" type="submit">{{ t('common.save') }}</button>
-      </form>
-      <div class="divider"></div>
-      <form method="post" action="/domains" class="row">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <div>
-          <label for="new_domain">{{ t('tasks.domains') }}</label>
-          <input type="text" id="new_domain" name="name" dir="auto" />
-        </div>
-        <div style="flex: 0 0 auto; display: flex; align-items: flex-end;">
-          <button class="btn btn-sm" type="submit">{{ t('common.create') }}</button>
-        </div>
-      </form>
+      {% include "partials/task_domains.html" %}
     </div>
 
     <div class="card">
