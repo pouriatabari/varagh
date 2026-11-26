@@ -83,7 +83,7 @@
 
         <main class="content" id="main-content">
           {% if messages %} {% for kind, message in messages %}
-          <div class="flash {{ 'error' if kind == 'error' }}">{{ message }}</div>
+          <div class="flash {{ 'error' if kind == 'error' }}">{{ message | digits }}</div>
           {% endfor %} {% endif %} {% block content %}{% endblock %}
         </main>
       </div>

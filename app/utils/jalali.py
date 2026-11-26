@@ -99,6 +99,11 @@ def week_start(value: dt.date) -> dt.date:
     return value - dt.timedelta(days=(value.weekday() - 5) % 7)
 
 
+def jalali_short(value: dt.date) -> str:
+    """Return the short Jalali form of a date, e.g. ``05/08``."""
+    return jalali_of(value).strftime("%m/%d")
+
+
 def jalali_input_string(value: dt.date | None) -> str:
     """Return a date as ``YYYY/MM/DD`` in Jalali form with Latin digits."""
     if value is None:

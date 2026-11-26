@@ -120,6 +120,7 @@ async def task_list(request: Request, session: SessionDep) -> HTMLResponse:
         session,
         active_page="tasks",
         tasks=rows,
+        task_ids=[task.id for task in rows],
         domains=domains,
         filters=filters,
         now=now,
@@ -308,6 +309,27 @@ async def task_delete(request: Request, task_id: int, session: SessionDep) -> Re
         return _redirect("/tasks", error="error.not_found")
     task_service.soft_delete(session, task, utcnow())
     return _redirect("/tasks", flash="flash.task_deleted")
+
+
+@router.post("/tasks/delete")
+async def tasks_delete(request: Request, session: SessionDep) -> RedirectResponse:
+    """Soft-delete every task of the selection."""
+    form = await request.form()
+    raw_ids = form.getlist("task_ids")
+    ids = [int(value) for value in raw_ids if str(value).isdigit()]
+    if not ids:
+        return _redirect("/tasks", error="error.validation")
+    now = utcnow()
+    deleted = 0
+    for task_id in ids:
+        task = task_service.get_task(session, task_id)
+        if task is None:
+            continue
+        task_service.soft_delete(session, task, now)
+        deleted += 1
+    if not deleted:
+        return _redirect("/tasks", error="error.not_found")
+    return _redirect(f"/tasks?flash=flash.tasks_deleted&count={deleted}")
 
 
 @router.post("/tasks/{task_id}/restore")

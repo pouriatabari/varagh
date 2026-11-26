@@ -15,12 +15,13 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.i18n import t
 from app.models.review import Review
 from app.models.task import Task
 from app.services import learning as learning_service
 from app.services import tasks as task_service
 from app.services import time_entries as time_service
-from app.utils.jalali import period_bounds, previous_period
+from app.utils.jalali import jalali_short, period_bounds, previous_period
 from app.utils.text import format_minutes
 from app.utils.time import to_local
 
@@ -188,12 +189,93 @@ def compute_stats(
             "total_minutes": learning["total_minutes"],
         },
         "tasks": task_rows,
+        "series": _series(minutes_by_kind, counts_by_context, counts_by_origin, entries, timezone),
         "basis": {
             "measured": "time_entries",
             "estimated": "tasks.effort_minutes_estimate",
             "elapsed": "completed_at - started_at",
         },
     }
+
+
+def _series(
+    minutes_by_kind: dict[str, int],
+    counts_by_context: dict[str, int],
+    counts_by_origin: dict[str, int],
+    entries: list[Any],
+    timezone: str,
+) -> dict[str, Any]:
+    """Return the series the AI may chart out of the statistics of the period."""
+    kinds = [kind for kind in ("work", "overtime", "study", "learning") if kind in minutes_by_kind]
+    by_kind = {
+        "measured_minutes_by_kind": {
+            "labels": [t(f"time.kind.{kind}") for kind in kinds],
+            "values": [minutes_by_kind[kind] for kind in kinds],
+            "unit": "units.minutes",
+        }
+    }
+    contexts = [
+        context for context in ("company", "personal", "learning") if context in counts_by_context
+    ]
+    by_context = {
+        "counts_by_context": {
+            "labels": [t(f"tasks.context.{context}") for context in contexts],
+            "values": [counts_by_context[context] for context in contexts],
+            "unit": "units.count",
+        }
+    }
+    origins = [origin for origin in ("self_initiated", "assigned") if origin in counts_by_origin]
+    by_origin = {
+        "counts_by_origin": {
+            "labels": [t(f"tasks.origin.{origin}") for origin in origins],
+            "values": [counts_by_origin[origin] for origin in origins],
+            "unit": "units.count",
+        }
+    }
+    overtime = {
+        "overtime_by_day": {
+            "labels": _day_labels(entries, timezone, kind="overtime"),
+            "values": _day_values(entries, timezone, kind="overtime"),
+            "unit": "units.minutes",
+        }
+    }
+    daily = {
+        "measured_minutes_by_day": {
+            "labels": _day_labels(entries, timezone),
+            "values": _day_values(entries, timezone),
+            "unit": "units.minutes",
+        }
+    }
+    return {**by_kind, **by_context, **by_origin, **daily, **overtime}
+
+
+def _day_labels(entries: list[Any], timezone: str, kind: str | None = None) -> list[str]:
+    """Return the Jalali labels of the days that have entries."""
+    days = _days_with_entries(entries, timezone, kind)
+    return [jalali_short(day) for day in days]
+
+
+def _day_values(entries: list[Any], timezone: str, kind: str | None = None) -> list[int]:
+    """Return the measured minutes of every day that has entries."""
+    days = _days_with_entries(entries, timezone, kind)
+    totals = {day: 0 for day in days}
+    for entry in entries:
+        if kind and entry.kind != kind:
+            continue
+        day = to_local(entry.started_at, timezone).date()
+        if day in totals:
+            totals[day] += entry.duration_minutes or 0
+    return [totals[day] for day in days]
+
+
+def _days_with_entries(entries: list[Any], timezone: str, kind: str | None = None) -> list[date]:
+    """Return the sorted days that have entries."""
+    days = {
+        to_local(entry.started_at, timezone).date()
+        for entry in entries
+        if not kind or entry.kind == kind
+    }
+    return sorted(days)
 
 
 def list_reviews(session: Session) -> list[Review]:

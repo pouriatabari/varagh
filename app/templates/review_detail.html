@@ -65,6 +65,12 @@
     <button class="btn" type="submit">{{ t('reviews.generate_ai') }}</button>
   </form>
   {% if review.ai_draft %}
+  {% if review.ai_draft.charts %}
+  <div class="divider"></div>
+  <h3>{{ t('ai.charts_title') }}</h3>
+  {% set charts = review.ai_draft.charts %}
+  {% include "partials/charts.html" %}
+  {% endif %}
   <div class="divider"></div>
   <h3>{{ t('reviews.bottlenecks') }}</h3>
   <ul>

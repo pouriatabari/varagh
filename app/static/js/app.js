@@ -124,3 +124,82 @@
     setInterval(pollNotifications, POLL_INTERVAL_MS);
   }
 })();
+
+/* The selection of the task list: the checkboxes of the tasks and the bulk
+   actions of the page. */
+function taskSelection(ids) {
+  return {
+    selected: [],
+    ids: ids || [],
+    toggleAll(value) {
+      this.selected = value ? this.ids.slice() : [];
+    },
+  };
+}
+window.taskSelection = taskSelection;
+
+/* A form may ask for a confirmation before it is sent. */
+document.addEventListener("submit", function (event) {
+  const form = event.target;
+  if (!form || !form.getAttribute) return;
+  const message = form.getAttribute("data-confirm");
+  if (message && !window.confirm(message)) {
+    event.preventDefault();
+  }
+});
+
+/* Charts of the AI answers. The data comes from the server: the model only
+   chooses which series of the database it wants to show. */
+(function () {
+  const PALETTE = ["#2f6f5e", "#c2703d", "#4a6fa5", "#8a6fa5", "#b0553f", "#5a8a4a"];
+  const ROUND_TYPES = ["doughnut", "pie"];
+
+  function varaghRenderChart(canvas, spec) {
+    if (!canvas || !spec || typeof Chart === "undefined") return null;
+    const round = ROUND_TYPES.indexOf(spec.type) !== -1;
+    return new Chart(canvas, {
+      type: spec.type || "bar",
+      data: {
+        labels: spec.labels || [],
+        datasets: [
+          {
+            label: spec.unit || "",
+            data: spec.values || [],
+            backgroundColor: round ? PALETTE : PALETTE[0],
+            borderColor: round ? "#ffffff" : "transparent",
+            borderWidth: round ? 2 : 0,
+            borderRadius: round ? 0 : 6,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: round } },
+        scales: round ? {} : { y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  window.varaghRenderChart = varaghRenderChart;
+
+  function renderAll(root) {
+    const canvases = (root || document).querySelectorAll("canvas[data-chart]");
+    canvases.forEach(function (canvas) {
+      if (canvas.getAttribute("data-chart-ready") === "1") return;
+      try {
+        const spec = JSON.parse(canvas.getAttribute("data-chart"));
+        if (varaghRenderChart(canvas, spec)) {
+          canvas.setAttribute("data-chart-ready", "1");
+        }
+      } catch (error) {
+        /* a broken chart must never break the page */
+      }
+    });
+  }
+
+  window.varaghRenderCharts = renderAll;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    renderAll(document);
+  });
+})();

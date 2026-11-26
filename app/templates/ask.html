@@ -25,6 +25,11 @@
 <div class="card">
   <div class="card-title"><h2>{{ t('ai.answer') }}</h2></div>
   <div class="markdown-body" dir="auto">{{ answer.answer_fa }}</div>
+  {% if answer.charts %}
+  <div class="divider"></div>
+  {% set charts = answer.charts %}
+  {% include "partials/charts.html" %}
+  {% endif %}
   {% if answer.used_task_ids %}
   <p class="small muted">
     {{ t('ai.used_tasks') }}:

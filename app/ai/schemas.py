@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -89,11 +90,25 @@ class PlanItem(StrictModel):
     note_fa: str = ""
 
 
+class ChartSpec(StrictModel):
+    """A chart the model asks for.
+
+    The model names a series of the payload; the labels and the values are
+    resolved by the server, so no figure can be invented.
+    """
+
+    type: Literal["bar", "line", "doughnut", "pie"] = "bar"
+    series: str = Field(min_length=1, max_length=100)
+    title_fa: str = Field(default="", max_length=200)
+    basis: Literal["measured", "estimated", "elapsed"] = "measured"
+
+
 class DailyPlanDraft(StrictModel):
     """The plan the AI proposes for today."""
 
     plan: list[PlanItem] = Field(default_factory=list)
     summary_fa: str = ""
+    charts: list[ChartSpec] = Field(default_factory=list, max_length=6)
 
 
 class AchievementDraft(StrictModel):
@@ -114,6 +129,7 @@ class ReviewDraft(StrictModel):
     bottlenecks: list[str] = Field(default_factory=list)
     suggestions: list[str] = Field(default_factory=list)
     narrative_fa: str = ""
+    charts: list[ChartSpec] = Field(default_factory=list, max_length=6)
 
 
 class AnswerDraft(StrictModel):
@@ -122,3 +138,4 @@ class AnswerDraft(StrictModel):
     answer_fa: str = Field(min_length=1)
     used_task_ids: list[int] = Field(default_factory=list)
     used_dates: list[str] = Field(default_factory=list)
+    charts: list[ChartSpec] = Field(default_factory=list, max_length=6)

@@ -146,3 +146,14 @@ together with its rationale.
   provider, model or gateway without editing a file and restarting a
   container. A stored document that wins as a whole also allows a field to be
   cleared on purpose, which a per-field fallback would not allow.
+
+## D18 — An AI chart names a series, never a number
+
+- **Decision:** The model may ask for a chart, but it may only name a series
+  of the payload (`measured_minutes_by_kind`, `measured_minutes_by_day`,
+  `counts_by_context`, `counts_by_status`, …). The server resolves the labels
+  and the values out of the database and rejects a chart of an unknown series.
+- **Why:** The rule that the AI never invents a figure has to hold for the
+  charts too: a model that sends its own numbers could show a bar that no
+  time entry ever produced. Naming a series keeps the figure in the database
+  and lets the labels stay in the app's own Persian wording.

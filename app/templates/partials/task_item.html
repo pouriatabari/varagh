@@ -1,4 +1,14 @@
 <li class="task-item {{ 'done' if task.status == 'done' }} {{ 'overdue' if task.due_at and task.status not in ('done', 'cancelled') and task.due_at < now }}">
+  {% if selectable %}
+  <input
+    class="task-check"
+    type="checkbox"
+    name="task_ids"
+    value="{{ task.id }}"
+    x-model="selected"
+    aria-label="{{ t('tasks.select') }}"
+  />
+  {% endif %}
   <div class="head">
     <span class="title"><bdi>{{ task.title }}</bdi></span>
     {% if task.status == 'done' %}
@@ -28,5 +38,9 @@
     <span class="chip info"><bdi>{{ name }}</bdi></span>
     {% endfor %}
     <a class="btn btn-sm" href="/tasks/{{ task.id }}">{{ t('common.edit') }}</a>
+    <form method="post" action="/tasks/{{ task.id }}/delete" data-confirm="{{ t('tasks.delete_confirm_one') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <button class="btn btn-sm btn-danger" type="submit">{{ t('tasks.delete_one') }}</button>
+    </form>
   </div>
 </li>

@@ -88,6 +88,19 @@
       </ol>
     </template>
     <p class="muted" x-show="plan && !plan.length">{{ t('ai.plan_empty') }}</p>
+    <template x-if="charts && charts.length">
+      <div class="charts">
+        <template x-for="chart in charts" :key="chart.id">
+          <figure class="chart">
+            <figcaption>
+              <span x-text="chart.title"></span>
+              <span class="small muted" x-text="chart.basis_label"></span>
+            </figcaption>
+            <canvas :id="chart.id" height="220"></canvas>
+          </figure>
+        </template>
+      </div>
+    </template>
   </div>
   {% else %}
   <p class="muted">{{ t('dashboard.ai_plan_hint') }}</p>
@@ -103,6 +116,7 @@
   function dailyPlan() {
     return {
       plan: [],
+      charts: [],
       loading: true,
       error: "",
       async load() {
@@ -114,12 +128,21 @@
             this.error = data.error || "";
           } else {
             this.plan = data.plan.plan || [];
+            this.charts = data.plan.charts || [];
+            this.$nextTick(() => this.drawCharts());
           }
         } catch (error) {
           this.error = "";
         } finally {
           this.loading = false;
         }
+      },
+      drawCharts() {
+        if (typeof window.varaghRenderChart !== "function") return;
+        this.charts.forEach((chart) => {
+          const canvas = document.getElementById(chart.id);
+          if (canvas) window.varaghRenderChart(canvas, chart);
+        });
       },
     };
   }

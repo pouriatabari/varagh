@@ -94,7 +94,6 @@ STRINGS: dict[str, str] = {
     "tasks.domains": "حوزه‌ها",
     "tasks.no_domains": "بدون حوزه",
     "tasks.deleted": "تسک حذف‌شده",
-    "tasks.delete_confirm": "این تسک حذف شود؟",
     "tasks.time_entries": "ثبت‌های زمان",
     "tasks.notes": "یادداشت‌ها",
     "tasks.board": "تخته",
@@ -284,6 +283,8 @@ STRINGS: dict[str, str] = {
     "flash.task_created": "تسک ثبت شد.",
     "flash.task_updated": "تسک به‌روزرسانی شد.",
     "flash.task_deleted": "تسک حذف شد.",
+    "flash.tasks_deleted": "{count} تسک حذف شد.",
+    "flash.tasks_restored": "{count} تسک بازگردانده شد.",
     "flash.time_created": "زمان ثبت شد.",
     "flash.time_deleted": "ثبت زمان حذف شد.",
     "flash.note_added": "یادداشت افزوده شد.",
@@ -336,6 +337,19 @@ STRINGS: dict[str, str] = {
     "ai.test_incomplete": "پیکربندی کامل نیست؛ پروایدر، مدل و کلید را وارد کن.",
     "ai.invalid": "مقدار یکی از فیلدها معتبر نیست.",
     "ai.saved": "تنظیمات هوش مصنوعی ذخیره شد.",
+    # --- charts ---
+    "ai.charts_title": "نمودارها",
+    # --- bulk actions on the task list ---
+    "tasks.select_all": "انتخاب همه",
+    "tasks.selected_unit": "انتخاب‌شده",
+    "tasks.select": "انتخاب تسک",
+    "tasks.delete_selected": "حذف انتخاب‌شده‌ها",
+    "tasks.delete_one": "حذف",
+    "tasks.delete_confirm": "تسک‌های انتخاب‌شده حذف شوند؟ این کار قابل بازگشت است.",
+    "tasks.delete_confirm_one": "این تسک حذف شود؟",
+    "units.minutes": "دقیقه",
+    "units.hours": "ساعت",
+    "units.count": "تعداد",
 }
 
 

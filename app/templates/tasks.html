@@ -70,9 +70,30 @@
     <h2>{{ tasks | length }} {{ t('common.tasks') }}</h2>
   </div>
   {% if tasks %}
-  <ul class="task-list">
-    {% for task in tasks %} {% include "partials/task_item.html" %} {% endfor %}
-  </ul>
+  <form
+    method="post"
+    action="/tasks/delete"
+    data-confirm="{{ t('tasks.delete_confirm') }}"
+    x-data="taskSelection({{ task_ids | tojson }})"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="bulk-bar">
+      <label class="inline">
+        <input type="checkbox" @change="toggleAll($event.target.checked)" />
+        {{ t('tasks.select_all') }}
+      </label>
+      <span class="small muted" x-text="selected.length + ' ' + '{{ t('tasks.selected_unit') }}'"></span>
+      <button class="btn btn-sm btn-danger" type="submit" :disabled="selected.length === 0">
+        {{ t('tasks.delete_selected') }}
+      </button>
+    </div>
+    <ul class="task-list">
+      {% for task in tasks %}
+      {% set selectable = True %}
+      {% include "partials/task_item.html" %}
+      {% endfor %}
+    </ul>
+  </form>
   {% else %}
   <div class="empty">{{ t('tasks.empty') }}</div>
   {% endif %}

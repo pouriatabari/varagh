@@ -1,0 +1,22 @@
+{# The charts of an AI answer. The data comes from the database; the model
+   only chooses which series it wants to show. #}
+{% if charts %}
+<div class="charts">
+  {% for chart in charts %}
+  <figure class="chart">
+    <figcaption>
+      <bdi>{{ chart.title }}</bdi>
+      <span class="small muted">
+        {{ chart.basis_label }}
+        {% if chart.unit_label %}· {{ chart.unit_label }}{% endif %}
+      </span>
+    </figcaption>
+    <canvas
+      id="{{ chart.id }}"
+      height="220"
+      data-chart='{{ chart | tojson }}'
+    ></canvas>
+  </figure>
+  {% endfor %}
+</div>
+{% endif %}

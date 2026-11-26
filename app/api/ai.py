@@ -59,9 +59,11 @@ async def ai_daily_plan(session: SessionDep) -> JSONResponse:
     open_tasks = task_service.list_tasks(
         session, task_service.TaskFilters(status="open"), now=now, timezone=timezone
     )
+    series = dashboard_service.build_series(session, now=now, timezone=timezone, days=14)
     payload = {
         "today": now.date().isoformat(),
         "measured_minutes_today": stats.weekly_measured_minutes,
+        "series": series,
         "open_tasks": [
             {
                 "id": task.id,
@@ -77,7 +79,8 @@ async def ai_daily_plan(session: SessionDep) -> JSONResponse:
         draft = ai_service.daily_plan(session, provider, payload)
     except AIError as exc:
         return JSONResponse({"ok": False, "error": str(exc)}, status_code=502)
-    return JSONResponse({"ok": True, "plan": ai_service.draft_to_dict(draft)}, status_code=200)
+    plan = ai_service.draft_to_dict(draft, payload)
+    return JSONResponse({"ok": True, "plan": plan}, status_code=200)
 
 
 @router.post("/api/ai/parse-quick-add")
@@ -171,11 +174,13 @@ async def ai_review_draft(
     provider = get_provider(session)
     if provider is None:
         return _redirect(f"/reviews/{review.id}", error="error.ai_disabled")
+    stats = review.stats or {}
+    payload = ai_service.review_payload(stats)
     try:
-        draft = ai_service.review_draft(session, provider, review.stats or {})
+        draft = ai_service.review_draft(session, provider, stats)
     except AIError:
         return _redirect(f"/reviews/{review.id}", error="error.ai_failed")
-    review_service.update_review(session, review, ai_draft=ai_service.draft_to_dict(draft))
+    review_service.update_review(session, review, ai_draft=ai_service.draft_to_dict(draft, payload))
     for kind, items in (
         ("technical", draft.achievements_technical),
         ("work", draft.achievements_work),
@@ -222,8 +227,9 @@ async def ask_submit(request: Request, session: SessionDep) -> HTMLResponse:
         error = "error.validation"
     else:
         try:
-            draft = ai_service.ask_my_data(session, provider, question, _data_payload(session))
-            answer = ai_service.draft_to_dict(draft)
+            data = _data_payload(session)
+            draft = ai_service.ask_my_data(session, provider, question, data)
+            answer = ai_service.draft_to_dict(draft, ai_service.ask_payload(question, data))
         except AIError:
             error = "error.ai_failed"
     context = base_context(
@@ -244,8 +250,11 @@ def _data_payload(session: Session) -> dict[str, Any]:
         select(Task).where(Task.deleted_at.is_(None)).order_by(Task.created_at.desc()).limit(200)
     ).all()
     items = learning_service.list_items(session)
+    now = utcnow()
+    timezone = settings_service.timezone_name(session)
     return {
         "today": date.today().isoformat(),
+        "series": dashboard_service.build_series(session, now=now, timezone=timezone, days=30),
         "tasks": [
             {
                 "id": task.id,

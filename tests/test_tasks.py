@@ -147,3 +147,43 @@ def test_api_tasks_returns_json(client: TestClient, session: Session) -> None:
     response = client.get("/api/tasks")
     assert response.status_code == 200
     assert response.json()["count"] == 1
+
+
+def test_a_task_can_be_deleted_from_the_list(client: TestClient, session: Session) -> None:
+    """The delete button of the task list soft-deletes the task."""
+    task = _make_task(session, title="تسک برای حذف")
+    response = client.post(f"/tasks/{task.id}/delete", follow_redirects=False)
+    assert response.status_code == 303
+    assert task.deleted_at is not None
+
+
+def test_several_tasks_can_be_deleted_at_once(client: TestClient, session: Session) -> None:
+    """The selection of the task list deletes every chosen task."""
+    first = _make_task(session, title="تسک اول")
+    second = _make_task(session, title="تسک دوم")
+    response = client.post(
+        "/tasks/delete",
+        data={"task_ids": [first.id, second.id]},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "flash.tasks_deleted" in response.headers["location"]
+    assert first.deleted_at is not None
+    assert second.deleted_at is not None
+
+
+def test_a_deleted_task_leaves_the_list(client: TestClient, session: Session) -> None:
+    """A deleted task is not listed any more."""
+    task = _make_task(session, title="تسک پنهان")
+    client.post(f"/tasks/{task.id}/delete")
+    response = client.get("/tasks")
+    assert "تسک پنهان" not in response.text
+
+
+def test_the_task_list_offers_the_selection(client: TestClient, session: Session) -> None:
+    """The list shows the checkboxes and the bulk action."""
+    _make_task(session, title="تسک انتخابی")
+    response = client.get("/tasks")
+    assert response.status_code == 200
+    assert 'name="task_ids"' in response.text
+    assert "/tasks/delete" in response.text

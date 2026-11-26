@@ -15,6 +15,7 @@ from typing import Any
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
+from app.ai import charts as chart_service
 from app.ai.provider import AIError, AIProvider
 from app.ai.schemas import (
     AnswerDraft,
@@ -36,6 +37,13 @@ JSON_ONLY = (
 )
 
 PERSIAN = "Write the human-readable text in Persian (Farsi)."
+
+CHARTS = (
+    "You may also return charts: a list of {type (bar|line|doughnut|pie), "
+    "series (the name of one of the series of the payload), title_fa (a short "
+    "Persian title), basis (measured|estimated|elapsed)}. A series already "
+    "carries its labels and its values; never send numbers yourself."
+)
 
 SYSTEM_PROMPTS: dict[str, str] = {
     "parse_quick_add": (
@@ -63,7 +71,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "You propose a plan for today out of the tasks given in the payload. "
         "Return JSON with: plan (list of {title, task_id (int or null), "
         "minutes (int or null), note_fa (string)}), summary_fa (string). "
-        "Only use task ids that appear in the payload. " + JSON_ONLY + " " + PERSIAN
+        "Only use task ids that appear in the payload. " + CHARTS + " " + JSON_ONLY + " " + PERSIAN
     ),
     "review_draft": (
         "You write the draft of a periodic review out of the statistics given "
@@ -71,12 +79,19 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "achievements_work (lists of {title, description_fa, task_ids (list of "
         "int), impact_fa}), comparison (string), bottlenecks (list of strings), "
         "suggestions (list of strings), narrative_fa (string). Only use task "
-        "ids that appear in the payload; never invent a number. " + JSON_ONLY + " " + PERSIAN
+        "ids that appear in the payload; never invent a number. "
+        + CHARTS
+        + " "
+        + JSON_ONLY
+        + " "
+        + PERSIAN
     ),
     "ask_my_data": (
         "You answer a question about the personal data given in the payload. "
         "Return JSON with: answer_fa (string), used_task_ids (list of int), "
         "used_dates (list of strings). Use only the data in the payload. "
+        + CHARTS
+        + " "
         + JSON_ONLY
         + " "
         + PERSIAN
@@ -177,7 +192,9 @@ def parse_syllabus(session: Session, provider: AIProvider, text: str) -> Syllabu
 def daily_plan(session: Session, provider: AIProvider, payload: dict[str, Any]) -> DailyPlanDraft:
     """Propose the plan of the day."""
     answer = _call(session, provider, feature="daily_plan", payload=payload)
-    return _validate(DailyPlanDraft, answer)
+    draft = _validate(DailyPlanDraft, answer)
+    chart_service.validate_charts(draft.charts, payload)
+    return draft
 
 
 def review_draft(session: Session, provider: AIProvider, stats: dict[str, Any]) -> ReviewDraft:
@@ -186,13 +203,15 @@ def review_draft(session: Session, provider: AIProvider, stats: dict[str, Any]) 
     The draft is rejected when it cites a task id that is not part of the
     statistics: the AI may not talk about tasks it did not see.
     """
-    answer = _call(session, provider, feature="review_draft", payload={"stats": stats})
+    payload = review_payload(stats)
+    answer = _call(session, provider, feature="review_draft", payload=payload)
     draft = _validate(ReviewDraft, answer)
     known_ids = {int(row["id"]) for row in stats.get("tasks", []) if "id" in row}
     for achievement in list(draft.achievements_technical) + list(draft.achievements_work):
         unknown = [task_id for task_id in achievement.task_ids if task_id not in known_ids]
         if unknown:
             raise AIError(f"the draft cites unknown task ids: {sorted(unknown)}")
+    chart_service.validate_charts(draft.charts, payload)
     return draft
 
 
@@ -200,13 +219,34 @@ def ask_my_data(
     session: Session, provider: AIProvider, question: str, data: dict[str, Any]
 ) -> AnswerDraft:
     """Answer a question about the personal data."""
-    payload = {"question": question, "data": data}
+    payload = ask_payload(question, data)
     answer = _call(session, provider, feature="ask_my_data", payload=payload)
-    return _validate(AnswerDraft, answer)
+    draft = _validate(AnswerDraft, answer)
+    chart_service.validate_charts(draft.charts, payload)
+    return draft
 
 
-def draft_to_dict(draft: Any) -> dict[str, Any]:
-    """Render a draft as plain JSON data."""
+def review_payload(stats: dict[str, Any]) -> dict[str, Any]:
+    """Build the payload of the review draft."""
+    return {"stats": stats, "series": stats.get("series", {})}
+
+
+def ask_payload(question: str, data: dict[str, Any]) -> dict[str, Any]:
+    """Build the payload of the «ask my data» feature."""
+    return {"question": question, "data": data, "series": data.get("series", {})}
+
+
+def draft_to_dict(draft: Any, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Render a draft as plain JSON data.
+
+    When the payload is given, the charts of the draft are resolved against
+    it: the labels and the values come from the database, not from the model.
+    """
     if hasattr(draft, "model_dump"):
-        return draft.model_dump(mode="json")
-    return json.loads(json.dumps(draft, default=str))
+        data = draft.model_dump(mode="json")
+    else:
+        data = json.loads(json.dumps(draft, default=str))
+    if payload is not None:
+        charts = getattr(draft, "charts", [])
+        data["charts"] = chart_service.resolve_charts(charts, payload)
+    return data

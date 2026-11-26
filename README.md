@@ -36,12 +36,12 @@ Then open <http://localhost:8000>.
 | Screen | What it does |
 | --- | --- |
 | **داشبورد** (dashboard) | Overdue / today / done-this-week counters, measured hours by kind, weekly target, 90-day activity heatmap with streak, the day plan |
-| **تسک‌ها** (tasks) | CRUD, filters, Markdown notes, soft delete, quick-add bar, draggable sticky board, AI domain classification |
+| **تسک‌ها** (tasks) | CRUD, filters, Markdown notes, soft delete (single and in bulk), quick-add bar, draggable sticky board, AI domain classification |
 | **تقویم** (calendar) | Jalali month grid with the daily totals, click to add a task, running-timer chip |
 | **یادداشت روزانه** (journal) | Free-form entries; the AI proposes a structure that is written only after you confirm it |
 | **یادگیری** (learning) | Syllabus parsing, units, "read up to here", progress bars, stale-item report |
 | **دستاوردها** (achievements) | Grounded in cited task ids, confirmed manually, Markdown export |
-| **ارزیابی‌ها** (reviews) | Jalali month/quarter/half-year/year periods, an immutable stats snapshot, comparison with the previous period, a wizard with an AI draft, Markdown export |
+| **ارزیابی‌ها** (reviews) | Jalali month/quarter/half-year/year periods, an immutable stats snapshot, comparison with the previous period, a wizard with an AI draft and its charts, Markdown export |
 | **تنظیمات** (settings) | Timezone, weekly target, notification channels with test buttons, holidays, JSON export |
 
 ## The test gate
@@ -162,6 +162,18 @@ worker only *decides* that something needs attention and records it in the
 `/api/notifications/due` every 30–60 seconds and raises the actual OS
 notification through the browser's Notification API. This works on
 `http://localhost:8000`, and the app can be installed as a PWA.
+
+## Charts in the AI answers
+
+An AI answer may come with charts: the plan of the day, the draft of a review
+and the answer of «از داده‌هایم بپرس» can show a bar, line or doughnut chart.
+
+The model never sends a number. It names a **series** of the payload it was
+given — `measured_minutes_by_kind`, `measured_minutes_by_day`,
+`counts_by_context`, `counts_by_status` — and the server resolves the labels
+and the values out of the database. A chart that names a series the payload
+does not have is rejected, exactly like a draft that cites an unknown task id.
+Every chart states its basis (measured, estimated or elapsed) and its unit.
 
 ## The three-layer time model
 

@@ -31,7 +31,8 @@ def flash_messages(request: Request) -> list[tuple[str, str]]:
     messages: list[tuple[str, str]] = []
     flash = request.query_params.get("flash")
     if flash:
-        messages.append(("success", t(flash)))
+        count = request.query_params.get("count")
+        messages.append(("success", t(flash, count=int(count)) if count else t(flash)))
     error = request.query_params.get("error")
     if error:
         messages.append(("error", t(error)))

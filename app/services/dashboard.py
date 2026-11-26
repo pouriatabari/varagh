@@ -9,13 +9,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.i18n import t
 from app.models.task import Task
 from app.services import time_entries as time_service
-from app.utils.jalali import week_start
+from app.utils.jalali import jalali_short, week_start
 from app.utils.time import to_local
 
 HEATMAP_DAYS = 90
@@ -101,6 +103,66 @@ def collect_stats(
 
     stats.heatmap, stats.streak_days = _activity_heatmap(session, now=now, timezone=timezone)
     return stats
+
+
+def build_series(
+    session: Session,
+    *,
+    now: datetime,
+    timezone: str = "Asia/Tehran",
+    days: int = 30,
+) -> dict[str, Any]:
+    """Return the series the AI may chart out of the personal data.
+
+    The labels and the values are built here, in the server; the model only
+    chooses which series it wants to show.
+    """
+    local_now = to_local(now, timezone)
+    first_day = local_now.date() - timedelta(days=days - 1)
+    start = datetime.combine(first_day, datetime.min.time(), tzinfo=local_now.tzinfo)
+    entries = time_service.list_entries(session, start=start, end=now)
+
+    minutes_by_kind: dict[str, int] = {}
+    for entry in entries:
+        minutes = entry.duration_minutes or 0
+        minutes_by_kind[entry.kind] = minutes_by_kind.get(entry.kind, 0) + minutes
+    kinds = [kind for kind in ("work", "overtime", "study", "learning") if kind in minutes_by_kind]
+
+    minutes_by_day = time_service.minutes_by_day(session, first_day, local_now.date())
+    days_with_entries = sorted(minutes_by_day)
+
+    tasks = session.scalars(select(Task).where(Task.deleted_at.is_(None))).all()
+    counts_by_context: dict[str, int] = {}
+    counts_by_status: dict[str, int] = {}
+    for task in tasks:
+        counts_by_context[task.context] = counts_by_context.get(task.context, 0) + 1
+        counts_by_status[task.status] = counts_by_status.get(task.status, 0) + 1
+
+    contexts = [item for item in ("company", "personal", "learning") if item in counts_by_context]
+    statuses = [item for item in ("todo", "doing", "done", "cancelled") if item in counts_by_status]
+
+    return {
+        "measured_minutes_by_kind": {
+            "labels": [t(f"time.kind.{kind}") for kind in kinds],
+            "values": [minutes_by_kind[kind] for kind in kinds],
+            "unit": "units.minutes",
+        },
+        "measured_minutes_by_day": {
+            "labels": [jalali_short(day) for day in days_with_entries],
+            "values": [minutes_by_day[day] for day in days_with_entries],
+            "unit": "units.minutes",
+        },
+        "counts_by_context": {
+            "labels": [t(f"tasks.context.{context}") for context in contexts],
+            "values": [counts_by_context[context] for context in contexts],
+            "unit": "units.count",
+        },
+        "counts_by_status": {
+            "labels": [t(f"tasks.status.{status}") for status in statuses],
+            "values": [counts_by_status[status] for status in statuses],
+            "unit": "units.count",
+        },
+    }
 
 
 def _activity_heatmap(
