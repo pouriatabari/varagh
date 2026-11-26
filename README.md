@@ -59,8 +59,9 @@ make logs    # follow app and worker logs
 | `SECRET_KEY` | dev value | Session/CSRF secret — change it |
 | `TIMEZONE` | `Asia/Tehran` | Timezone used for display |
 | `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` | empty | Optional HTTP Basic auth for the single user |
-| `AI_PROVIDER` / `AI_API_KEY` / `AI_MODEL` / `AI_BASE_URL` | empty | Optional AI provider |
+| `AI_PROVIDER` / `AI_API_KEY` / `AI_MODEL` / `AI_BASE_URL` | empty | Optional AI provider (`anthropic`, `openai`, `custom`) |
 | `AI_TIMEOUT_SECONDS` | `30` | AI request timeout |
+| `AI_CUSTOM_URL` / `AI_CUSTOM_METHOD` / `AI_CUSTOM_HEADERS` | empty | Custom provider: endpoint URL, request shape (`json`, `openai`, `anthropic`, `prompt`) and extra headers |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | empty | Optional email channel |
 | `WEBHOOK_URL` / `WEBHOOK_FORMAT` | empty / `slack` | Optional webhook channel (`json` or `slack`) |
 
@@ -78,6 +79,32 @@ AI_API_KEY=sk-...
 AI_MODEL=<model id>     # never hard-coded in the app
 # AI_BASE_URL=https://my-endpoint.example/v1   # only for OpenAI-compatible providers
 ```
+
+### A custom provider
+
+Any endpoint that answers with JSON can be used — a local model, a gateway or
+a proxy:
+
+```bash
+AI_PROVIDER=custom
+AI_CUSTOM_URL=https://my-model.example/v1/answer
+AI_CUSTOM_METHOD=json      # json | openai | anthropic | prompt
+AI_CUSTOM_HEADERS=X-Api-Key: abc, X-Tenant: personal
+AI_MODEL=<model id>
+```
+
+The request body is chosen by `AI_CUSTOM_METHOD`:
+
+| Method | Body |
+| --- | --- |
+| `json` | `{model, system, messages, payload}` — the generic shape |
+| `openai` | an OpenAI chat-completions request |
+| `anthropic` | an Anthropic messages request |
+| `prompt` | `{model, prompt}` — the answer is plain text that is parsed as JSON |
+
+The answer may be a bare JSON object or an OpenAI/Anthropic-shaped one; all
+three are understood. Whatever the provider returns is validated against a
+strict schema, and a draft that cites a task the model never saw is rejected.
 
 ## Enabling notification channels
 
@@ -125,12 +152,17 @@ Dates are Jalali (`YYYY/MM/DD`); `title` is optional. The file ships empty on
 purpose — no official holidays are hard-coded. Dates can also be added and
 removed from the settings page.
 
-## Backup and restore
+## Backup, restore and export
 
 ```bash
 make backup                                  # pg_dump into ./backups
 make restore BACKUP_FILE=backups/<file>.sql  # restore a dump
+make seed                                    # Persian demo data
 ```
+
+`GET /export.json` returns every table as a single JSON document (tasks,
+entries, notes, board items, journal, learning items, reviews, achievements,
+settings).
 
 ## Project structure
 
@@ -162,15 +194,25 @@ app/
 ## Roadmap
 
 - [x] M1 — foundation: compose, migrations, RTL layout, test gate
-- [ ] M2 — tasks: CRUD, quick-add, filters, Markdown, soft delete
-- [ ] M3 — time and calendar: timer, overtime rules, Jalali calendar, journal
-- [ ] M4 — dashboard
-- [ ] M5 — notifications: browser/PWA, worker rules, email, webhook
-- [ ] M6 — task board and notes timeline
-- [ ] M7 — reviews, achievements, period-over-period comparison
-- [ ] M7b — learning tracker
-- [ ] M8 — AI features behind the `AIProvider` interface
-- [ ] M9 — export, backup/restore, seed data, final polish
+- [x] M2 — tasks: CRUD, quick-add, filters, Markdown, soft delete
+- [x] M3 — time and calendar: timer, overtime rules, Jalali calendar, journal
+- [x] M4 — dashboard: counters, measured hours by kind, weekly target, heatmap
+- [x] M5 — notifications: browser/PWA, worker rules, email, webhook
+- [x] M6 — task board and notes timeline
+- [x] M7 — reviews, achievements, period-over-period comparison
+- [x] M7b — learning tracker: syllabus, units, progress, stale report
+- [x] M8 — AI features behind the `AIProvider` interface
+- [x] M9 — export, backup/restore, seed data, final polish
+
+Still open:
+
+- The AI draft of a review is written into the review, but the achievements it
+  proposes are created without a link to the review itself.
+- The learning report is generated per item; a yearly summary page is missing.
+- The dashboard heatmap is a flat 90-day grid; a calendar-shaped heatmap would
+  read better.
+- The journal stores the confirmed proposal as JSON but does not create time
+  entries out of it yet.
 
 Out of scope (roadmap only): notebook-photo → tasks via vision, Excalidraw /
 tldraw boards, Telegram bot, ICS export, multi-user support, host-side
