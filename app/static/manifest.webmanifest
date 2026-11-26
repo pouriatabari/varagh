@@ -1,0 +1,20 @@
+{
+  "name": "ورق — Varagh",
+  "short_name": "ورق",
+  "description": "دفتر کار شخصی: تسک‌ها، زمان، یادگیری و ارزیابی دوره‌ای.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#2f6f5e",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

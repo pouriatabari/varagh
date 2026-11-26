@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ t('nav.dashboard') }}{% endblock %} — ورق</title>
+    <link rel="manifest" href="/static/manifest.webmanifest" />
+    <meta name="theme-color" content="#2f6f5e" />
+    <link rel="stylesheet" href="/static/css/app.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232f6f5e'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'>و</text></svg>"
+    />
+    <script>
+      // Applied before paint so the theme never flashes.
+      (function () {
+        var stored = localStorage.getItem("varagh-theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = stored || (prefersDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="logo">و</span>
+          <span>{{ t('app.name') }}</span>
+        </div>
+        <nav class="nav">
+          <a href="/" class="{{ 'active' if active_page == 'dashboard' }}">{{ t('nav.dashboard') }}</a>
+          <a href="/tasks" class="{{ 'active' if active_page == 'tasks' }}">{{ t('nav.tasks') }}</a>
+          <a href="/calendar" class="{{ 'active' if active_page == 'calendar' }}">{{ t('nav.calendar') }}</a>
+          <a href="/learning" class="{{ 'active' if active_page == 'learning' }}">{{ t('nav.learning') }}</a>
+          <a href="/achievements" class="{{ 'active' if active_page == 'achievements' }}">{{ t('nav.achievements') }}</a>
+          <a href="/reviews" class="{{ 'active' if active_page == 'reviews' }}">{{ t('nav.reviews') }}</a>
+          <a href="/settings" class="{{ 'active' if active_page == 'settings' }}">{{ t('nav.settings') }}</a>
+        </nav>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <form class="quick-add grow" action="/tasks/quick-add" method="post" hx-post="/tasks/quick-add" hx-target="#quick-add-result" hx-swap="innerHTML" hx-on::after-request="this.reset()">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input
+              type="text"
+              name="title"
+              dir="auto"
+              autocomplete="off"
+              placeholder="{{ t('tasks.quick_add_placeholder') }}"
+              aria-label="{{ t('nav.quick_add') }}"
+              required
+            />
+            <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
+          </form>
+          <div id="quick-add-result"></div>
+          {% if running_timer %}
+          <span class="timer-chip" id="timer-chip" title="{{ t('time.running') }}">
+            <span class="dot">●</span>
+            <span id="timer-elapsed" data-started="{{ running_timer.started_at_iso }}">—</span>
+          </span>
+          {% endif %}
+          <button
+            class="btn btn-ghost"
+            type="button"
+            onclick="varaghToggleTheme()"
+            aria-label="{{ t('nav.toggle_theme') }}"
+            title="{{ t('nav.toggle_theme') }}"
+          >
+            ◐
+          </button>
+        </header>
+
+        <main class="content">
+          {% if messages %} {% for kind, message in messages %}
+          <div class="flash {{ 'error' if kind == 'error' }}">{{ message }}</div>
+          {% endfor %} {% endif %} {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script src="/static/vendor/htmx.min.js" defer></script>
+    <script src="/static/vendor/alpine.min.js" defer></script>
+    <script src="/static/vendor/chart.umd.min.js" defer></script>
+    <script src="/static/js/app.js" defer></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

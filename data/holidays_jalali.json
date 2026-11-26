@@ -1,0 +1,4 @@
+{
+  "description": "User-owned holiday list. Format: {\"date\": \"1404/01/01\", \"title\": \"optional label\"}. Dates are Jalali (YYYY/MM/DD); title is optional. No official holidays are hard-coded.",
+  "holidays": []
+}

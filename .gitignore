@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Env & secrets
+.env
+.env.local
+
+# Runtime data (holidays file is tracked, runtime artefacts are not)
+data/*.db
+data/*.sqlite
+data/uploads/
+
+# Backups
+backups/*
+!backups/.gitkeep
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
