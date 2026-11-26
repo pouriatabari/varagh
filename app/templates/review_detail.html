@@ -79,7 +79,7 @@
     {% endfor %}
   </ul>
   {% if review.ai_draft.narrative_fa %}
-  <div class="markdown-body" dir="auto">{{ review.ai_draft.narrative_fa }}</div>
+  <div class="markdown-body" dir="auto">{{ review.ai_draft.narrative_fa | markdown }}</div>
   {% endif %}
   {% endif %}
   <div class="divider"></div>

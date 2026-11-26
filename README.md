@@ -31,6 +31,19 @@ docker compose up --build
 
 Then open <http://localhost:8000>.
 
+## Features
+
+| Screen | What it does |
+| --- | --- |
+| **داشبورد** (dashboard) | Overdue / today / done-this-week counters, measured hours by kind, weekly target, 90-day activity heatmap with streak, the day plan |
+| **تسک‌ها** (tasks) | CRUD, filters, Markdown notes, soft delete, quick-add bar, draggable sticky board, AI domain classification |
+| **تقویم** (calendar) | Jalali month grid with the daily totals, click to add a task, running-timer chip |
+| **یادداشت روزانه** (journal) | Free-form entries; the AI proposes a structure that is written only after you confirm it |
+| **یادگیری** (learning) | Syllabus parsing, units, "read up to here", progress bars, stale-item report |
+| **دستاوردها** (achievements) | Grounded in cited task ids, confirmed manually, Markdown export |
+| **ارزیابی‌ها** (reviews) | Jalali month/quarter/half-year/year periods, an immutable stats snapshot, comparison with the previous period, a wizard with an AI draft, Markdown export |
+| **تنظیمات** (settings) | Timezone, weekly target, notification channels with test buttons, holidays, JSON export |
+
 ## The test gate
 
 The `tests` service in `docker-compose.yml` runs `ruff check` and then `pytest`
