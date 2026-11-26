@@ -15,9 +15,12 @@ RUN apt-get update \
 
 COPY pyproject.toml ./
 # The package directory must exist before the editable install, otherwise
-# setuptools cannot discover the `app` package.
-COPY app ./app
-RUN pip install --no-cache-dir -e ".[dev]"
+# setuptools cannot discover the `app` package. A placeholder is enough: the
+# real sources are copied in afterwards, and the editable install keeps
+# pointing at /srv/app. It keeps the dependency layer cached when only the
+# application code changes.
+RUN mkdir -p app && touch app/__init__.py \
+    && pip install --no-cache-dir -e ".[dev]"
 
 COPY . .
 
