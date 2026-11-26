@@ -1,6 +1,6 @@
 COMPOSE ?= docker compose
-PYTHON_IMAGE ?= python:3.12-slim
-POSTGRES_IMAGE ?= postgres:16-alpine
+PYTHON_IMAGE ?= public.ecr.aws/docker/library/python:3.12-slim
+POSTGRES_IMAGE ?= public.ecr.aws/docker/library/postgres:16-alpine
 BACKUP_DIR ?= ./backups
 
 .PHONY: help up build test down logs fmt backup restore seed shell

@@ -54,7 +54,7 @@ make logs    # follow app and worker logs
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `varagh` | PostgreSQL credentials and database name |
 | `DATABASE_URL` | `postgresql+psycopg://varagh:varagh@db:5432/varagh` | Application connection string |
 | `TEST_DATABASE_URL` | `…/varagh_test` | Database used by the test service |
-| `POSTGRES_IMAGE` / `PYTHON_IMAGE` | `postgres:16-alpine` / `python:3.12-slim` | Override the images when Docker Hub is unreachable |
+| `POSTGRES_IMAGE` / `PYTHON_IMAGE` | `public.ecr.aws/docker/library/…` | Base images; the defaults use the official Docker Hub library images through the public ECR mirror (no rate limits). Set them to `postgres:16-alpine` / `python:3.12-slim` to pull from Docker Hub directly |
 | `APP_PORT` | `8000` | Host port of the web UI |
 | `SECRET_KEY` | dev value | Session/CSRF secret — change it |
 | `TIMEZONE` | `Asia/Tehran` | Timezone used for display |
@@ -188,8 +188,10 @@ app/
   `DATABASE_URL` points somewhere else. Check `make logs`.
 - **No OS notifications** — the browser needs permission for the site, and the
   page must be open. See "How OS notifications work" above.
-- **Docker Hub is unreachable** — set `POSTGRES_IMAGE` and `PYTHON_IMAGE` to a
-  mirror, e.g. `public.ecr.aws/docker/library/postgres:16-alpine`.
+- **Docker Hub is unreachable** — the defaults already pull through the public
+  ECR mirror; if you forced `docker.io`, switch back to
+  `public.ecr.aws/docker/library/postgres:16-alpine` and
+  `public.ecr.aws/docker/library/python:3.12-slim`.
 
 ## Roadmap
 
