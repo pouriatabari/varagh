@@ -1,8 +1,114 @@
 {% extends "base.html" %}
 {% block title %}{{ t('dashboard.title') }}{% endblock %}
 {% block content %}
-<div class="card">
-  <div class="card-title"><h1>{{ t('dashboard.title') }}</h1></div>
-  <p class="muted">{{ t('app.tagline') }}</p>
+<div class="grid">
+  <div class="stat">
+    <div class="value">{{ stats.overdue_count | digits }}</div>
+    <div class="label">{{ t('dashboard.overdue') }}</div>
+  </div>
+  <div class="stat">
+    <div class="value">{{ stats.today_count | digits }}</div>
+    <div class="label">{{ t('dashboard.today') }}</div>
+  </div>
+  <div class="stat">
+    <div class="value">{{ stats.done_this_week | digits }}</div>
+    <div class="label">{{ t('dashboard.done_this_week') }}</div>
+  </div>
+  <div class="stat">
+    <div class="value">{{ stats.streak_days | digits }}</div>
+    <div class="label">{{ t('dashboard.streak') }} — {{ t('dashboard.streak_days') }}</div>
+  </div>
 </div>
+
+<div class="grid-2" style="margin-top: 1rem;">
+  <div class="card">
+    <div class="card-title">
+      <h2>{{ t('dashboard.hours_by_kind') }}</h2>
+      <span class="chip">{{ t('time.basis.measured') }}</span>
+    </div>
+    <canvas id="hours-chart" height="220"></canvas>
+    <p class="small muted">{{ t('time.basis.explain') }}</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <h2>{{ t('dashboard.weekly_target') }}</h2>
+      <span class="chip">{{ t('time.basis.measured') }}</span>
+    </div>
+    {% set target = stats.weekly_target_minutes %}
+    {% set done = stats.weekly_measured_minutes %}
+    {% set pct = ((done / target) * 100) | round(0, 'floor') | int if target else 0 %}
+    <div class="progress"><span style="width: {{ pct if pct < 100 else 100 }}%"></span></div>
+    <p class="small muted" style="margin-top: 0.5rem;">
+      {{ done | duration }} / {{ target | duration }} ({{ pct | digits }}٪)
+    </p>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>{{ t('time.basis.measured') }}</th>
+          <td>{{ stats.weekly_measured_minutes | duration }}</td>
+        </tr>
+        <tr>
+          <th>{{ t('time.basis.elapsed') }}</th>
+          <td>{{ stats.weekly_elapsed_minutes | duration }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top: 1rem;">
+  <div class="card-title">
+    <h2>{{ t('dashboard.activity') }}</h2>
+  </div>
+  <div class="heatmap">
+    {% for cell in stats.heatmap %}
+    <div class="cell l{{ cell.level }}" title="{{ cell.date | jdate }} — {{ cell.minutes | duration }}"></div>
+    {% endfor %}
+  </div>
+  <p class="small muted">{{ t('time.basis.explain') }}</p>
+</div>
+
+<div class="card" style="margin-top: 1rem;">
+  <div class="card-title">
+    <h2>{{ t('dashboard.ai_plan') }}</h2>
+  </div>
+  {% if ai_enabled %}
+  <div id="ai-plan" hx-get="/api/ai/daily-plan" hx-trigger="load" hx-swap="innerHTML">
+    {{ t('common.loading') }}
+  </div>
+  {% else %}
+  <p class="muted">{{ t('dashboard.ai_plan_hint') }}</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const canvas = document.getElementById("hours-chart");
+    if (!canvas || typeof Chart === "undefined") return;
+    const labels = {{ chart_labels | tojson }};
+    const values = {{ chart_values | tojson }};
+    new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "دقیقه",
+            data: values,
+            backgroundColor: "#2f6f5e",
+            borderRadius: 6,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  })();
+</script>
 {% endblock %}
