@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}{{ t('guide.title') }}{% endblock %}
+{% block content %}
+<h1>{{ t('guide.title') }}</h1>
+<p class="muted">{{ t('guide.intro') }}</p>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.steps_title') }}</h2></div>
+  <ol class="guide-steps">
+    <li>
+      <h3>{{ t('guide.step_tasks_title') }}</h3>
+      <p>{{ t('guide.step_tasks_body') }}</p>
+    </li>
+    <li>
+      <h3>{{ t('guide.step_time_title') }}</h3>
+      <p>{{ t('guide.step_time_body') }}</p>
+    </li>
+    <li>
+      <h3>{{ t('guide.step_journal_title') }}</h3>
+      <p>{{ t('guide.step_journal_body') }}</p>
+    </li>
+    <li>
+      <h3>{{ t('guide.step_muster_title') }}</h3>
+      <p>{{ t('guide.step_muster_body') }}</p>
+    </li>
+    <li>
+      <h3>{{ t('guide.step_draft_title') }}</h3>
+      <p>{{ t('guide.step_draft_body') }}</p>
+    </li>
+    <li>
+      <h3>{{ t('guide.step_confirm_title') }}</h3>
+      <p>{{ t('guide.step_confirm_body') }}</p>
+    </li>
+    <li>
+      <h3>{{ t('guide.step_hall_title') }}</h3>
+      <p>{{ t('guide.step_hall_body') }}</p>
+    </li>
+  </ol>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.scoring_title') }}</h2></div>
+  <p>{{ t('guide.scoring_body') }}</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{{ t('guide.tier') }}</th>
+          <th>{{ t('guide.value') }}</th>
+          <th>{{ t('guide.tasks') }}</th>
+          <th>{{ t('guide.impact') }}</th>
+          <th>{{ t('guide.concrete') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tier in guide_tiers %}
+        <tr>
+          <td>{{ tier.name }}</td>
+          <td>{{ tier.value | digits }}</td>
+          <td>{{ tier.tasks | digits }}</td>
+          <td>{{ t('guide.yes') if tier.impact else t('guide.no') }}</td>
+          <td>{{ t('guide.yes') if tier.concrete else t('guide.no') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.counting_title') }}</h2></div>
+  <p>{{ t('guide.counting_body', degree_size=guide_degree_size | digits) }}</p>
+  <div class="grid">
+    <div class="stat">
+      <div class="value">{{ guide_monthly_cap | digits }}</div>
+      <div class="label">{{ t('guide.monthly_cap') }}</div>
+    </div>
+    <div class="stat">
+      <div class="value">{{ guide_diminishing | digits }}٪</div>
+      <div class="label">{{ t('guide.diminishing') }}</div>
+    </div>
+    <div class="stat">
+      <div class="value">{{ guide_degree_size | digits }}</div>
+      <div class="label">{{ t('guide.degree_value') }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.titles_title') }}</h2></div>
+  <p>{{ t('guide.titles_body') }}</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{{ t('guide.tier') }}</th>
+          <th>{{ t('honours.gate.degrees') }}</th>
+          <th>{{ t('guide.gates') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for title in guide_titles %}
+        <tr>
+          <td>{{ title.name }}</td>
+          <td>{{ title.degrees | digits }}</td>
+          <td>
+            {% for gate in title.gates %}
+            <span class="chip">{{ gate.label }}: {{ gate.required | digits }}</span>
+            {% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.realms_title') }}</h2></div>
+  <p>{{ t('guide.realms_body', endgame_realms=guide_endgame_realms | digits) }}</p>
+  <p class="small muted">
+    {{ t('honours.gate.fiefs') }}: {{ guide_medals_per_fief | digits }}
+    — {{ guide_endgame_title }}
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.insignia_title') }}</h2></div>
+  <p>{{ t('guide.insignia_body') }}</p>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.rules_title') }}</h2></div>
+  <ul class="plain-list">
+    <li>{{ t('guide.rule_1') }}</li>
+    <li>{{ t('guide.rule_2') }}</li>
+    <li>{{ t('guide.rule_3') }}</li>
+    <li>{{ t('guide.rule_4') }}</li>
+    <li>{{ t('guide.rule_5') }}</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('guide.knobs_title') }}</h2></div>
+  <p>{{ t('guide.knobs_body') }}</p>
+</div>
+{% endblock %}

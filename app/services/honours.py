@@ -350,6 +350,25 @@ def reach_title(
     return row
 
 
+def promote_if_ready(
+    session: Session, config: RewardsConfig, now: datetime | None = None
+) -> TitleHistory | None:
+    """Give the next title when every gate of it is met.
+
+    The ceremony is the app's own step: the user never writes a title
+    down by hand. The vigil of the night stays with the title.
+    """
+    state = title_state(session, config)
+    if not state.eligible or not state.next_title:
+        return None
+    stamp = now or utcnow()
+    return reach_title(
+        session,
+        state.next_title,
+        vigil={"date": stamp.date().isoformat()},
+    )
+
+
 def medals_of_review(session: Session, review_id: int) -> list[Medal]:
     """The medals a muster gave."""
     rows = session.scalars(

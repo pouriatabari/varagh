@@ -64,6 +64,7 @@ def create_app() -> FastAPI:
     from app.api import (
         ai,
         board,
+        guide,
         insignia,
         learning,
         notifications,
@@ -80,6 +81,7 @@ def create_app() -> FastAPI:
     app.include_router(timing.router)
     app.include_router(board.router)
     app.include_router(reviews.router)
+    app.include_router(guide.router)
     app.include_router(insignia.router)
     app.include_router(realms.router)
     app.include_router(learning.router)

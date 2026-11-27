@@ -386,3 +386,37 @@ together with its rationale.
   the gateway (for example `does not support max tokens > 196608`), and the
   page of the app shows the sentence of the lexicon with the technical
   detail in a smaller line beneath it.
+
+## D35 — The guide is built out of the configuration, never written by hand
+
+- **Decision:** The page `/guide` explains the whole round — the steps of a
+  month, the tiers of a medal and the evidence of each, the monthly cap,
+  the halving of the second medal of a domain, the degrees, the ladder of
+  the titles with the gates of every one of them, the map and the rules —
+  and every number on it is read from `config/rewards.yaml` when the page
+  is drawn. The words live in the two lexicon packs (medieval and plain),
+  like every other word of the interface; the numbers live in the
+  configuration, like every other number of the engine.
+- **Why:** A guide that repeats the numbers in its own text rots: the
+  moment a threshold is changed, the guide lies. A guide that reads the
+  configuration cannot lie, and the tests check that the numbers of the
+  page are the numbers of the engine.
+- **What the guide does not promise:** the orders (the quill, the scholar
+  and the round table) and the quests are not given by the app yet, so the
+  guide does not speak of them. The hidden realm of the map waits for the
+  order of the scholar, and that is a rule of the map, not a promise of a
+  date.
+
+## D36 — The ceremony of the title is the app's own step
+
+- **Decision:** When every gate of the next title is met, the app writes
+  the title down by itself (`honours.promote_if_ready`), with the vigil of
+  the ceremony, and the date stays in the case of the insignia. The user
+  never registers a title by hand — the same rule that holds for the
+  medals, and for the same reason: the honours must be earned, not typed.
+- **Why:** The hall already said that the ceremony was due when the gates
+  were met, but nothing ever performed it, so a title could never be
+  reached and the badges of the ladder would stay closed for good. The
+  promotion is now a step of the muster confirmation, where the medals are
+  given, and the tests check that a title is given only when its gates are
+  met and never taken back.

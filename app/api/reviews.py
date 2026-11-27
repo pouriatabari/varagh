@@ -278,6 +278,9 @@ async def review_confirm(
     session.flush()
     review.status = "finished"
     session.flush()
+    # The ceremony of the title: when every gate of the next title is
+    # met, the app writes the title down by itself.
+    honours.promote_if_ready(session, config)
     # The muster is given: the map shows the ceremony of the new realm.
     return _redirect("/realms?ceremony=1", flash="flash.review_updated")
 

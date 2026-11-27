@@ -298,6 +298,18 @@ the titles with the tiers that were reached lit, and the round table shows
 the six virtues, each seat lighting as far as the medals of that virtue have
 carried the user.
 
+## The guide of the round
+
+The page `/guide` explains the whole round in the words of the lexicon the
+user has chosen: the seven steps of a month, the three tiers of a medal and
+the evidence each of them needs, the monthly cap and the halving of the
+second medal of a domain, the ladder of the titles with the gates of every
+one of them, the rules of the map, and the rules that are never broken.
+
+Every number on that page is read from `config/rewards.yaml` when the page
+is drawn, so the guide cannot drift away from the engine: when a number is
+changed in the settings, the guide changes with it.
+
 ## The insignia of the ranks
 
 Every title of the ladder has a badge, and every badge is drawn by the code
@@ -395,6 +407,7 @@ app/
 - [x] M12 — the hall: the court chart, the round table and the heraldry
 - [x] M13 — the map of the realms: the ground, the fog, the castles and the campaign road
 - [x] M14 — the insignia of the ranks: the badges of the titles, the studs and the ribbons
+- [x] M15 — the guide of the round: the steps, the scoring and the gates of the titles
 
 Still open:
 
