@@ -127,3 +127,53 @@ def test_the_ai_routes_answer_without_a_provider(client: TestClient) -> None:
     response = client.get("/api/ai/daily-plan")
     assert response.status_code == 503
     assert response.json()["ok"] is False
+
+
+# --- the budget of the answer ---
+
+
+def test_the_budget_of_the_answer_is_clamped() -> None:
+    """A budget that no model can give is brought back to what a model gives.
+
+    A gateway that is asked for more tokens than the model can ever
+    answer answers with a server error, and then every call of the app
+    fails for a reason the user cannot act on.
+    """
+    from app.ai.anthropic_provider import MAX_OUTPUT_TOKENS, AnthropicProvider
+    from app.ai.config import AIConfig
+
+    config = AIConfig(
+        enabled=True,
+        provider="anthropic",
+        api_key="k",
+        model="m",
+        max_output_tokens=200_000,
+    )
+    provider = AnthropicProvider(config)
+    assert provider._max_tokens == MAX_OUTPUT_TOKENS
+
+    small = AnthropicProvider(
+        AIConfig(enabled=True, provider="anthropic", api_key="k", model="m",
+                 max_output_tokens=4096)
+    )
+    assert small._max_tokens == 4096
+
+    empty = AnthropicProvider(
+        AIConfig(enabled=True, provider="anthropic", api_key="k", model="m",
+                 max_output_tokens=0)
+    )
+    assert empty._max_tokens == 2048
+
+
+def test_the_message_of_the_gateway_is_kept() -> None:
+    """The words of the gateway travel with the failure."""
+    from app.ai.anthropic_provider import _upstream_message
+
+    class FakeResponse:
+        status_code = 502
+
+        @staticmethod
+        def json() -> dict:
+            return {"error": {"message": "does not support max tokens > 196608"}}
+
+    assert "196608" in _upstream_message(FakeResponse())  # type: ignore[arg-type]

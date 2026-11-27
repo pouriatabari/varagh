@@ -15,6 +15,11 @@ logger = logging.getLogger("varagh.ai")
 DEFAULT_BASE_URL = "https://api.anthropic.com"
 API_VERSION = "2023-06-01"
 
+# The budget of the answer is clamped: a gateway or a model that is asked
+# for more tokens than it can ever give answers with a server error, and
+# then every call of the app fails for a reason the user cannot see.
+MAX_OUTPUT_TOKENS = 65536
+
 
 class AnthropicProvider:
     """Calls the Anthropic messages API and returns a JSON object."""
@@ -26,7 +31,7 @@ class AnthropicProvider:
         self.model = config.model
         self._base_url = (config.base_url or DEFAULT_BASE_URL).rstrip("/")
         self._timeout = config.timeout_seconds
-        self._max_tokens = config.max_output_tokens
+        self._max_tokens = _clamp_tokens(config.max_output_tokens)
         self._auth_header = config.auth_header
 
     def complete_json(self, feature: str, system: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -51,9 +56,42 @@ class AnthropicProvider:
             )
             response.raise_for_status()
             data = response.json()
+        except httpx.HTTPStatusError as exc:
+            raise AIError(
+                f"the Anthropic call failed: {exc} {_upstream_message(exc.response)}"
+            ) from exc
         except (httpx.HTTPError, ValueError) as exc:
             raise AIError(f"the Anthropic call failed: {exc}") from exc
         return extract_json(_first_text(data))
+
+
+def _clamp_tokens(value: int) -> int:
+    """Keep the budget of the answer inside what a model can give."""
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        number = 0
+    if number <= 0:
+        number = 2048
+    return min(number, MAX_OUTPUT_TOKENS)
+
+
+def _upstream_message(response: httpx.Response) -> str:
+    """The message of the gateway, when it sent one."""
+    try:
+        data = response.json()
+    except ValueError:
+        return ""
+    if isinstance(data, dict):
+        error = data.get("error")
+        if isinstance(error, dict):
+            message = str(error.get("message") or "")
+            if message:
+                return f"({message})"
+        message = str(data.get("message") or "")
+        if message:
+            return f"({message})"
+    return ""
 
 
 def _auth_headers(api_key: str, mode: str) -> dict[str, str]:

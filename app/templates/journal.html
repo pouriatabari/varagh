@@ -116,7 +116,7 @@
         });
         const data = await response.json();
         if (!data.ok) {
-          this.error = data.error || this.messages.failed;
+          this.error = data.message || data.error || this.messages.failed;
           return;
         }
         this.proposal = data.proposal;

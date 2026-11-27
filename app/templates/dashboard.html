@@ -77,7 +77,10 @@
   {% if ai_enabled %}
   <div id="ai-plan" x-data="dailyPlan()" x-init="load()">
     <p class="muted" x-show="loading">{{ t('common.loading') }}</p>
-    <p class="muted" x-show="error" x-text="error"></p>
+    <div class="ai-error" x-show="error">
+      <p x-text="error"></p>
+      <p class="small muted" x-show="detail" x-text="detail"></p>
+    </div>
     <template x-if="plan && plan.length">
       <ol>
         <template x-for="(item, index) in plan" :key="index">
@@ -125,13 +128,15 @@
       charts: [],
       loading: true,
       error: "",
+      detail: "",
       async load() {
         this.loading = true;
         try {
           const response = await fetch("/api/ai/daily-plan");
           const data = await response.json();
           if (!data.ok) {
-            this.error = data.error || "";
+            this.error = data.message || data.error || "";
+            this.detail = data.message ? data.error || "" : "";
           } else {
             this.plan = data.plan.plan || [];
             this.charts = data.plan.charts || [];
@@ -139,6 +144,7 @@
           }
         } catch (error) {
           this.error = "";
+          this.detail = "";
         } finally {
           this.loading = false;
         }

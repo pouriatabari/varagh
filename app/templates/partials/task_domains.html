@@ -71,7 +71,7 @@
         });
         const data = await response.json();
         if (!data.ok) {
-          this.error = data.error || "";
+          this.error = data.message || data.error || "";
           return;
         }
         this.suggestions = data.domains || [];

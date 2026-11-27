@@ -169,9 +169,10 @@
           type="number"
           name="max_output_tokens"
           min="256"
-          max="200000"
+          max="65536"
           value="{{ ai_config.max_output_tokens }}"
         />
+        <span class="small muted">{{ t('ai.max_output_tokens_hint') }}</span>
       </label>
       <label>
         {{ t('ai.auth_header') }}

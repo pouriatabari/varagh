@@ -40,7 +40,7 @@ class CustomProvider:
         self.model = config.model
         self._api_key = config.api_key
         self._timeout = config.timeout_seconds
-        self._max_tokens = config.max_output_tokens
+        self._max_tokens = _clamp_tokens(config.max_output_tokens)
         self._method = config.custom_method
         self._headers = _parse_headers(config.custom_headers)
         if config.auth_header in {"bearer", "both"} and self._api_key:
@@ -91,6 +91,17 @@ class CustomProvider:
             ],
             "payload": payload,
         }
+
+
+def _clamp_tokens(value: int) -> int:
+    """Keep the budget of the answer inside what a model can give."""
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        number = 0
+    if number <= 0:
+        number = 2048
+    return min(number, 65536)
 
 
 def _parse_headers(raw: str) -> dict[str, str]:

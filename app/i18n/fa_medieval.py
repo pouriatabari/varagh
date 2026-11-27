@@ -487,6 +487,9 @@ STRINGS: dict[str, str] = {
     "ai.base_url": "نشانی پایه",
     "ai.timeout": "مهلت",
     "ai.max_output_tokens": "بیشینهٔ توکن",
+    "ai.max_output_tokens_hint": (
+        "بیشتر از این مقدار را سرویس نمی‌پذیرد و پاسخ خطا می‌دهد."
+    ),
     "ai.auth_header": "سرآیند احراز",
     "ai.auth_header.both": "هر دو",
     "ai.auth_header.x-api-key": "x-api-key",

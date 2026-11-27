@@ -14,6 +14,7 @@ from app.ai import service as ai_service
 from app.ai.provider import AIError, get_provider
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_str
+from app.i18n import translate
 from app.models.task import Task
 from app.services import achievements as achievement_service
 from app.services import dashboard as dashboard_service
@@ -40,9 +41,28 @@ def _redirect(url: str, flash: str | None = None, error: str | None = None) -> R
     return RedirectResponse(url, status_code=303)
 
 
-def _no_provider() -> JSONResponse:
+def _failure(
+    session: Session, detail: str, status: int, key: str = "error.ai_failed"
+) -> JSONResponse:
+    """The answer of a call that did not work.
+
+    The sentence is in the lexicon of the user; the detail keeps the
+    words of the provider, so the page can show both.
+    """
+    lexicon = settings_service.lexicon(session)
+    return JSONResponse(
+        {
+            "ok": False,
+            "error": detail,
+            "message": str(translate(key, lexicon)),
+        },
+        status_code=status,
+    )
+
+
+def _no_provider(session: Session) -> JSONResponse:
     """The answer when the AI is not configured."""
-    return JSONResponse({"ok": False, "error": "error.ai_disabled"}, status_code=503)
+    return _failure(session, "error.ai_disabled", 503, key="error.ai_disabled")
 
 
 @router.get("/api/ai/daily-plan")
@@ -50,7 +70,7 @@ async def ai_daily_plan(session: SessionDep) -> JSONResponse:
     """The plan the AI proposes for today."""
     provider = get_provider(session)
     if provider is None:
-        return _no_provider()
+        return _no_provider(session)
     timezone = settings_service.timezone_name(session)
     now = utcnow()
     stats = dashboard_service.collect_stats(
@@ -78,7 +98,7 @@ async def ai_daily_plan(session: SessionDep) -> JSONResponse:
     try:
         draft = ai_service.daily_plan(session, provider, payload)
     except AIError as exc:
-        return JSONResponse({"ok": False, "error": str(exc)}, status_code=502)
+        return _failure(session, str(exc), 502)
     plan = ai_service.draft_to_dict(draft, payload)
     return JSONResponse({"ok": True, "plan": plan}, status_code=200)
 
@@ -88,15 +108,15 @@ async def ai_parse_quick_add(request: Request, session: SessionDep) -> JSONRespo
     """Parse a quick-add string into a task draft; nothing is created."""
     provider = get_provider(session)
     if provider is None:
-        return _no_provider()
+        return _no_provider(session)
     form = await request.form()
     text = form_str(form, "text")
     if not text:
-        return JSONResponse({"ok": False, "error": "error.validation"}, status_code=400)
+        return _failure(session, "error.validation", 400, key="error.validation")
     try:
         draft = ai_service.parse_quick_add(session, provider, text, now=utcnow())
     except AIError as exc:
-        return JSONResponse({"ok": False, "error": str(exc)}, status_code=502)
+        return _failure(session, str(exc), 502)
     return JSONResponse({"ok": True, "draft": ai_service.draft_to_dict(draft)})
 
 
@@ -105,10 +125,10 @@ async def ai_classify_task(request: Request, task_id: int, session: SessionDep) 
     """Suggest the domains of a task; the user's choice always wins."""
     provider = get_provider(session)
     if provider is None:
-        return _no_provider()
+        return _no_provider(session)
     task = task_service.get_task(session, task_id)
     if task is None:
-        return JSONResponse({"ok": False, "error": "error.not_found"}, status_code=404)
+        return _failure(session, "error.not_found", 404, key="error.not_found")
     domains = [domain.name for domain in task_service.list_domains(session)]
     try:
         draft = ai_service.classify_task(
@@ -119,7 +139,7 @@ async def ai_classify_task(request: Request, task_id: int, session: SessionDep) 
             existing_domains=domains,
         )
     except AIError as exc:
-        return JSONResponse({"ok": False, "error": str(exc)}, status_code=502)
+        return _failure(session, str(exc), 502)
     return JSONResponse({"ok": True, "domains": draft.domains})
 
 
@@ -128,15 +148,15 @@ async def ai_journal(request: Request, session: SessionDep) -> JSONResponse:
     """Propose the entries of a journal; nothing is written before confirmation."""
     provider = get_provider(session)
     if provider is None:
-        return _no_provider()
+        return _no_provider(session)
     form = await request.form()
     text = form_str(form, "raw_text")
     if not text:
-        return JSONResponse({"ok": False, "error": "error.validation"}, status_code=400)
+        return _failure(session, "error.validation", 400, key="error.validation")
     try:
         draft = ai_service.parse_daily_journal(session, provider, text, now=utcnow())
     except AIError as exc:
-        return JSONResponse({"ok": False, "error": str(exc)}, status_code=502)
+        return _failure(session, str(exc), 502)
     return JSONResponse({"ok": True, "proposal": ai_service.draft_to_dict(draft)})
 
 

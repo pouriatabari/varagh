@@ -474,6 +474,9 @@ STRINGS: dict[str, str] = {
     "ai.base_url": "آدرس پایه (Base URL)",
     "ai.timeout": "مهلت پاسخ (ثانیه)",
     "ai.max_output_tokens": "حداکثر توکن خروجی",
+    "ai.max_output_tokens_hint": (
+        "بیشتر از این مقدار را سرویس قبول نمی‌کند و خطا می‌دهد."
+    ),
     "ai.auth_header": "روش ارسال کلید",
     "ai.auth_header.both": "هر دو (x-api-key و Bearer)",
     "ai.auth_header.x-api-key": "x-api-key",

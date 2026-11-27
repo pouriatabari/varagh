@@ -75,7 +75,7 @@ make logs    # follow app and worker logs
 | `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` | empty | Optional HTTP Basic auth for the single user |
 | `AI_PROVIDER` / `AI_API_KEY` / `AI_MODEL` / `AI_BASE_URL` | empty | Optional AI provider (`anthropic`, `openai`, `custom`) |
 | `AI_TIMEOUT_SECONDS` | `30` | AI request timeout |
-| `AI_MAX_OUTPUT_TOKENS` | `2048` | Maximum number of tokens the model may answer with |
+| `AI_MAX_OUTPUT_TOKENS` | `2048` | Maximum number of tokens the model may answer with (capped at 65536) |
 | `AI_AUTH_HEADER` | `both` | How the key is sent: `x-api-key`, `bearer` or `both` |
 | `AI_CUSTOM_URL` / `AI_CUSTOM_METHOD` / `AI_CUSTOM_HEADERS` | empty | Custom provider: endpoint URL, request shape (`json`, `openai`, `anthropic`, `prompt`) and extra headers |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | empty | Optional email channel |

@@ -369,3 +369,20 @@ together with its rationale.
   and no pearl at all, the prince one arch, the king two arches with the
   orb and the cross, and the bretwalda twelve rays around the king
   crown.
+
+## D34 — The budget of the answer is capped inside the app
+
+- **Decision:** The number of tokens the model may answer with is clamped
+  to 65536 before the call leaves the app, and the settings page offers no
+  larger number. A gateway that is asked for a budget no model can give
+  answers with a server error (502), and the message of the gateway hides
+  the reason; every call of the app then fails and the user cannot see
+  what to change. The budget of the answer is a number of the machine, not
+  a wish: a model that can give 196608 tokens still answers well with
+  65536, and the clamp keeps the calls alive.
+- **Why:** The error was a `502 Bad Gateway` on every AI feature, with a
+  message that named the URL and nothing else. The settings page now
+  shows the number it will actually use, the failure carries the words of
+  the gateway (for example `does not support max tokens > 196608`), and the
+  page of the app shows the sentence of the lexicon with the technical
+  detail in a smaller line beneath it.
