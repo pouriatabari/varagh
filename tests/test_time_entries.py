@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.services import holidays
+from app.services import settings as settings_service
 from app.services import tasks as task_service
 from app.services import time_entries as time_service
 
@@ -233,8 +234,12 @@ def test_manual_entry_route(client: TestClient, session: Session) -> None:
     assert entries[0].duration_minutes == 45
 
 
-def test_the_calendar_has_a_dedicated_overtime_form(client: TestClient) -> None:
+def test_the_calendar_has_a_dedicated_overtime_form(
+    client: TestClient, session: Session
+) -> None:
     """The calendar offers a separate form for the overtime."""
+    settings_service.set_setting(session, "lexicon", "plain")
+    session.commit()
     response = client.get("/calendar")
     assert response.status_code == 200
     assert "ثبت اضافه‌کاری" in response.text
@@ -271,8 +276,12 @@ def test_journal_page_and_manual_entry(client: TestClient, session: Session) -> 
     assert "گرافانا" in page.text
 
 
-def test_done_prompt_appears_after_completing_a_task(client: TestClient, session: Session) -> None:
+def test_done_prompt_appears_after_completing_a_task(
+    client: TestClient, session: Session
+) -> None:
     """Completing a task asks roughly how long it took."""
+    settings_service.set_setting(session, "lexicon", "plain")
+    session.commit()
     task = task_service.create_task(session, title="تقریباً", now=NOW)
     response = client.post(
         f"/tasks/{task.id}/status", data={"status": "done"}, follow_redirects=False

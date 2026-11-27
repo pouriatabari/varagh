@@ -216,17 +216,46 @@ make seed                                    # Persian demo data
 entries, notes, board items, journal, learning items, reviews, achievements,
 settings).
 
-## The isometric icons
+## The icons
 
-The icons of the app are drawn by hand in an isometric style: a cube, a
-trophy, a book, a report, a clock. Every icon is a small SVG file in
-`app/static/icons`, and the pages inline it, so an icon takes the colour of
-the text it sits in and costs no extra request.
+Every icon is a small SVG file in `app/static/icons`, and the pages inline
+it, so an icon takes the colour of the text it sits in and costs no extra
+request. The files come from Tabler Icons (MIT) and from game-icons.net
+(CC BY 3.0); `app/static/icons/manifest.json` names the source, the author
+and the licence of every one of them, and the page `/about/credits` shows
+the same list.
 
 ```bash
 # the icons are plain files; open one in a browser to see it
-open app/static/icons/cube.svg
+open app/static/icons/tasks.svg
 ```
+
+## The two lexicons
+
+The interface speaks in one of two Persian packs, and the user chooses the
+pack in the settings page:
+
+- **medieval** (the default) — the missions are orders, the review is a
+  muster, the learning is a library and the overtime is a night watch;
+- **plain** — the everyday words of the app.
+
+The two packs have exactly the same keys, so no screen can miss a word. A
+medieval term carries its plain wording with it: the mouse shows it in the
+tooltip, and a long press on a touch screen shows it in a small box.
+
+The pack only touches the presentation layer. The exports, the ledger, the
+mail and the webhooks always speak plainly, and the code, the columns and
+the URLs keep their neutral English names (`task`, `review`, `achievement`).
+The words of the interface live in `app/i18n`, and a test refuses any
+Persian word written directly in a template.
+
+## The two themes
+
+The night (the default) and the parchment are two sets of CSS variables:
+the night is the dark of a watchtower with a warm gold and a green ink,
+the parchment is the warm paper of a ledger. The setting lives in the
+settings page; the system preference (`prefers-color-scheme`) only decides
+the theme the very first time, before the user has chosen one.
 
 ## Project structure
 
@@ -241,7 +270,7 @@ app/
 ├── ai/         # AIProvider interface and implementations
 ├── notify/     # notification channels and rules
 ├── worker/     # APScheduler worker
-└── i18n/       # every Persian UI string in one file
+└── i18n/       # the two Persian packs: the plain one and the medieval one
 ```
 
 ## Troubleshooting
@@ -269,11 +298,14 @@ app/
 - [x] M7b — learning tracker: syllabus, units, progress, stale report
 - [x] M8 — AI features behind the `AIProvider` interface
 - [x] M9 — export, backup/restore, seed data, final polish
+- [x] M10 — the two lexicons, the two themes, the icon manifest and the credits
 
 Still open:
 
 - The AI draft of a review is written into the review, but the achievements it
   proposes are created without a link to the review itself.
+- The honours hall is not a manual list: the honours are given by the
+  reviews, and the reward engine that computes them is not written yet.
 - The learning report is generated per item; a yearly summary page is missing.
 - The dashboard heatmap is a flat 90-day grid; a calendar-shaped heatmap would
   read better.

@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% block title %}{{ t('overtime.title') }}{% endblock %}
 {% block content %}
 <div class="card-title">
-  <h1>{{ t('overtime.title') }}</h1>
+  <h1>{{ term('overtime.title') }}</h1>
 </div>
 <p class="muted">{{ t('time.overtime_hint') }}</p>
 

@@ -225,3 +225,35 @@ together with its rationale.
 - **Why:** A board holds pictures of many sizes; storing them as blobs in the
   database would make every load of the board heavy, and the notes of the
   task are Markdown — a picture does not belong in them.
+
+## D26 — Two packs of words, one of them medieval
+
+- **Decision:** The words of the interface live in two packs with the same
+  keys: `fa_plain` (the everyday words) and `fa_medieval` (the language of a
+  ledger — the missions are orders, the review is a muster). The user
+  chooses the pack in the settings; the default is the medieval one. A
+  medieval term keeps its plain wording with it, so the page can show it in
+  a tooltip.
+- **Why:** The vocabulary of the app is part of its character, but it must
+  never cost the user the meaning of a word. The plain wording is always
+  one hover away, and the exports, the ledger, the mail and the webhooks
+  always speak plainly — the words of the interface never leave the
+  presentation layer.
+
+## D27 — The theme is a setting, the system only has the first word
+
+- **Decision:** The night and the parchment are two sets of CSS variables.
+  The theme is a setting of the user; `prefers-color-scheme` only decides
+  the theme of the very first visit, before a choice was made.
+- **Why:** A theme is a taste, and a taste belongs to the person, not to
+  the machine. The system may have the first word, but never the last one.
+
+## D28 — The honours hall is given by the reviews, never by hand
+
+- **Decision:** The honours of the hall are computed by the reward engine
+  out of the finished reviews and the work they measure. Nothing is
+  registered by hand as an achievement: the page has no form to add one.
+- **Why:** An honour that anyone can write down is worth nothing. The
+  honour must come from the muster — the review that looked at the work —
+  and from the work itself, so that it cannot be claimed and cannot be
+  lost either.

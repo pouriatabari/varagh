@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% block title %}{{ t('journal.title') }}{% endblock %}
 {% block content %}
 <div class="grid-2">
   <div class="card">
-    <div class="card-title"><h1>{{ t('journal.title') }}</h1></div>
+    <div class="card-title"><h1>{{ term('journal.title') }}</h1></div>
     <form method="post" action="/journal">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
       <input type="hidden" name="mode" value="manual" />
@@ -13,14 +14,18 @@
       </div>
       <div class="field">
         <label for="raw_text">{{ t('journal.placeholder') }}</label>
-        <textarea id="raw_text" name="raw_text" dir="auto" placeholder="امروز روی ایجنت گرافانا کار کردم و ردیس‌ها رو چک کردم، حدود ۳ ساعت"></textarea>
+        <textarea id="raw_text" name="raw_text" dir="auto" placeholder="{{ t('journal.placeholder_example') }}"></textarea>
       </div>
       <button class="btn btn-primary" type="submit">{{ t('journal.save') }}</button>
     </form>
 
     <div class="divider"></div>
 
-    <div x-data="journalAI()">
+    <div
+      x-data="journalAI()"
+      data-empty="{{ t('journal.error_empty') }}"
+      data-failed="{{ t('journal.error_failed') }}"
+    >
       <h2>{{ t('journal.parse') }}</h2>
       <p class="small muted">{{ t('journal.ai_hint') }}</p>
       <button class="btn" type="button" @click="parse()">{{ t('journal.parse') }}</button>
@@ -32,7 +37,11 @@
             <template x-for="(entry, index) in proposal.entries" :key="index">
               <li>
                 <span x-text="entry.text"></span>
-                <span class="chip" x-text="entry.minutes ? entry.minutes + ' دقیقه' : ''"></span>
+                <span
+                  class="chip"
+                  data-unit="{{ t('units.minutes') }}"
+                  x-text="entry.minutes ? entry.minutes + $el.dataset.unit : ''"
+                ></span>
               </li>
             </template>
           </ul>
@@ -51,7 +60,7 @@
   </div>
 
   <div class="card">
-    <div class="card-title"><h2>{{ t('journal.title') }}</h2></div>
+    <div class="card-title"><h2>{{ term('journal.title') }}</h2></div>
     {% if entries %}
     <ul class="notes-timeline">
       {% for entry in entries %}
@@ -78,7 +87,12 @@
 {% block scripts %}
 <script>
   function journalAI() {
+    const root = document.querySelector("[x-data='journalAI()']");
     return {
+      messages: {
+        empty: root ? root.dataset.empty : "",
+        failed: root ? root.dataset.failed : "",
+      },
       proposal: null,
       error: "",
       rawText: "",
@@ -88,7 +102,7 @@
         const textarea = document.getElementById("raw_text");
         this.rawText = textarea ? textarea.value : "";
         if (!this.rawText.trim()) {
-          this.error = "متنی برای تحلیل وارد کنید.";
+          this.error = this.messages.empty;
           return;
         }
         const token = document.querySelector('input[name="csrf_token"]').value;
@@ -102,7 +116,7 @@
         });
         const data = await response.json();
         if (!data.ok) {
-          this.error = data.error || "خطا";
+          this.error = data.error || this.messages.failed;
           return;
         }
         this.proposal = data.proposal;

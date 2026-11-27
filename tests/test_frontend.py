@@ -33,10 +33,10 @@ def test_the_navigation_carries_the_isometric_icons(client: TestClient) -> None:
         "dashboard",
         "tasks",
         "calendar",
-        "clock",
-        "book",
+        "overtime",
+        "learning",
         "trophy",
-        "report",
+        "muster",
         "settings",
     ):
         assert f"iso_icon('{name}'" in source

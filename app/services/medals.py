@@ -142,7 +142,7 @@ def compute_medals(
         Medal(
             key="tasks_done",
             title_fa="تسک‌های انجام‌شده",
-            icon="medal_gold",
+            icon="medal",
             unit="tasks",
             value=float(_completed_tasks(session)),
             bronze=10,
@@ -152,7 +152,7 @@ def compute_medals(
         Medal(
             key="measured_hours",
             title_fa="ساعت کار اندازه‌گیری‌شده",
-            icon="medal_silver",
+            icon="medal",
             unit="hours",
             value=_measured_hours(session),
             bronze=10,
@@ -162,7 +162,7 @@ def compute_medals(
         Medal(
             key="achievements",
             title_fa="دستاوردهای تأییدشده",
-            icon="achievements",
+            icon="trophy",
             unit="count",
             value=float(_confirmed_achievements(session)),
             bronze=1,
@@ -182,7 +182,7 @@ def compute_medals(
         Medal(
             key="reviews",
             title_fa="ارزیابی‌های امتیازدار",
-            icon="reviews",
+            icon="muster",
             unit="count",
             value=float(_finished_reviews(session)),
             bronze=1,

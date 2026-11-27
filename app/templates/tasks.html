@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% block title %}{{ t('tasks.title') }}{% endblock %}
 {% block content %}
 <div class="card">
   <div class="card-title">
-    <h1>{{ t('tasks.title') }}</h1>
+    <h1>{{ term('tasks.title') }}</h1>
     <a class="btn btn-primary" href="/tasks/new" data-shortcut="new-task">{{ t('tasks.new') }}</a>
   </div>
 

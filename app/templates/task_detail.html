@@ -190,34 +190,34 @@
               class="drawing-color active"
               data-drawing-color="#e05a4f"
               style="--dot: #e05a4f"
-              aria-label="قرمز"
+              aria-label="{{ t('tasks.drawing_color.red') }}"
             ></button>
             <button
               type="button"
               class="drawing-color"
               data-drawing-color="#1f7a5a"
               style="--dot: #1f7a5a"
-              aria-label="سبز"
+              aria-label="{{ t('tasks.drawing_color.green') }}"
             ></button>
             <button
               type="button"
               class="drawing-color"
               data-drawing-color="#2b5fb8"
               style="--dot: #2b5fb8"
-              aria-label="آبی"
+              aria-label="{{ t('tasks.drawing_color.blue') }}"
             ></button>
             <button
               type="button"
               class="drawing-color"
               data-drawing-color="#1c1c1c"
               style="--dot: #1c1c1c"
-              aria-label="مشکی"
+              aria-label="{{ t('tasks.drawing_color.black') }}"
             ></button>
           </div>
           <div class="drawing-widths">
-            <button type="button" class="drawing-width" data-drawing-width="2">نازک</button>
-            <button type="button" class="drawing-width active" data-drawing-width="4">معمولی</button>
-            <button type="button" class="drawing-width" data-drawing-width="9">ضخیم</button>
+            <button type="button" class="drawing-width" data-drawing-width="2">{{ t('tasks.drawing_width.thin') }}</button>
+            <button type="button" class="drawing-width active" data-drawing-width="4">{{ t('tasks.drawing_width.normal') }}</button>
+            <button type="button" class="drawing-width" data-drawing-width="9">{{ t('tasks.drawing_width.thick') }}</button>
           </div>
           <div class="drawing-actions">
             <button type="button" class="btn btn-sm" data-drawing-undo>{{ t('common.undo') }}</button>

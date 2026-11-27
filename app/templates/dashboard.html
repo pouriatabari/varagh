@@ -83,7 +83,12 @@
         <template x-for="(item, index) in plan" :key="index">
           <li>
             <span x-text="item.title"></span>
-            <span class="chip" x-show="item.minutes" x-text="item.minutes + ' دقیقه'"></span>
+            <span
+              class="chip"
+              x-show="item.minutes"
+              x-text="item.minutes + $el.dataset.unit"
+              data-unit="{{ t('units.minutes') }}"
+            ></span>
           </li>
         </template>
       </ol>

@@ -1,0 +1,15 @@
+{# The medieval terms.
+
+   A term of the medieval pack knows its plain wording. The macro puts the
+   plain wording in the ``title`` of the term, so a mouse shows it at once,
+   and in ``data-plain``, so a long press on a touch screen shows it too. #}
+
+{% macro term(key, class_name="") -%}
+{%- set wording = t_term(key) -%}
+{%- set plain = t_plain(key) -%}
+{%- if plain != wording -%}
+<span class="term {{ class_name }}" title="{{ plain }}" data-plain="{{ plain }}" tabindex="0">{{ wording }}</span>
+{%- else -%}
+<span class="term {{ class_name }}">{{ wording }}</span>
+{%- endif -%}
+{%- endmacro %}

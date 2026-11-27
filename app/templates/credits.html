@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
+{% block title %}{{ t('credits.title') }}{% endblock %}
+{% block content %}
+<h1>{{ term('credits.title') }}</h1>
+<p class="muted">{{ t('credits.hint') }}</p>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('credits.icons') }}</h2></div>
+  <p class="small muted">{{ t('credits.icons_hint') }}</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ t('credits.icon') }}</th>
+          <th>{{ t('credits.source') }}</th>
+          <th>{{ t('credits.licence') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for icon in icons %}
+        <tr>
+          <td>
+            <span class="iso">{{ read_icon(ICON_DIR ~ icon.name ~ '.svg') | safe }}</span>
+            <bdi>{{ icon.name }}</bdi>
+          </td>
+          <td><bdi>{{ icon.source }}</bdi></td>
+          <td><bdi>{{ icon.license }}</bdi></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('credits.fonts') }}</h2></div>
+  <ul class="plain-list">
+    <li>{{ t('credits.vazir') }}</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('credits.libraries') }}</h2></div>
+  <ul class="plain-list">
+    <li>{{ t('credits.htmx') }}</li>
+    <li>{{ t('credits.alpine') }}</li>
+    <li>{{ t('credits.chartjs') }}</li>
+  </ul>
+  <p class="small muted">{{ t('credits.no_network') }}</p>
+</div>
+{% endblock %}

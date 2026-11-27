@@ -31,45 +31,107 @@
   font-display: swap;
 }
 
-:root {
-  --bg: #f6f7f9;
-  --bg-elevated: #ffffff;
-  --bg-sunken: #eceef2;
-  --text: #1c2430;
-  --text-muted: #6b7684;
-  --border: #dfe3e9;
-  --accent: #2f6f5e;
-  --accent-soft: #e3f0ec;
-  --danger: #b3443c;
-  --danger-soft: #fbe9e8;
-  --warn: #a9741a;
-  --warn-soft: #fbf2e0;
-  --info: #2b5f96;
-  --info-soft: #e7f0fa;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 2px rgba(20, 30, 40, 0.06), 0 6px 18px rgba(20, 30, 40, 0.05);
-  --sidebar-w: 232px;
-  color-scheme: light;
-}
-
-html[data-theme="dark"] {
-  --bg: #12161b;
-  --bg-elevated: #1a2027;
-  --bg-sunken: #0d1116;
-  --text: #e6eaf0;
-  --text-muted: #93a0b0;
-  --border: #2a323c;
-  --accent: #6fbf9f;
-  --accent-soft: #1c2f2a;
+/* The two themes of the app: the night of a watchtower and the warm paper
+   of a ledger. The colours are the only thing that changes; the layout is
+   the same in both. */
+:root,
+html[data-theme="night"] {
+  --bg: #0e1420;
+  --bg-elevated: #161e2c;
+  --bg-sunken: #0a0f18;
+  --text: #e8ecf4;
+  --text-muted: #93a1b8;
+  --border: #26324a;
+  --accent: #d9b45a;
+  --accent-soft: #2a2415;
+  --accent-2: #5ec8b0;
+  --accent-2-soft: #142b28;
   --danger: #e08b83;
   --danger-soft: #33201f;
   --warn: #e0b56a;
   --warn-soft: #322a1a;
   --info: #86b4e6;
   --info-soft: #1b2735;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --glow: 0 0 0 1px rgba(217, 180, 90, 0.35), 0 0 14px rgba(217, 180, 90, 0.22);
+  --glow-2: 0 0 0 1px rgba(94, 200, 176, 0.35), 0 0 14px rgba(94, 200, 176, 0.2);
+  --fog: rgba(14, 20, 32, 0.72);
+  --sidebar-w: 232px;
   color-scheme: dark;
+}
+
+html[data-theme="parchment"] {
+  --bg: #f3e7cd;
+  --bg-elevated: #fbf3df;
+  --bg-sunken: #e7d8b6;
+  --text: #2c2114;
+  --text-muted: #6d5c43;
+  --border: #d3bd92;
+  --accent: #9a6f1c;
+  --accent-soft: #efe0bb;
+  --accent-2: #1f6f5e;
+  --accent-2-soft: #d8e6dd;
+  --danger: #a33c31;
+  --danger-soft: #f2d9d2;
+  --warn: #8a6114;
+  --warn-soft: #f0e2c2;
+  --info: #2b5f96;
+  --info-soft: #dbe5ef;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(70, 50, 20, 0.14), 0 8px 22px rgba(70, 50, 20, 0.12);
+  --glow: 0 0 0 1px rgba(154, 111, 28, 0.35), 0 0 14px rgba(154, 111, 28, 0.18);
+  --glow-2: 0 0 0 1px rgba(31, 111, 94, 0.35), 0 0 14px rgba(31, 111, 94, 0.16);
+  --fog: rgba(243, 231, 205, 0.72);
+  --sidebar-w: 232px;
+  color-scheme: light;
+}
+
+.site-footer {
+  padding: 0.5rem 1.25rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.site-footer a {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+/* A medieval term: the plain wording waits in the title of the term, and
+   a long press on a touch screen shows it in this box. */
+.term {
+  cursor: help;
+  border-bottom: 1px dotted var(--border);
+}
+
+.term-tip {
+  position: fixed;
+  z-index: 90;
+  max-width: 22rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.term-tip.show {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-tip {
+    transition: none;
+  }
 }
 
 * {
@@ -566,13 +628,13 @@ label {
   background: var(--accent);
 }
 
-html[data-theme="dark"] .heatmap .cell.l1 {
+html[data-theme="night"] .heatmap .cell.l1 {
   background: #23443a;
 }
-html[data-theme="dark"] .heatmap .cell.l2 {
+html[data-theme="night"] .heatmap .cell.l2 {
   background: #2f6454;
 }
-html[data-theme="dark"] .heatmap .cell.l3 {
+html[data-theme="night"] .heatmap .cell.l3 {
   background: #3f8a72;
 }
 
@@ -834,22 +896,22 @@ html[data-theme="dark"] .heatmap .cell.l3 {
   background: #e6e8ea;
 }
 
-[data-theme="dark"] .sticky.c-yellow {
+[data-theme="night"] .sticky.c-yellow {
   background: #4a4326;
 }
-[data-theme="dark"] .sticky.c-green {
+[data-theme="night"] .sticky.c-green {
   background: #26402c;
 }
-[data-theme="dark"] .sticky.c-blue {
+[data-theme="night"] .sticky.c-blue {
   background: #22364f;
 }
-[data-theme="dark"] .sticky.c-pink {
+[data-theme="night"] .sticky.c-pink {
   background: #4a2c38;
 }
-[data-theme="dark"] .sticky.c-grey {
+[data-theme="night"] .sticky.c-grey {
   background: #33373b;
 }
-[data-theme="dark"] .sticky-body {
+[data-theme="night"] .sticky-body {
   color: #f2f4f5;
 }
 

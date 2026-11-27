@@ -9,12 +9,17 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.i18n import PACKS
 from app.models.system import Setting
+
+THEMES = ("night", "parchment")
 
 DEFAULT_SETTINGS: dict[str, Any] = {
     "timezone": "Asia/Tehran",
     "calendar_system": "jalali",
     "digits": "persian",
+    "lexicon": "medieval",
+    "theme": "night",
     "weekly_hour_target": 40,
     "weekend_weekdays": [6],
     "ai": {
@@ -130,6 +135,18 @@ def calendar_system(session: Session) -> str:
 def digit_mode(session: Session) -> str:
     """Return ``persian`` or ``latin``."""
     return str(get_setting(session, "digits", "persian"))
+
+
+def lexicon(session: Session) -> str:
+    """Return the pack of the interface: ``medieval`` or ``plain``."""
+    value = str(get_setting(session, "lexicon", "medieval"))
+    return value if value in PACKS else "medieval"
+
+
+def theme(session: Session) -> str:
+    """Return the theme of the interface: ``night`` or ``parchment``."""
+    value = str(get_setting(session, "theme", "night"))
+    return value if value in THEMES else "night"
 
 
 def weekend_weekdays(session: Session) -> frozenset[int]:

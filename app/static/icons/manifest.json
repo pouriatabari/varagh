@@ -1,0 +1,298 @@
+[
+  {
+    "name": "achievements",
+    "file": "static/icons/achievements.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "ai",
+    "file": "static/icons/ai.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "backup",
+    "file": "static/icons/backup.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (delapouite)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "banner",
+    "file": "static/icons/banner.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (delapouite)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "board",
+    "file": "static/icons/board.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "calendar",
+    "file": "static/icons/calendar.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "channel_email",
+    "file": "static/icons/channel_email.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "channel_webhook",
+    "file": "static/icons/channel_webhook.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "council",
+    "file": "static/icons/council.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "dashboard",
+    "file": "static/icons/dashboard.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "domain",
+    "file": "static/icons/domain.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (lorc)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "fog",
+    "file": "static/icons/fog.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "journal",
+    "file": "static/icons/journal.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "learning",
+    "file": "static/icons/learning.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "lock",
+    "file": "static/icons/lock.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "medal",
+    "file": "static/icons/medal.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "moon",
+    "file": "static/icons/moon.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "muster",
+    "file": "static/icons/muster.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "muster_horn",
+    "file": "static/icons/muster_horn.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "notifications",
+    "file": "static/icons/notifications.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "origin_assigned",
+    "file": "static/icons/origin_assigned.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "origin_self",
+    "file": "static/icons/origin_self.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "overtime",
+    "file": "static/icons/overtime.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (delapouite)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "priority_critical",
+    "file": "static/icons/priority_critical.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "quest",
+    "file": "static/icons/quest.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "quick_add",
+    "file": "static/icons/quick_add.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (lorc)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "realm",
+    "file": "static/icons/realm.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "settings",
+    "file": "static/icons/settings.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "shield",
+    "file": "static/icons/shield.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "status_doing",
+    "file": "static/icons/status_doing.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (lorc)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "status_overdue",
+    "file": "static/icons/status_overdue.svg",
+    "source": "game-icons.net",
+    "author": "game-icons.net (delapouite)",
+    "license": "CC BY 3.0",
+    "homepage": "https://game-icons.net"
+  },
+  {
+    "name": "sticky",
+    "file": "static/icons/sticky.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "sun",
+    "file": "static/icons/sun.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "tasks",
+    "file": "static/icons/tasks.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "timer",
+    "file": "static/icons/timer.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "title",
+    "file": "static/icons/title.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  },
+  {
+    "name": "unlock",
+    "file": "static/icons/unlock.svg",
+    "source": "Tabler Icons",
+    "author": "Tabler Icons",
+    "license": "MIT",
+    "homepage": "https://tabler.io/icons"
+  }
+]

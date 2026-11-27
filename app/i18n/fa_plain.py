@@ -1,8 +1,6 @@
-"""All Persian UI strings live here — one file, one language."""
+"""The plain Persian pack — the language of the app, the exports and the mail."""
 
 from __future__ import annotations
-
-from typing import Any
 
 STRINGS: dict[str, str] = {
     # --- app ---
@@ -110,6 +108,13 @@ STRINGS: dict[str, str] = {
     "tasks.board_color.grey": "خاکستری",
     "tasks.drawing": "رسم روی برد",
 "tasks.drawing_hint": "با ماژیک روی بوم بکشید و آن را روی برد بگذارید.",
+    "tasks.drawing_color.red": "قرمز",
+    "tasks.drawing_color.green": "سبز",
+    "tasks.drawing_color.blue": "آبی",
+    "tasks.drawing_color.black": "مشکی",
+    "tasks.drawing_width.thin": "نازک",
+    "tasks.drawing_width.normal": "معمولی",
+    "tasks.drawing_width.thick": "ضخیم",
 "tasks.drawing_save": "گذاشتن روی برد",
 "tasks.drawing_empty": "اول چیزی بکشید.",
 "tasks.add_note": "یادداشت جدید",
@@ -180,6 +185,11 @@ STRINGS: dict[str, str] = {
     "journal.confirm": "تأیید و ثبت",
     "journal.empty": "برای این روز ژورنالی ثبت نشده.",
     "journal.suggestions": "پیشنهادهای استخراج‌شده",
+    "journal.placeholder_example": (
+        "امروز روی ایجنت گرافانا کار کردم و ردیس‌ها را چک کردم، حدود ۳ ساعت"
+    ),
+    "journal.error_empty": "متنی برای تحلیل وارد کنید.",
+    "journal.error_failed": "خطا",
     "journal.ai_hint": "متن ژورنال تحلیل می‌شود؛ تا وقتی تأیید نکنی چیزی ثبت نمی‌شود.",
     # --- notifications ---
     "notifications.title": "اعلان‌ها",
@@ -316,16 +326,45 @@ STRINGS: dict[str, str] = {
     "settings.digits": "نمایش ارقام",
     "settings.digits.persian": "فارسی",
     "settings.digits.latin": "لاتین",
+    "settings.lexicon": "واژگان",
+    "settings.lexicon.medieval": "شوالیه‌گری (پیش‌فرض)",
+    "settings.lexicon.plain": "ساده",
+    "settings.theme": "پوسته",
+    "settings.theme.night": "شب",
+    "settings.theme.parchment": "کاغذ کهنه",
     "settings.weekly_hour_target": "هدف ساعت هفتگی",
     "settings.holidays": "روزهای تعطیل",
     "settings.holidays_hint": "قالب فایل: فهرستی از تاریخ‌های شمسی به شکل YYYY/MM/DD.",
     "settings.holidays_add": "افزودن تعطیلی",
     "settings.holidays_remove": "حذف",
     "settings.holiday_invalid": "تاریخ تعطیلی نامعتبر است.",
+    "settings.weekday.0": "شنبه",
+    "settings.weekday.1": "یک‌شنبه",
+    "settings.weekday.2": "دوشنبه",
+    "settings.weekday.3": "سه‌شنبه",
+    "settings.weekday.4": "چهارشنبه",
+    "settings.weekday.5": "پنج‌شنبه",
+    "settings.weekday.6": "جمعه",
     "settings.weekend": "روزهای تعطیل هفتگی",
+
     "settings.saved": "تنظیمات ذخیره شد.",
     "settings.export_hint": "خروجی JSON شامل همهٔ داده‌های برنامه است.",
     "settings.export_json": "دانلود خروجی JSON",
+    # --- credits ---
+    "credits.title": "اعتبارها",
+    "credits.hint": "هر چیزی که در این برنامه هست، روی همین رایانه است؛ هیچ چیز از بیرون نمی‌آید.",
+    "credits.icons": "نقشک‌ها",
+    "credits.icons_hint": "نقشک‌ها از این منابع برداشته و در پروندهٔ برنامه نگه داشته شده‌اند.",
+    "credits.icon": "نقشک",
+    "credits.source": "منبع",
+    "credits.licence": "پروانه",
+    "credits.fonts": "قلم‌ها",
+    "credits.vazir": "وزیرمتن — SIL Open Font License 1.1",
+    "credits.libraries": "کتابخانه‌ها",
+    "credits.htmx": "HTMX — BSD 2-Clause",
+    "credits.alpine": "Alpine.js — MIT",
+    "credits.chartjs": "Chart.js — MIT",
+    "credits.no_network": "هیچ کتابخانه‌ای از اینترنت خوانده نمی‌شود؛ همه درون برنامه‌اند.",
     # --- errors / flash ---
     "error.not_found": "یافت نشد.",
     "error.forbidden": "دسترسی مجاز نیست.",
@@ -411,16 +450,3 @@ STRINGS: dict[str, str] = {
     "units.rating": "امتیاز از ۵",
     "units.count": "تعداد",
 }
-
-
-def t(key: str, **kwargs: Any) -> str:
-    """Translate a key to Persian, falling back to the key itself."""
-    template = STRINGS.get(key)
-    if template is None:
-        return key
-    if kwargs:
-        try:
-            return template.format(**kwargs)
-        except (KeyError, IndexError):
-            return template
-    return template

@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from markupsafe import escape
 from sqlalchemy.orm import Session
 
@@ -14,7 +14,7 @@ from app.ai import config as ai_config
 from app.ai.provider import AIError, build_provider
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_bool, form_float, form_int, form_str
-from app.i18n import t
+from app.i18n import PACKS, t
 from app.services import export as export_service
 from app.services import holidays as holiday_service
 from app.services import settings as settings_service
@@ -141,8 +141,34 @@ async def settings_general(request: Request, session: SessionDep) -> HTMLRespons
         "weekly_hour_target": form_int(form, "weekly_hour_target", 40) or 40,
         "weekend_weekdays": weekend or [6],
     }
+    lexicon = form_str(form, "lexicon")
+    if lexicon in PACKS:
+        values["lexicon"] = lexicon
+    theme = form_str(form, "theme")
+    if theme in settings_service.THEMES:
+        values["theme"] = theme
     settings_service.update_settings(session, values)
     return HTMLResponse(f'<span class="muted">{escape(t("settings.saved"))}</span>')
+
+
+@router.post("/settings/theme")
+async def settings_theme(request: Request, session: SessionDep) -> RedirectResponse:
+    """Save the theme of the interface."""
+    form = await request.form()
+    theme = form_str(form, "theme")
+    if theme in settings_service.THEMES:
+        settings_service.set_setting(session, "theme", theme)
+    return RedirectResponse(url="/", status_code=303)
+
+
+@router.post("/settings/lexicon")
+async def settings_lexicon(request: Request, session: SessionDep) -> RedirectResponse:
+    """Save the pack of the interface."""
+    form = await request.form()
+    lexicon = form_str(form, "lexicon")
+    if lexicon in PACKS:
+        settings_service.set_setting(session, "lexicon", lexicon)
+    return RedirectResponse(url="/", status_code=303)
 
 
 @router.post("/settings/holidays/add")

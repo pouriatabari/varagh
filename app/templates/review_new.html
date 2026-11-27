@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% block title %}{{ t('reviews.new') }}{% endblock %}
 {% block content %}
-<h1>{{ t('reviews.new') }}</h1>
+<h1>{{ term('reviews.new') }}</h1>
 
 <div class="card">
   <div class="card-title"><h2>{{ t('reviews.period_type') }}</h2></div>

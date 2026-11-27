@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% block title %}{{ t('settings.title') }}{% endblock %}
 {% block content %}
-<h1>{{ t('settings.title') }}</h1>
+<h1>{{ term('settings.title') }}</h1>
 
 <div class="card">
-  <div class="card-title"><h2>{{ t('settings.title') }}</h2></div>
+  <div class="card-title"><h2>{{ term('settings.title') }}</h2></div>
   <form hx-post="/settings/general" hx-target="#settings-result" hx-swap="innerHTML">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div class="grid-2">
@@ -47,10 +48,31 @@
           value="{{ settings.weekly_hour_target }}"
         />
       </label>
+      <label>
+        {{ t('settings.lexicon') }}
+        <select name="lexicon">
+          <option value="medieval" {{ 'selected' if settings.lexicon == 'medieval' }}>
+            {{ t('settings.lexicon.medieval') }}
+          </option>
+          <option value="plain" {{ 'selected' if settings.lexicon == 'plain' }}>
+            {{ t('settings.lexicon.plain') }}
+          </option>
+        </select>
+      </label>
+      <label>
+        {{ t('settings.theme') }}
+        <select name="theme">
+          <option value="night" {{ 'selected' if settings.theme == 'night' }}>
+            {{ t('settings.theme.night') }}
+          </option>
+          <option value="parchment" {{ 'selected' if settings.theme == 'parchment' }}>
+            {{ t('settings.theme.parchment') }}
+          </option>
+        </select>
+      </label>
     </div>
     <fieldset class="weekend">
       <legend>{{ t('settings.weekend') }}</legend>
-      {% set names = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'] %}
       {% for index in range(7) %}
       <label class="inline">
         <input
@@ -59,7 +81,7 @@
           value="1"
           {{ 'checked' if index in settings.weekend_weekdays }}
         />
-        {{ names[index] }}
+        {{ t('settings.weekday.' ~ index) }}
       </label>
       {% endfor %}
     </fieldset>

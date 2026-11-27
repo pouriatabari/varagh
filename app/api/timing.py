@@ -308,6 +308,9 @@ async def journal_create(request: Request, session: SessionDep) -> RedirectRespo
         entry.raw_text = raw_text
         entry.parsed = parsed
         entry.confirmed = True
+    # The write is made visible at once: the services of the app flush in
+    # the same way, and the page that follows must find the entry.
+    session.flush()
     return _redirect("/journal", flash="flash.time_created")
 
 

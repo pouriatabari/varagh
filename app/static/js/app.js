@@ -4,10 +4,17 @@
 
   const root = document.documentElement;
 
-  window.varaghToggleTheme = function () {
-    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
-    localStorage.setItem("varagh-theme", next);
+  /* The theme is a setting of the user: the button sends it to the server
+     and the server answers with the page that carries the new theme. */
+  window.varaghToggleTheme = function (next) {
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = "/settings/theme";
+    form.innerHTML =
+      '<input name="csrf_token" value="' + (window.csrfToken ? window.csrfToken() : "") + '">' +
+      '<input name="theme" value="' + next + '">';
+    document.body.appendChild(form);
+    form.submit();
   };
 
   function isTypingTarget(element) {
@@ -118,6 +125,64 @@
   if ("Notification" in window) {
     setInterval(pollNotifications, POLL_INTERVAL_MS);
   }
+})();
+
+/* The plain wording of a medieval term.
+
+   A mouse gets it from the title of the term; a touch screen has no
+   hover, so a long press shows the same wording in a small box. */
+(function () {
+  "use strict";
+
+  const HOLD_MS = 480;
+  let tip = null;
+  let timer = null;
+
+  function hide() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (tip) {
+      tip.remove();
+      tip = null;
+    }
+  }
+
+  function show(element) {
+    const plain = element.getAttribute("data-plain");
+    if (!plain) return;
+    hide();
+    tip = document.createElement("div");
+    tip.className = "term-tip";
+    tip.setAttribute("role", "tooltip");
+    tip.textContent = plain;
+    document.body.appendChild(tip);
+    const box = element.getBoundingClientRect();
+    const size = tip.getBoundingClientRect();
+    let left = box.left + box.width / 2 - size.width / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - size.width - 8));
+    let top = box.bottom + 8;
+    if (top + size.height > window.innerHeight - 8) top = box.top - size.height - 8;
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+    tip.classList.add("show");
+  }
+
+  document.addEventListener("touchstart", function (event) {
+    const element = event.target.closest ? event.target.closest(".term[data-plain]") : null;
+    if (!element) return;
+    timer = setTimeout(function () {
+      show(element);
+    }, HOLD_MS);
+  }, { passive: true });
+
+  document.addEventListener("touchend", hide, { passive: true });
+  document.addEventListener("touchmove", hide, { passive: true });
+  document.addEventListener("scroll", hide, { passive: true, capture: true });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") hide();
+  });
 })();
 
 /* The CSRF token of the page: the hidden field of a form, or the cookie. */

@@ -14,6 +14,7 @@ from app.ai.fake_provider import FakeAIProvider
 from app.ai.provider import AIError
 from app.ai.schemas import ChartSpec
 from app.services import dashboard as dashboard_service
+from app.services import settings as settings_service
 
 NOW = dt.datetime(2024, 8, 5, 9, 0, tzinfo=dt.UTC)
 
@@ -116,8 +117,12 @@ def test_the_chart_partial_renders_a_canvas() -> None:
     assert "ساعت کاری" in html
 
 
-def test_the_ask_page_renders_without_an_ai(client: TestClient) -> None:
+def test_the_ask_page_renders_without_an_ai(
+    client: TestClient, session: Session
+) -> None:
     """The page answers even when no provider is configured."""
+    settings_service.set_setting(session, "lexicon", "plain")
+    session.commit()
     response = client.post("/ask", data={"question": "این هفته چه کردم؟"})
     assert response.status_code == 200
     assert "هوش مصنوعی فعال نیست" in response.text

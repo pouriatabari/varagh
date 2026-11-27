@@ -11,7 +11,7 @@ from app.i18n import t
 from app.services import charts as chart_service
 from app.services import dashboard as dashboard_service
 from app.services import settings as settings_service
-from app.templating import templates
+from app.templating import read_manifest, templates
 from app.utils.time import utcnow
 
 router = APIRouter()
@@ -24,6 +24,13 @@ KIND_LABELS = {
     "study": "time.kind.study",
     "learning": "time.kind.learning",
 }
+
+
+@router.get("/about/credits", response_class=HTMLResponse)
+async def credits(request: Request, session: SessionDep) -> HTMLResponse:
+    """Render the page that names the sources of the vendored assets."""
+    context = base_context(request, session, active_page="credits", icons=read_manifest())
+    return templates.TemplateResponse(request, "credits.html", context)
 
 
 @router.get("/", response_class=HTMLResponse)

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% block title %}{{ t('ai.ask_title') }}{% endblock %}
 {% block content %}
-<h1>{{ t('ai.ask_title') }}</h1>
+<h1>{{ term('ai.ask_title') }}</h1>
 
 <div class="card">
   <form method="post" action="/ask">

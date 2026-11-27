@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% from "partials/terms.html" import term with context %}
 {% from "partials/icons.html" import iso_icon %}
 {% block title %}{{ t('achievements.title') }}{% endblock %}
 {% block content %}
-<h1>{{ t('achievements.title') }}</h1>
+<h1>{{ term('achievements.title') }}</h1>
 
 <div class="card">
   <div class="card-title"><h2>{{ t('achievements.new') }}</h2></div>

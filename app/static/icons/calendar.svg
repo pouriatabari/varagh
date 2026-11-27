@@ -1,7 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="none">
-  <polygon points="16,6 29,13 16,20 3,13" fill="currentColor" fill-opacity="1"/>
-  <polygon points="3,13 16,20 16,30 3,23" fill="currentColor" fill-opacity="0.68"/>
-  <polygon points="29,13 16,20 16,30 29,23" fill="currentColor" fill-opacity="0.45"/>
-  <polyline points="11,4 11,10" fill="none" stroke="currentColor" stroke-opacity="0.9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <polyline points="21,4 21,10" fill="none" stroke="currentColor" stroke-opacity="0.9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12" />
+  <path d="M16 3v4" />
+  <path d="M8 3v4" />
+  <path d="M4 11h16" />
 </svg>
