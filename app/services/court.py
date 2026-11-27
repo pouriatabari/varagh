@@ -1,102 +1,20 @@
-"""The court chart and the round table.
+"""The round table of the virtues.
 
-The chart is the pyramid of the titles: the page at the bottom, the king
-at the top. The tiers that were reached are lit, the others are locked,
-and the tier of the user is the one that shines.
+The table is the circle of the six virtues. Each seat lights as far as
+the medals of that virtue have carried the user.
 
-The round table is the circle of the six virtues. Each seat lights as
-far as the medals of that virtue have carried the user.
+The ladder of the titles is drawn by the tree of the ranks
+(:mod:`app.insignia.skill_tree`), not from here.
 """
 
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 # The order of the virtues around the table.
 VIRTUE_ORDER = ("prowess", "valor", "wisdom", "loyalty", "largesse", "temperance")
-
-
-@dataclass(frozen=True)
-class CourtTier:
-    """One tier of the pyramid."""
-
-    key: str
-    reached: bool
-    current: bool
-    next: bool
-    progress: float = 0.0
-
-
-def court_chart_svg(
-    tiers: Sequence[CourtTier],
-    *,
-    labels: dict[str, str] | None = None,
-    width: int = 380,
-    row_height: int = 34,
-    badge_for: Callable[[str, str], str] | None = None,
-) -> str:
-    """The pyramid of the titles, from the page at the bottom to the king.
-
-    The tiers are drawn from the top (the highest title) down, so the
-    page is at the bottom of the picture. The labels are the words of
-    the interface; they are given from the outside, so the picture stays
-    a picture and not a page.
-
-    The badge of every tier stands in a column beside the pyramid when
-    ``badge_for`` is given: it draws the badge of a title in a state.
-    """
-    count = len(tiers)
-    height = count * row_height + 16
-    names = labels or {}
-    top_half = width * 0.15
-    bottom_half = width * 0.42
-    span = (bottom_half - top_half) / max(count, 1)
-    body = [
-        f'<svg class="court-chart" viewBox="0 0 {width} {height}" width="{width}" '
-        f'height="{height}" role="img" aria-label="court chart" '
-        'xmlns="http://www.w3.org/2000/svg">',
-    ]
-    for index, tier in enumerate(reversed(tiers)):
-        # The first drawn row is the highest title.
-        level = index
-        half_top = top_half + span * level
-        half_bottom = half_top + span
-        middle = width / 2
-        y = 8 + index * row_height
-        classes = "court-tier"
-        if tier.reached:
-            classes += " lit"
-        else:
-            classes += " locked"
-        if tier.current:
-            classes += " current"
-        if tier.next:
-            classes += " next"
-        badge = ""
-        if badge_for is not None:
-            state = "locked"
-            if tier.reached or tier.current:
-                state = "lit"
-            elif tier.next:
-                state = "next"
-            drawn = badge_for(tier.key, state)
-            badge = (
-                f'<g class="court-badge" transform="translate({width - 30} {y + 3}) '
-                f'scale(0.6)">{drawn}</g>'
-            )
-        body.append(
-            f'<g class="{classes}"><title>{names.get(tier.key, tier.key)}</title>'
-            f'<path d="M {middle - half_top:.1f} {y} H {middle + half_top:.1f} '
-            f'L {middle + half_bottom:.1f} {y + row_height - 3} '
-            f'H {middle - half_bottom:.1f} Z" />'
-            f'<text x="{middle:.1f}" y="{y + row_height / 2 + 4:.1f}" '
-            f'text-anchor="middle">{names.get(tier.key, tier.key)}</text>'
-            f"{badge}</g>"
-        )
-    body.append("</svg>")
-    return "".join(body)
 
 
 @dataclass(frozen=True)

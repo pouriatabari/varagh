@@ -72,6 +72,7 @@ def create_app() -> FastAPI:
         reviews,
         tasks,
         timing,
+        tree,
         web,
     )
     from app.api import settings as settings_api
@@ -83,6 +84,7 @@ def create_app() -> FastAPI:
     app.include_router(reviews.router)
     app.include_router(guide.router)
     app.include_router(insignia.router)
+    app.include_router(tree.router)
     app.include_router(realms.router)
     app.include_router(learning.router)
     app.include_router(ai.router)

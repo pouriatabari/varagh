@@ -1,0 +1,54 @@
+{# The details of one node of the tree of the ranks. #}
+{% if tree_node %}
+<div class="tree-detail-inner">
+  <div class="tree-detail-head">
+    {% if tree_badge %}<div class="tree-detail-badge">{{ tree_badge | safe }}</div>{% endif %}
+    <div>
+      <h3>{{ tree_node.label }}</h3>
+      {% if tree_node.kind == 'rank' %}
+      <p class="chip chip-{{ tree_node.state }}">
+        {% if tree_node.state == 'current' %}{{ t('tree.current') }}
+        {% elif tree_node.state == 'reached' %}{{ t('tree.reached') }}
+        {% elif tree_node.state == 'next' %}{{ t('tree.next') }}
+        {% else %}{{ t('tree.locked') }}{% endif %}
+      </p>
+      {% else %}
+      <p class="chip chip-{{ tree_node.state }}">
+        {% if tree_node.satisfied %}{{ t('tree.met') }}{% else %}{{ t('tree.unmet') }}{% endif %}
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if tree_node.detail %}
+  <p class="small muted">{{ tree_node.detail }}</p>
+  {% endif %}
+
+  {% if tree_node.kind == 'rank' %}
+  <h4>{{ t('tree.requirements') }}</h4>
+  <ul class="plain-list tree-gates">
+    {% for gate in tree_gates %}
+    <li class="{{ 'met' if gate.satisfied else 'unmet' }}">
+      <span class="gate-mark {{ 'met' if gate.satisfied else 'unmet' }}"></span>
+      {{ t('honours.gate.' ~ gate.key) if not gate.key.startswith('virtue:') else t('honours.virtue.' ~ gate.key.split(':')[1]) }}:
+      {{ gate.current | digits }} / {{ gate.required | digits }}
+    </li>
+    {% endfor %}
+  </ul>
+  <h4>{{ t('tree.rewards') }}</h4>
+  <ul class="plain-list">
+    <li>{{ t('tree.reward_insignia') }}</li>
+    <li>{{ t('tree.reward_degrees', count=tree_node.degrees | digits) }}</li>
+  </ul>
+  {% else %}
+  <h4>{{ t('tree.requirement') }}</h4>
+  <p class="small">
+    {{ t('tree.requirement_body', current=tree_node.current | digits, required=tree_node.required | digits) }}
+  </p>
+  {% endif %}
+</div>
+{% else %}
+<div class="tree-detail-inner">
+  <p class="small muted">{{ t('tree.pick_a_node') }}</p>
+</div>
+{% endif %}

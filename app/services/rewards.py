@@ -347,6 +347,31 @@ def title_state(
     )
 
 
+def gates_for_rule(
+    rule: TitleRule,
+    *,
+    medals: Sequence[MedalRecord],
+    musters: int,
+    reached_titles: Sequence[str] = (),
+    fiefs: int = 0,
+    config: RewardsConfig,
+) -> list[TitleGate]:
+    """The gates of one title, with the distance that is left to each.
+
+    The gates of a title that was reached are the gates that were met
+    when it was reached: the vigil comes with the title itself.
+    """
+    return _gates_for(
+        rule,
+        degrees_held=degrees(total_value(medals), config),
+        musters=musters,
+        counts=tier_counts(medals),
+        virtues=virtues_of(medals),
+        fiefs=fiefs,
+        vigil_done=rule.key in set(reached_titles),
+    )
+
+
 def _vigil_answered(reached_titles: Sequence[str], title_key: str) -> bool:
     """Whether the vigil of a title has been answered.
 

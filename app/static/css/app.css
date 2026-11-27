@@ -115,6 +115,16 @@ html[data-theme="night"] {
   --insignia-gilt: #d4a72c;
   --insignia-gold: #e6c05a;
   --insignia-field: #1e2a3b;
+  --insignia-azure: #1f4a86;
+  --insignia-gules: #7c2233;
+  --insignia-vert: #1c5a44;
+  --insignia-purpure: #452a5e;
+  --insignia-sable: #171b24;
+  --insignia-or: #6d5417;
+  --insignia-field-line: rgba(0, 0, 0, 0.5);
+  --skill-floor-1: #1b2534;
+  --skill-floor-2: #101722;
+  --skill-floor-3: #080c13;
   --insignia-shadow: rgba(0, 0, 0, 0.45);
   --insignia-ink: #e8ecf4;
   --heat-1: #1c332c;
@@ -142,6 +152,16 @@ html[data-theme="parchment"] {
   --insignia-gilt: #b58a2e;
   --insignia-gold: #9a6f1c;
   --insignia-field: #ecdcb4;
+  --insignia-azure: #3a6fb5;
+  --insignia-gules: #a8394a;
+  --insignia-vert: #2f7d5f;
+  --insignia-purpure: #6a4a8c;
+  --insignia-sable: #4b4436;
+  --insignia-or: #b08b28;
+  --insignia-field-line: rgba(90, 68, 30, 0.35);
+  --skill-floor-1: #f3e9d2;
+  --skill-floor-2: #e3d3ae;
+  --skill-floor-3: #cdb98d;
   --insignia-shadow: rgba(90, 68, 30, 0.22);
   --insignia-ink: #2c2114;
   --heat-1: #dcefe8;
@@ -160,45 +180,6 @@ html[data-theme="parchment"] {
   align-items: flex-start;
 }
 
-.court-chart .court-tier path {
-  fill: var(--bg-elevated);
-  stroke: var(--border);
-  stroke-width: 1;
-}
-
-.court-chart .court-tier text {
-  fill: var(--text-muted);
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
-.court-chart .court-tier.lit path {
-  fill: var(--accent);
-  stroke: var(--accent);
-  filter: drop-shadow(0 0 6px var(--glow));
-}
-
-.court-chart .court-tier.lit text {
-  fill: var(--text);
-}
-
-.court-chart .court-tier.locked path {
-  opacity: 0.45;
-}
-
-.court-chart .court-tier.locked text::after {
-  content: " \2714";
-}
-
-.court-chart .court-tier.current path {
-  stroke: var(--accent-2);
-  stroke-width: 2;
-  filter: drop-shadow(0 0 8px var(--glow-2));
-}
-
-.court-chart .court-tier.next path {
-  stroke-dasharray: 4 3;
-}
 
 .round-table .table-top {
   fill: color-mix(in srgb, var(--text) 4%, transparent);
@@ -288,7 +269,6 @@ html[data-theme="parchment"] {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .court-chart .court-tier.current path,
   .round-table .seat.lit path {
     animation: court-glow 4s ease-in-out infinite;
   }
@@ -2091,15 +2071,14 @@ table tbody tr:hover {
   filter: drop-shadow(0 2px 4px var(--insignia-shadow));
 }
 
-.insignia-badge .insignia-shield {
-  fill: var(--insignia-field);
+.insignia-badge .insignia-bordure {
+  fill: var(--insignia-metal);
 }
 
-.insignia-badge .insignia-rim {
-  fill: none;
-  stroke: var(--insignia-metal);
-  stroke-width: 3;
-  stroke-linejoin: round;
+.insignia-badge .insignia-field {
+  fill: var(--insignia-tincture);
+  stroke: var(--insignia-field-line);
+  stroke-width: 1;
 }
 
 .insignia-badge .insignia-band,
@@ -2145,8 +2124,8 @@ table tbody tr:hover {
 }
 
 .insignia-badge .insignia-blade {
-  fill: var(--insignia-field);
-  stroke: var(--insignia-metal);
+  fill: var(--insignia-metal);
+  stroke: var(--insignia-field-line);
   stroke-width: 1.6;
 }
 
@@ -2161,7 +2140,7 @@ table tbody tr:hover {
 }
 
 .insignia-badge .insignia-flag-cross {
-  fill: var(--insignia-field);
+  fill: var(--insignia-ink);
 }
 
 .insignia-badge .insignia-rowel {
@@ -2372,7 +2351,350 @@ table tbody tr:hover {
   color: var(--text-muted);
 }
 
-/* The badges of the court chart sit in their own column. */
-.court-chart .insignia-badge {
-  overflow: visible;
+/* ------------------------------------------------------------------
+   The tree of the ranks.
+
+   The picture is a window over the ladder of the titles: a dark field
+   with a gilt frame, the gold of the road that has been walked, the
+   grey of the road that has not, and the shield of every rank inside a
+   ring of notches. The state of a node is told by the words, by the
+   shape of the ring and by the colour — never by the colour alone.
+   ------------------------------------------------------------------ */
+
+.skill-tree-host {
+  position: relative;
+  min-width: 0;
+}
+
+/* The tree is a long picture: the box scrolls down it, the way a page
+   scrolls, and the picture is not squeezed to fit. */
+.skill-tree-scroll {
+  max-height: 620px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--insignia-gilt) 38%, transparent);
+  border-radius: 12px;
+  background: var(--skill-floor-3);
+  box-shadow:
+    inset 0 0 70px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 3px rgba(212, 167, 44, 0.07),
+    0 3px 14px rgba(0, 0, 0, 0.35);
+}
+
+.skill-tree {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The roads of the tree. */
+.skill-path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.skill-path.open {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--insignia-gilt) 60%, transparent));
+}
+
+.skill-path.ready {
+  stroke-dasharray: 16 9;
+  animation: skill-flow 1.5s linear infinite;
+}
+
+.skill-path.locked {
+  opacity: 0.5;
+}
+
+@keyframes skill-flow {
+  to {
+    stroke-dashoffset: -50;
+  }
+}
+
+/* The nodes: a rank is a shield inside a ring of notches. */
+.skill-node {
+  cursor: pointer;
+}
+
+.skill-frame {
+  fill: none;
+  stroke: var(--insignia-iron);
+  stroke-width: 3;
+}
+
+.skill-tick {
+  stroke: var(--insignia-iron);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.skill-rank.reached .skill-frame,
+.skill-rank.reached .skill-tick {
+  stroke: var(--insignia-gilt);
+}
+
+.skill-rank.reached .skill-badge {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--insignia-gilt) 45%, transparent));
+}
+
+.skill-rank.current .skill-frame {
+  stroke: var(--insignia-gold);
+  stroke-width: 4;
+}
+
+.skill-rank.current .skill-tick {
+  stroke: var(--insignia-gold);
+}
+
+.skill-rank.next .skill-frame {
+  stroke: var(--insignia-gilt);
+  stroke-dasharray: 9 7;
+}
+
+.skill-rank.locked .skill-frame,
+.skill-rank.locked .skill-tick {
+  stroke: var(--insignia-iron);
+  opacity: 0.55;
+}
+
+.skill-rank.locked .skill-badge {
+  filter: grayscale(0.75) brightness(0.62);
+  opacity: 0.8;
+}
+
+.skill-node:hover .skill-frame,
+.skill-node:focus .skill-frame {
+  stroke: var(--insignia-gold);
+}
+
+.skill-node:focus {
+  outline: none;
+}
+
+.skill-halo {
+  fill: none;
+  stroke: var(--insignia-gold);
+  stroke-width: 2;
+  opacity: 0.6;
+  animation: skill-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes skill-pulse {
+  0%,
+  100% {
+    r: 60;
+    opacity: 0.55;
+  }
+  50% {
+    r: 72;
+    opacity: 0.12;
+  }
+}
+
+/* The gates: the small medallions beside the ranks. */
+.skill-medallion {
+  fill: color-mix(in srgb, var(--insignia-iron) 18%, #0a0f16);
+  stroke: var(--insignia-iron);
+  stroke-width: 2.5;
+}
+
+.skill-gate.met .skill-medallion {
+  fill: color-mix(in srgb, var(--insignia-gilt) 14%, #0a0f16);
+  stroke: var(--insignia-gilt);
+}
+
+.skill-gate.met .skill-glyph {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--insignia-gilt) 55%, transparent));
+}
+
+.skill-gate:hover .skill-medallion {
+  stroke: var(--insignia-gold);
+}
+
+.skill-glyph {
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.skill-label,
+.skill-count {
+  fill: var(--insignia-ink);
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.78);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.skill-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.skill-label-small {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.skill-count {
+  font-size: 12px;
+}
+
+.skill-rivet {
+  fill: var(--insignia-iron);
+}
+
+.skill-gate.met .skill-rivet {
+  fill: var(--insignia-gilt);
+}
+
+.skill-knot {
+  opacity: 0.85;
+}
+
+/* The ribbon that carries the name of a rank. */
+.skill-banner-band {
+  fill: color-mix(in srgb, var(--insignia-iron) 30%, transparent);
+  stroke: var(--insignia-gilt);
+  stroke-width: 1.6;
+}
+
+.skill-banner-tail {
+  fill: color-mix(in srgb, var(--insignia-iron) 30%, transparent);
+  stroke: var(--insignia-gilt);
+  stroke-width: 1.6;
+}
+
+.skill-rank.locked .skill-banner-band,
+.skill-rank.locked .skill-banner-tail {
+  stroke: var(--insignia-iron);
+}
+
+.skill-label-banner {
+  font-size: 15px;
+}
+
+/* The tools of the window and the legend of the roads. */
+.tree-legend {
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  padding: 6px 12px;
+  list-style: none;
+  font-size: 0.8rem;
+  background: rgba(10, 15, 22, 0.78);
+  border: 1px solid color-mix(in srgb, var(--insignia-gilt) 26%, transparent);
+  border-radius: 8px;
+}
+
+.tree-mark {
+  display: inline-block;
+  width: 20px;
+  height: 4px;
+  margin-left: 7px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.tree-mark.open {
+  background: var(--insignia-gilt);
+}
+
+.tree-mark.ready {
+  background: var(--insignia-gold);
+}
+
+.tree-mark.locked {
+  background: var(--insignia-iron);
+  opacity: 0.6;
+}
+
+.tree-mark.current {
+  background: var(--insignia-gold);
+  box-shadow: 0 0 7px var(--insignia-gold);
+}
+
+/* The panel of the details of a node. */
+.tree-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .tree-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tree-detail {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--insignia-gilt) 28%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--card-bg, #10161f) 88%, transparent);
+  min-height: 220px;
+}
+
+.tree-detail-inner h3 {
+  margin: 0 0 0.4rem;
+}
+
+.tree-detail-inner h4 {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.9rem;
+  color: var(--insignia-gilt);
+  text-transform: none;
+}
+
+.tree-detail-head {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.tree-detail-badge {
+  flex: 0 0 auto;
+}
+
+.tree-gates li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gate-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--insignia-iron);
+  display: inline-block;
+}
+
+.gate-mark.met {
+  background: var(--insignia-gilt);
+  border-color: var(--insignia-gilt);
+}
+
+.chip-current {
+  border-color: var(--insignia-gold);
+  color: var(--insignia-gold);
+}
+
+.chip-reached {
+  border-color: var(--insignia-gilt);
+  color: var(--insignia-gilt);
+}
+
+.chip-next {
+  border-color: color-mix(in srgb, var(--insignia-gold) 70%, transparent);
+}
+
+.chip-locked,
+.chip-unmet {
+  color: var(--text-muted);
 }

@@ -276,7 +276,7 @@ together with its rationale.
 
 ## D30 — The pictures of the hall are read from the database, never drawn by the AI
 
-- **Decision:** The arms, the court chart and the round table are generated
+- **Decision:** The arms, the tree of the ranks and the round table are generated
   by the server from the state of the honours: the title gives the crown,
   the domains the user works in give the colours of the field, the virtues
   the medals stand for give the charges, and the counted medals give the
@@ -354,7 +354,7 @@ together with its rationale.
 - **The placements:** three places carry the badges today: the case of the
   insignia (`/insignia`), the header of the hall of honours (the badge of
   the title of the user, the studs of the degrees and the rack of the six
-  ribbons) and the pyramid of the court (a badge beside every title, lit up
+  ribbons) and the tree of the ranks (a badge beside every title, lit up
   to the title of the user and locked above it). Three more placements were
   asked for and are not built yet, because the flows behind them do not
   exist: the pinning ceremony (no route may promote a title by hand, so
@@ -420,3 +420,20 @@ together with its rationale.
   promotion is now a step of the muster confirmation, where the medals are
   given, and the tests check that a title is given only when its gates are
   met and never taken back.
+
+## D37 — The tree of the ranks is drawn from the data, and it is not a canvas to fight with
+
+- **Decision:** The ladder of the titles is drawn as a tree of the ranks: the
+  ranks are the nodes of the spine, the gates of a rank are the medallions
+  beside it, and every node and every path is computed from
+  `config/rewards.yaml` and from the state of the user. The picture is a
+  plain scrolling column of SVG — no zoom, no drag, no panning. Clicking a
+  node loads its panel with HTMX.
+- **Why:** The tree was first drawn as a canvas that could be zoomed and
+  dragged. It was fiddly to drive, easy to lose the thread of, and it hid
+  the very thing the tree is for: the gates of the rank that waits. A long
+  picture that scrolls the way a page scrolls is easier to read and easier
+  to keep honest, and the panel of a node gives the detail that the picture
+  has no room for. Nothing of the tree is written by hand: a title that the
+  configuration does not know is never drawn, so the picture cannot drift
+  away from the rules of the reward engine.

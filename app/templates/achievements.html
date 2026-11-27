@@ -65,9 +65,29 @@
 </div>
 
 <div class="card">
+  <div class="card-title"><h2>{{ t('tree.title') }}</h2></div>
+  <p class="small muted">{{ t('tree.hint') }}</p>
+  <div class="tree-layout">
+    <div class="skill-tree-host">
+      <div class="skill-tree-scroll">
+        {{ skill_tree | safe }}
+      </div>
+      <ul class="tree-legend">
+        <li><span class="tree-mark open"></span>{{ t('tree.legend_open') }}</li>
+        <li><span class="tree-mark ready"></span>{{ t('tree.legend_ready') }}</li>
+        <li><span class="tree-mark locked"></span>{{ t('tree.legend_locked') }}</li>
+        <li><span class="tree-mark current"></span>{{ t('tree.legend_current') }}</li>
+      </ul>
+    </div>
+    <aside id="tree-detail" class="tree-detail">
+      {{ tree_detail | safe }}
+    </aside>
+  </div>
+</div>
+
+<div class="card">
   <div class="card-title"><h2>{{ t('honours.court') }}</h2></div>
   <div class="court-layout">
-    {{ court_chart | safe }}
     <div>
       <h3>{{ t('honours.table') }}</h3>
       {{ round_table | safe }}

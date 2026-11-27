@@ -24,6 +24,7 @@ from app.insignia.catalog import (
     title_of,
 )
 from app.insignia.ribbons import render_ribbon_rack
+from app.insignia.skill_tree import render_skill_tree
 
 __all__ = [
     "Emblem",
@@ -34,5 +35,6 @@ __all__ = [
     "ordered_titles",
     "render_badge",
     "render_ribbon_rack",
+    "render_skill_tree",
     "title_of",
 ]

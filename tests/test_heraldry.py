@@ -74,38 +74,6 @@ def test_the_arms_of_a_knight_are_stable() -> None:
     check_snapshot("heraldry_knight.svg", arms)
 
 
-# --- the court chart ---
-
-
-def tiers() -> list[court.CourtTier]:
-    """A pyramid of four tiers."""
-    return [
-        court.CourtTier(key="page", reached=True, current=False, next=False),
-        court.CourtTier(key="squire", reached=True, current=True, next=False),
-        court.CourtTier(key="knight", reached=False, current=False, next=True),
-        court.CourtTier(key="banneret", reached=False, current=False, next=False),
-    ]
-
-
-def test_the_chart_lights_the_reached_tiers() -> None:
-    """The tiers that were reached are lit, the others are locked."""
-    chart_svg = court.court_chart_svg(tiers())
-    assert chart_svg.count("lit") == 2
-    assert chart_svg.count("locked") == 2
-
-
-def test_the_chart_marks_the_current_and_the_next() -> None:
-    """The tier of the user and the one that waits are marked."""
-    chart_svg = court.court_chart_svg(tiers())
-    assert "current" in chart_svg
-    assert "next" in chart_svg
-
-
-def test_the_chart_is_stable() -> None:
-    """The picture of the chart does not move without a reason."""
-    check_snapshot("court_chart.svg", court.court_chart_svg(tiers()))
-
-
 # --- the round table ---
 
 

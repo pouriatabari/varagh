@@ -40,7 +40,7 @@ Then open <http://localhost:8000>.
 | **تقویم** (calendar) | Jalali month grid with the daily totals, click to add a task, running-timer chip, a dedicated form for the overtime |
 | **یادداشت روزانه** (journal) | Free-form entries; the AI proposes a structure that is written only after you confirm it |
 | **یادگیری** (learning) | Syllabus parsing, units, "read up to here", progress bars, stale-item report, deletion (single and in bulk), a chart per item and for the minutes |
-| **تالار افتخارات** (hall of honours) | The medals the musters give, the degrees, the title of the user and the gates of the next one. Nothing is registered by hand: the honours come from the reviews |
+| **تالار افتخارات** (hall of honours) | The medals the musters give, the degrees, the tree of the ranks with the gates of every title, the title of the user and the gates of the next one. Nothing is registered by hand: the honours come from the reviews |
 | **ارزیابی‌ها** (reviews) | Jalali month/quarter/half-year/year periods, an immutable stats snapshot, comparison with the previous period, a wizard with an AI draft and its charts, Markdown export, a read-only view of a finished review, a rating that shows its scale (۴ از ۵), deletion (single and in bulk), a chart of the hours per kind and of the rating of every review |
 | **تنظیمات** (settings) | Timezone, weekend days, weekly target, notification channels with test buttons, holidays, the AI provider, key and model, JSON export |
 | **اضافه‌کاری** (overtime) | A tab of its own: a dedicated form, the total, the split between the off days and the working days, a chart of the last sixty days and the list of the entries |
@@ -258,9 +258,9 @@ the parchment is the warm paper of a ledger. The setting lives in the
 settings page; the system preference (`prefers-color-scheme`) only decides
 the theme the very first time, before the user has chosen one.
 
-Every picture of the app — the charts, the court chart, the round table
-and the map of the realms — takes its colours from the theme and not from
-its own code, so the whole app changes with the setting. The steps of the
+Every picture of the app — the charts, the tree of the ranks, the round
+table and the map of the realms — takes its colours from the theme and not
+from its own code, so the whole app changes with the setting. The steps of the
 palette were not chosen by eye: they were checked with a validator for the
 contrast against the surface of the theme, for the separation of the
 neighbours under the three kinds of colour blindness, and for the
@@ -296,10 +296,18 @@ title), the degrees that were earned and the gates that still stand between
 the user and the next title. It also says how far the next degree is: the
 value of the counted medals and how many of the six points of a degree are
 already won, so the number of the table and the number of the ladder are
-never a puzzle. Below it the court chart shows the pyramid of
-the titles with the tiers that were reached lit, and the round table shows
-the six virtues, each seat lighting as far as the medals of that virtue have
-carried the user.
+never a puzzle. Below it the tree of the ranks shows the ladder of the
+titles as a picture: every rank is a node with the shield of its badge, and
+the gates of a rank stand beside it as medallions with a path into the rank.
+The road that has been walked is gold, the road that is open is the bright
+gold, and the road that is closed is grey and dashed; the rank of the user
+carries a crown and a halo. Nothing of the tree is written by hand — every
+node and every path comes from `config/rewards.yaml` and from the state of
+the user, so a title that the data does not know is never drawn. Clicking a
+node opens its panel: the note of the rank, the gates and how far each one
+has come, and the reward that waits at the top. Beside it the round table
+shows the six virtues, each seat lighting as far as the medals of that
+virtue have carried the user.
 
 ## The guide of the round
 
@@ -338,7 +346,7 @@ drawing and its own description can never drift apart.
 The badges stand in three places: the case of the insignia (`/insignia`) is
 the shelf of the whole ladder, the header of the hall of honours carries the
 badge of the title of the user with the studs of the degrees and the rack of
-the six ribbons of the virtues, and the pyramid of the court carries a badge
+the six ribbons of the virtues, and the tree of the ranks carries a badge
 beside every title. A badge is never told by its colour alone: it has a
 lock when it is not earned yet, a frame when it is the next title, and the
 name of the title in its own `<title>`.
@@ -407,7 +415,7 @@ app/
 - [x] M9 — export, backup/restore, seed data, final polish
 - [x] M10 — the two lexicons, the two themes, the icon manifest and the credits
 - [x] M11 — the reward engine: the musters, the medals, the degrees and the titles
-- [x] M12 — the hall: the court chart, the round table and the heraldry
+- [x] M12 — the hall: the tree of the ranks, the round table and the heraldry
 - [x] M13 — the map of the realms: the ground, the fog, the castles and the campaign road
 - [x] M14 — the insignia of the ranks: the badges of the titles, the studs and the ribbons
 - [x] M15 — the guide of the round: the steps, the scoring and the gates of the titles

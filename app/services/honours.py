@@ -160,6 +160,36 @@ def title_state(session: Session, config: RewardsConfig) -> rewards.TitleState:
     )
 
 
+def title_gates(
+    session: Session, config: RewardsConfig, title_key: str
+) -> tuple[rewards.TitleGate, ...]:
+    """The gates of one title, with the distance that is left to each."""
+    medals = list_medals(session)
+    musters = (
+        session.scalar(
+            select(func.count())
+            .select_from(Review)
+            .where(Review.status == "finished")
+        )
+        or 0
+    )
+    fiefs = len(claimed_realms(session))
+    rules = {rule.key: rule for rule in config.titles}
+    rule = rules.get(title_key)
+    if rule is None:
+        return ()
+    return tuple(
+        rewards.gates_for_rule(
+            rule,
+            medals=medal_records(session, medals),
+            musters=musters,
+            reached_titles=reached_titles(session),
+            fiefs=fiefs,
+            config=config,
+        )
+    )
+
+
 def _domain_for(session: Session, name: str | None) -> Domain | None:
     """Find a domain by its name, when the proposal names one."""
     if not name:
@@ -421,23 +451,6 @@ def virtue_counts(session: Session) -> dict[str, int]:
         .group_by(Medal.virtue)
     ).all()
     return {virtue: int(count) for virtue, count in rows}
-
-
-def court_tiers(session: Session, config: RewardsConfig) -> list[court.CourtTier]:
-    """The tiers of the pyramid, from the page at the bottom to the king."""
-    state = title_state(session, config)
-    reached = set(state.reached)
-    tiers = []
-    for rule in config.titles:
-        tiers.append(
-            court.CourtTier(
-                key=rule.key,
-                reached=rule.key in reached,
-                current=rule.key == state.current,
-                next=rule.key == state.next_title,
-            )
-        )
-    return tiers
 
 
 def seats(session: Session) -> list[court.Seat]:

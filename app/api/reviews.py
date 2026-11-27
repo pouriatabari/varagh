@@ -2,20 +2,27 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from datetime import date
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.api import tree as tree_api
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_bool, form_int, form_str
 from app.i18n import t, translate
 from app.security import validate_csrf
 from app.services import achievements as achievement_service
 from app.services import charts as chart_service
-from app.services import court, heraldry, honours, rewards, rewards_config
+from app.services import (
+    court,
+    heraldry,
+    honours,
+    rewards,
+    rewards_config,
+    skill_tree,
+)
 from app.services import reviews as review_service
 from app.services import settings as settings_service
 from app.services.rewards_config import VIRTUES, RewardsConfig
@@ -320,24 +327,6 @@ def _badge_of(
     )
 
 
-def _badge_for_title(lexicon: str, theme: str) -> Callable[[str, str], str]:
-    """Draw the badge of a title in a state, for the pyramid of the court."""
-    from app.insignia import render_badge
-
-    def draw(key: str, state: str) -> str:
-        name = str(translate(f"honours.title.{key}", lexicon))
-        return render_badge(
-            key,
-            state=state,
-            theme=theme,
-            size="sm",
-            name=name,
-            desc=str(translate(f"title_{key}", lexicon)),
-        )
-
-    return draw
-
-
 def _ribbon_rack(session: Session, lexicon: str, theme: str) -> str:
     """The rack of the six ribbons of the virtues."""
     from app.insignia import render_ribbon_rack
@@ -375,6 +364,7 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
     theme = settings_service.theme(session)
     state = honours.title_state(session, config)
     medals = honours.list_medals(session)
+    tree_model = skill_tree.build(session, config, lexicon)
     context = base_context(
         request,
         session,
@@ -386,14 +376,8 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
         honours=state,
         honours_medals=medals,
         honours_config=config,
-        court_chart=court.court_chart_svg(
-            honours.court_tiers(session, config),
-            labels={
-                rule.key: str(translate(f"honours.title.{rule.key}", lexicon))
-                for rule in config.titles
-            },
-            badge_for=_badge_for_title(lexicon, theme),
-        ),
+        skill_tree=tree_api.draw_tree(session, tree_model, lexicon),
+        tree_detail=tree_api.render_detail(request, session, tree_model),
         round_table=court.round_table_svg(
             honours.seats(session),
             labels={
