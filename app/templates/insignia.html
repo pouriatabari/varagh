@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "partials/icons.html" import iso_icon %}
+{% block title %}{{ t('insignia.case') }}{% endblock %}
+{% block content %}
+<h1>{{ t('insignia.case') }}</h1>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('insignia.case') }}</h2></div>
+  <p class="small muted">{{ t('insignia.footnote') }}</p>
+
+  <div x-data="{ selected: '' }" class="insignia-case-wrap">
+    <div class="insignia-case">
+      {% for slot in insignia_slots %}
+      <button
+        type="button"
+        class="insignia-slot {{ slot.state }}"
+        @click="selected = '{{ slot.key }}'"
+        :aria-expanded="selected === '{{ slot.key }}'"
+      >
+        {{ slot.badge | safe }}
+        <span class="insignia-slot-name">{{ slot.name }}</span>
+        <span class="insignia-slot-state">{{ t(slot.state_label) }}</span>
+      </button>
+      {% endfor %}
+    </div>
+
+    {% for slot in insignia_slots %}
+    <div class="insignia-card" x-show="selected === '{{ slot.key }}'" x-cloak>
+      <div>{{ slot.large_badge | safe }}</div>
+      <div>
+        <h3>{{ slot.name }}</h3>
+        {% if slot.reached_on %}
+        <p class="small muted">{{ t('insignia.reached_on') }}: {{ slot.reached_on | jdate }}</p>
+        {% endif %}
+        <p class="insignia-card-note">{{ slot.note }}</p>
+        {% if slot.vigil %}
+        <p><b>{{ t('insignia.vigil') }}</b>: {{ slot.vigil }}</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -426,6 +426,10 @@ STRINGS: dict[str, str] = {
     "credits.licence": "پروانه",
     "credits.fonts": "قلم‌ها",
     "credits.vazir": "وزیرمتن — SIL Open Font License 1.1",
+    "credits.insignia": "نشان‌های رتبه‌ها",
+    "credits.insignia_hint": (
+        "همهٔ نشان‌ها با کد خودِ برنامه کشیده می‌شوند؛ هیچ هنرِ بیرونی در کار نیست."
+    ),
     "credits.libraries": "کتابخانه‌ها",
     "credits.htmx": "HTMX — BSD 2-Clause",
     "credits.alpine": "Alpine.js — MIT",
@@ -536,4 +540,32 @@ STRINGS: dict[str, str] = {
     "realms.suggested": "پیشنهاد: {name}",
     "realms.no_candidates": "هنوز سرزمینی در دست نیست.",
     "realms.table_title": "سرزمین‌ها",
+    # --- the insignia of the ranks ---
+    "insignia.case": "گنجه‌ی نشان‌ها",
+    "insignia.rack": "قفسه‌ی روبان‌ها",
+    "insignia.studs": "میخ‌های درجه",
+    "insignia.pin": "مراسم نشان‌دهی",
+    "insignia.earned": "به‌دست‌آورده",
+    "insignia.next": "در راه",
+    "insignia.locked": "هنوز نرسیده",
+    "insignia.reached_on": "تاریخِ رسیدن",
+    "insignia.vigil": "نگهبانیِ شبانه",
+    "insignia.gates": "راه‌های پیشِ رو",
+    "insignia.footnote": (
+        "ورق از قراردادهای رایج نشان‌شناسی به‌عنوان زبان بصری رتبه "
+        "استفاده می‌کند؛ شکل دقیق بعضی تاج‌ها در دوره‌های بعد استاندارد شد."
+    ),
+    "insignia.reign": "سال‌های پادشاهی",
+    "title_page": "پیج",
+    "title_squire": "اسکوایر",
+    "title_knight": "شوالیه",
+    "title_banneret": "شوالیه‌ی پرچم‌دار",
+    "title_baron": "بارون",
+    "title_viscount": "ویسکونت",
+    "title_earl": "ارل",
+    "title_marquess": "مارکیز",
+    "title_duke": "دوک",
+    "title_prince": "شاهزاده",
+    "title_king": "پادشاه",
+    "title_bretwalda": "برتوالدا",
 }

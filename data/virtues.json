@@ -1,0 +1,41 @@
+{
+  "_comment": "The six virtues of the ribbon rack. Every ribbon has a colour AND a stripe pattern, so the ribbon is never told by the colour alone. The two columns of colours are the steps of the categorical palette of the theme; both were checked with the validator of the palette (contrast against the surface of the theme, separation of the neighbours under the colour blindness, lightness).",
+  "virtues": [
+    {
+      "key": "prowess",
+      "color": "#257de0",
+      "pattern": "solid",
+      "color_dark": "#338ced"
+    },
+    {
+      "key": "valor",
+      "color": "#f47230",
+      "pattern": "diagonal",
+      "color_dark": "#e76624"
+    },
+    {
+      "key": "wisdom",
+      "color": "#00b894",
+      "pattern": "dots",
+      "color_dark": "#00a888"
+    },
+    {
+      "key": "loyalty",
+      "color": "#f2a600",
+      "pattern": "horizontal",
+      "color_dark": "#d28e05"
+    },
+    {
+      "key": "largesse",
+      "color": "#ee7fac",
+      "pattern": "chevron",
+      "color_dark": "#e24d8b"
+    },
+    {
+      "key": "temperance",
+      "color": "#008a17",
+      "pattern": "vertical",
+      "color_dark": "#0aac23"
+    }
+  ]
+}

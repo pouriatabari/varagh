@@ -223,7 +223,8 @@ it, so an icon takes the colour of the text it sits in and costs no extra
 request. The files come from Tabler Icons (MIT) and from game-icons.net
 (CC BY 3.0); `app/static/icons/manifest.json` names the source, the author
 and the licence of every one of them, and the page `/about/credits` shows
-the same list.
+the same list. The insignia of the ranks are not icons of that kind: they
+are drawn by the code of the project, and they carry no third-party art.
 
 ```bash
 # the icons are plain files; open one in a browser to see it
@@ -297,6 +298,36 @@ the titles with the tiers that were reached lit, and the round table shows
 the six virtues, each seat lighting as far as the medals of that virtue have
 carried the user.
 
+## The insignia of the ranks
+
+Every title of the ladder has a badge, and every badge is drawn by the code
+of the project from the catalogue in `data/insignia.json` — no third-party
+art, nothing to fetch. The badge of a title is a heater shield with a rim in
+the metal of the title, the emblem of the rank above it and the studs of the
+degrees that were earned:
+
+- the page has a plain shield, the squire the crossed spurs, the knight the
+  sword, the banneret the banner;
+- the peers wear a coronet: the baron four pearls of its six, the viscount
+  nine of its sixteen, the earl five leaves and five pearls of its eight and
+  eight, the marquess four leaves and four pearls of its four and four, and
+  the duke five leaves and no pearl at all;
+- the prince has one arch, the king two with the orb and the cross, and the
+  bretwalda twelve rays around the king crown.
+
+The numbers that are drawn are written down in
+[docs/DECISIONS.md](docs/DECISIONS.md), and the tests of the project count
+the pearls of the picture and compare them with those numbers, so the
+drawing and its own description can never drift apart.
+
+The badges stand in three places: the case of the insignia (`/insignia`) is
+the shelf of the whole ladder, the header of the hall of honours carries the
+badge of the title of the user with the studs of the degrees and the rack of
+the six ribbons of the virtues, and the pyramid of the court carries a badge
+beside every title. A badge is never told by its colour alone: it has a
+lock when it is not earned yet, a frame when it is the next title, and the
+name of the title in its own `<title>`.
+
 ## The map of the realms
 
 The map is the other half of the hall: the work of the user also wins
@@ -363,6 +394,7 @@ app/
 - [x] M11 — the reward engine: the musters, the medals, the degrees and the titles
 - [x] M12 — the hall: the court chart, the round table and the heraldry
 - [x] M13 — the map of the realms: the ground, the fog, the castles and the campaign road
+- [x] M14 — the insignia of the ranks: the badges of the titles, the studs and the ribbons
 
 Still open:
 

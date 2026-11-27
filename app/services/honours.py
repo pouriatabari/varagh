@@ -79,6 +79,52 @@ def medal_records(session: Session, medals: Sequence[Medal]) -> list[rewards.Med
     return records
 
 
+def title_reached_at(session: Session, title_key: str) -> datetime | None:
+    """When a title was reached."""
+    return session.scalar(
+        select(TitleHistory.reached_at).where(TitleHistory.title_key == title_key)
+    )
+
+
+def title_vigil(session: Session, title_key: str) -> dict[str, Any]:
+    """The vigil that came with a title, when it has one."""
+    row = session.scalar(
+        select(TitleHistory).where(TitleHistory.title_key == title_key)
+    )
+    if row is None or not row.vigil:
+        return {}
+    return dict(row.vigil)
+
+
+def reign_years(session: Session, title_key: str) -> int | None:
+    """The years of the reign of a title, when there is no title above it."""
+    reached = title_reached_at(session, title_key)
+    if reached is None:
+        return None
+    days = (utcnow() - reached).days
+    return max(days // 365, 0)
+
+
+def title_studs(config: RewardsConfig, state: rewards.TitleState) -> tuple[int, int]:
+    """The degrees that are done inside the current title.
+
+    The studs of a badge are the degrees between the threshold of the
+    title of the user and the threshold of the title above it. A title
+    with no title above it has no studs: the years of the reign stand
+    in their place.
+    """
+    rules = {rule.key: rule for rule in config.titles}
+    current = rules.get(state.current)
+    if current is None or not state.next_title:
+        return 0, 0
+    following = rules.get(state.next_title)
+    if following is None:
+        return 0, 0
+    total = max(following.degrees - current.degrees, 0)
+    filled = max(min(state.degrees, following.degrees) - current.degrees, 0)
+    return filled, total
+
+
 def reached_titles(session: Session) -> list[str]:
     """The titles that were reached, oldest first."""
     rows = session.scalars(select(TitleHistory).order_by(TitleHistory.reached_at.asc())).all()
@@ -333,6 +379,19 @@ def top_domains(session: Session, limit: int = 3) -> list[str]:
         if domain is not None:
             names.append(domain.name)
     return names[:limit]
+
+
+def virtue_tier_counts(session: Session) -> dict[str, dict[str, int]]:
+    """The medals of every virtue, counted by tier."""
+    rows = session.execute(
+        select(Medal.virtue, Medal.tier, func.count(Medal.id))
+        .where(Medal.value_counted > 0)
+        .group_by(Medal.virtue, Medal.tier)
+    ).all()
+    counts: dict[str, dict[str, int]] = {}
+    for virtue, tier, number in rows:
+        counts.setdefault(str(virtue), {})[str(tier)] = int(number)
+    return counts
 
 
 def virtue_counts(session: Session) -> dict[str, int]:

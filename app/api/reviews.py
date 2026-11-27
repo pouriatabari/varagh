@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import date
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from sqlalchemy.orm import Session
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_bool, form_int, form_str
@@ -16,6 +18,7 @@ from app.services import charts as chart_service
 from app.services import court, heraldry, honours, rewards, rewards_config
 from app.services import reviews as review_service
 from app.services import settings as settings_service
+from app.services.rewards_config import VIRTUES, RewardsConfig
 from app.templating import templates
 from app.utils.time import utcnow
 
@@ -293,6 +296,60 @@ async def review_export(request: Request, review_id: int, session: SessionDep) -
     )
 
 
+def _badge_of(
+    state: rewards.TitleState, config: RewardsConfig, lexicon: str, theme: str
+) -> str:
+    """The badge of the title of the user, with the studs of its degrees."""
+    from app.insignia import render_badge
+
+    filled, total = honours.title_studs(config, state)
+    name = str(translate(f"title_{state.current}", lexicon))
+    return render_badge(
+        state.current,
+        filled,
+        total,
+        "lit",
+        theme,
+        "lg",
+        name=name,
+        desc=str(translate(f"honours.title.{state.current}", lexicon)),
+    )
+
+
+def _badge_for_title(lexicon: str, theme: str) -> Callable[[str, str], str]:
+    """Draw the badge of a title in a state, for the pyramid of the court."""
+    from app.insignia import render_badge
+
+    def draw(key: str, state: str) -> str:
+        name = str(translate(f"honours.title.{key}", lexicon))
+        return render_badge(
+            key,
+            state=state,
+            theme=theme,
+            size="sm",
+            name=name,
+            desc=str(translate(f"title_{key}", lexicon)),
+        )
+
+    return draw
+
+
+def _ribbon_rack(session: Session, lexicon: str, theme: str) -> str:
+    """The rack of the six ribbons of the virtues."""
+    from app.insignia import render_ribbon_rack
+
+    labels = {
+        virtue: str(translate(f"honours.virtue.{virtue}", lexicon))
+        for virtue in VIRTUES
+    }
+    return render_ribbon_rack(
+        honours.virtue_tier_counts(session),
+        theme,
+        "md",
+        labels=labels,
+    )
+
+
 @router.get("/achievements", response_class=HTMLResponse)
 async def achievement_list(request: Request, session: SessionDep) -> HTMLResponse:
     """The hall of the honours.
@@ -304,6 +361,7 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
     rows = achievement_service.list_achievements(session)
     config = rewards_config.load_config()
     lexicon = settings_service.lexicon(session)
+    theme = settings_service.theme(session)
     state = honours.title_state(session, config)
     medals = honours.list_medals(session)
     context = base_context(
@@ -323,6 +381,7 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
                 rule.key: str(translate(f"honours.title.{rule.key}", lexicon))
                 for rule in config.titles
             },
+            badge_for=_badge_for_title(lexicon, theme),
         ),
         round_table=court.round_table_svg(
             honours.seats(session),
@@ -338,6 +397,10 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
             domains=honours.top_domains(session),
             virtues=list(state.virtues),
         ),
+        insignia_badge=_badge_of(state, config, lexicon, theme),
+        insignia_studs=honours.title_studs(config, state),
+        insignia_reign=honours.reign_years(session, state.current),
+        insignia_rack=_ribbon_rack(session, lexicon, theme),
     )
     return templates.TemplateResponse(request, "achievements.html", context)
 

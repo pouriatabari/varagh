@@ -1,0 +1,175 @@
+{
+  "_comment": "The insignia of the titles. Every badge is drawn by the code from this file: the counts of the pearls, of the leaves, of the arches and of the rays are written down here, so the tests can count them and the drawing can never disagree with the description. The notes are the history of the title; they are data, not code.",
+  "titles": [
+    {
+      "key": "page",
+      "level": 1,
+      "family": "service",
+      "metal": "iron",
+      "emblem": { "kind": "plain_shield" },
+      "note_fa": "پیج‌ها نوجوانانی در خدمت یک خانواده‌ی اشرافی بودند که آداب و سوارکاری می‌آموختند. سپر ساده، تصویر رایج ادبیات شوالیه‌گری برای کسی است که هنوز نشانی نیافته."
+    },
+    {
+      "key": "squire",
+      "level": 2,
+      "family": "service",
+      "metal": "silver",
+      "emblem": { "kind": "spurs", "count": 2 },
+      "note_fa": "اسکوایر همراه و یاور شوالیه بود. طبق سنت، مهمیز نقره‌ای نشان اسکوایر و مهمیز زرین نشان شوالیه بود."
+    },
+    {
+      "key": "knight",
+      "level": 3,
+      "family": "chivalry",
+      "metal": "gilt",
+      "emblem": { "kind": "sword" },
+      "note_fa": "در مراسم شوالیه‌گری، شمشیر و کمربند و مهمیز زرین به شوالیه داده می‌شد؛ شمشیر نماد خدمت و حفاظت بود."
+    },
+    {
+      "key": "banneret",
+      "level": 4,
+      "family": "chivalry",
+      "metal": "gilt",
+      "emblem": { "kind": "banner" },
+      "note_fa": "شوالیه‌ی پرچم‌دار شوالیه‌ای بود که نیروهایی را زیر پرچم مربع خود فرماندهی می‌کرد؛ طبق روایت‌ها دم پرچم مثلثی‌اش در میدان نبرد بریده می‌شد تا مربع شود."
+    },
+    {
+      "key": "baron",
+      "level": 5,
+      "family": "peerage",
+      "metal": "gold",
+      "emblem": {
+        "kind": "coronet",
+        "pearls_total": 6,
+        "pearls_drawn": 4,
+        "leaves_total": 0,
+        "leaves_drawn": 0,
+        "pearls_raised": false,
+        "arches": 0,
+        "orb_cross": false
+      },
+      "note_fa": "بارون‌ها زمین‌دارانی بودند که مستقیماً از پادشاه زمین می‌گرفتند. شکل استاندارد تاج بارون در دوره‌های بعد در انگلستان تثبیت شد."
+    },
+    {
+      "key": "viscount",
+      "level": 6,
+      "family": "peerage",
+      "metal": "gold",
+      "emblem": {
+        "kind": "coronet",
+        "pearls_total": 16,
+        "pearls_drawn": 9,
+        "leaves_total": 0,
+        "leaves_drawn": 0,
+        "pearls_raised": false,
+        "arches": 0,
+        "orb_cross": false
+      },
+      "note_fa": "ویسکونت از قرن پانزدهم در انگلستان به‌عنوان رتبه‌ای میان ارل و بارون رایج شد."
+    },
+    {
+      "key": "earl",
+      "level": 7,
+      "family": "peerage",
+      "metal": "gold",
+      "emblem": {
+        "kind": "coronet",
+        "pearls_total": 8,
+        "pearls_drawn": 5,
+        "leaves_total": 8,
+        "leaves_drawn": 5,
+        "pearls_raised": true,
+        "arches": 0,
+        "orb_cross": false
+      },
+      "note_fa": "ارل ریشه‌ی ساکسونی دارد (eorl) و از قدیمی‌ترین عناوین اشرافی انگلستان است."
+    },
+    {
+      "key": "marquess",
+      "level": 8,
+      "family": "peerage",
+      "metal": "gold",
+      "emblem": {
+        "kind": "coronet",
+        "pearls_total": 4,
+        "pearls_drawn": 4,
+        "leaves_total": 4,
+        "leaves_drawn": 4,
+        "pearls_raised": false,
+        "arches": 0,
+        "orb_cross": false
+      },
+      "note_fa": "مارکیز فرمانروای مناطق مرزی بود؛ این عنوان از قرن چهاردهم در انگلستان رایج شد."
+    },
+    {
+      "key": "duke",
+      "level": 9,
+      "family": "peerage",
+      "metal": "gold",
+      "emblem": {
+        "kind": "coronet",
+        "pearls_total": 0,
+        "pearls_drawn": 0,
+        "leaves_total": 8,
+        "leaves_drawn": 5,
+        "pearls_raised": false,
+        "arches": 0,
+        "orb_cross": false
+      },
+      "note_fa": "دوک در انگلستان از سال ۱۳۳۷ رایج شد و بالاترین رتبه‌ی اشرافی زیر خانواده‌ی سلطنتی بود."
+    },
+    {
+      "key": "prince",
+      "level": 10,
+      "family": "crown",
+      "metal": "gold",
+      "emblem": {
+        "kind": "coronet",
+        "pearls_total": 0,
+        "pearls_drawn": 0,
+        "leaves_total": 0,
+        "leaves_drawn": 0,
+        "crosses_drawn": 2,
+        "fleurs_drawn": 2,
+        "pearls_raised": false,
+        "arches": 1,
+        "orb_cross": true
+      },
+      "note_fa": "شاهزاده فرزند یا وارث پادشاه بود؛ تاج کمان‌دار با صلیب و گل‌سوسن نقش رایج او در نشان‌شناسی است."
+    },
+    {
+      "key": "king",
+      "level": 11,
+      "family": "crown",
+      "metal": "gold",
+      "emblem": {
+        "kind": "crown",
+        "pearls_total": 0,
+        "pearls_drawn": 0,
+        "leaves_total": 0,
+        "leaves_drawn": 0,
+        "arches": 2,
+        "orb_cross": true
+      },
+      "note_fa": "پادشاه بالاترین مقام بود؛ تاج بسته با کمان‌ها، گوی و صلیب نماد حاکمیت مستقل بود."
+    },
+    {
+      "key": "bretwalda",
+      "level": 12,
+      "family": "crown",
+      "metal": "gold",
+      "emblem": {
+        "kind": "crown",
+        "pearls_total": 0,
+        "pearls_drawn": 0,
+        "leaves_total": 0,
+        "leaves_drawn": 0,
+        "arches": 2,
+        "orb_cross": true,
+        "rays": 12,
+        "island": true
+      },
+      "note_fa": "برتوالدا در برخی تواریخ ساکسونی عنوان پادشاهی بود که بر دیگر پادشاهان بریتانیا برتری داشت؛ مورخان درباره‌ی ماهیتش اختلاف‌نظر دارند."
+    }
+  ]
+}

@@ -331,3 +331,41 @@ together with its rationale.
   written down, so the next theme or the next chart is checked the same
   way and not by taste. The texture and the word keep the picture honest
   for the reader who does not see the colour at all.
+
+## D33 — The badges of the ranks are drawn by the code, from a catalogue
+
+- **Decision:** Every title has a badge, and the badge is drawn by the
+  code from `data/insignia.json`: a heater shield, a rim in the metal of
+  the title, an emblem and the studs of the degrees. The coronets and the
+  crowns are drawn from numbers (the pearls, the leaves, the arches, the
+  rays), never as a picture that was drawn once, so the drawing and the
+  description of the title can never disagree. The states of a badge are
+  told three times over: by the words of its `<title>`, by the lock of a
+  badge that is not earned yet and by the frame of the next title, so the
+  colour never carries the meaning alone. The ribbon rack gives every
+  virtue a colour **and** a stripe pattern, and a pip of the best tier
+  that was earned.
+- **Why:** The insignia are the language of the rank in the hall, and a
+  language that is drawn by hand drifts from its own rules: a title with
+  four pearls in one place and six in another. A catalogue and a
+  renderer keep the picture honest, and the tests can count the pearls of
+  the picture and compare them with the numbers that are written down
+  here.
+- **The placements:** three places carry the badges today: the case of the
+  insignia (`/insignia`), the header of the hall of honours (the badge of
+  the title of the user, the studs of the degrees and the rack of the six
+  ribbons) and the pyramid of the court (a badge beside every title, lit up
+  to the title of the user and locked above it). Three more placements were
+  asked for and are not built yet, because the flows behind them do not
+  exist: the pinning ceremony (no route may promote a title by hand, so
+  there is nothing to hang a badge on), the header of the saga (the saga of
+  the musters is not written yet) and the official ledger (there is no
+  ledger of the honours yet). The renderer is ready for them.
+- **The visible counts:** the counts that are drawn in perspective are a
+  choice of the drawing, and they are written down so that the test of
+  the project can read them: the baron draws 4 pearls of its 6, the
+  viscount 9 of its 16, the earl 5 leaves and 5 pearls of its 8 and 8,
+  the marquess 4 leaves and 4 pearls of its 4 and 4, the duke 5 leaves
+  and no pearl at all, the prince one arch, the king two arches with the
+  orb and the cross, and the bretwalda twelve rays around the king
+  crown.

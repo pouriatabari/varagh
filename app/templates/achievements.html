@@ -8,6 +8,22 @@
 {# The header of the hall: the arms of the user, the title, the degrees
    and the gates of the next one. #}
 <div class="card honours-header">
+  <div class="insignia-hall">
+    <figure class="insignia-current">
+      {{ insignia_badge | safe }}
+      <figcaption>
+        {% if insignia_reign is not none %}
+        {{ t('insignia.reign') }}: {{ insignia_reign | digits }}
+        {% else %}
+        {{ t('insignia.studs') }}: {{ insignia_studs[0] | digits }} / {{ insignia_studs[1] | digits }}
+        {% endif %}
+      </figcaption>
+    </figure>
+    <figure class="insignia-rack-wrap">
+      {{ insignia_rack | safe }}
+      <figcaption>{{ t('insignia.rack') }}</figcaption>
+    </figure>
+  </div>
   <div class="heraldry-frame">
     {{ heraldry | safe }}
     <div class="card-title">
@@ -95,7 +111,7 @@
   </div>
 </div>
 {% else %}
-<p class="muted">{{ t('honours.no_medals') }}</p>
+<p class="empty">{{ t('honours.no_medals') }}</p>
 {% endif %}
 
 {% if achievements %}
@@ -162,6 +178,6 @@
   {% endfor %}
 </div>
 {% else %}
-<p class="muted">{{ t('achievements.empty') }}</p>
+<p class="empty">{{ t('achievements.empty') }}</p>
 {% endif %}
 {% endblock %}

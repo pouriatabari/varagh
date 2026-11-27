@@ -26,3 +26,6 @@ backups/*
 .DS_Store
 .idea/
 .vscode/
+
+# Local tool settings of the machine
+.claude/

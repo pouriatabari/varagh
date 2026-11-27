@@ -11,7 +11,7 @@ far as the medals of that virtue have carried the user.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 # The order of the virtues around the table.
@@ -33,8 +33,9 @@ def court_chart_svg(
     tiers: Sequence[CourtTier],
     *,
     labels: dict[str, str] | None = None,
-    width: int = 320,
+    width: int = 380,
     row_height: int = 34,
+    badge_for: Callable[[str, str], str] | None = None,
 ) -> str:
     """The pyramid of the titles, from the page at the bottom to the king.
 
@@ -42,12 +43,15 @@ def court_chart_svg(
     page is at the bottom of the picture. The labels are the words of
     the interface; they are given from the outside, so the picture stays
     a picture and not a page.
+
+    The badge of every tier stands in a column beside the pyramid when
+    ``badge_for`` is given: it draws the badge of a title in a state.
     """
     count = len(tiers)
     height = count * row_height + 16
     names = labels or {}
-    top_half = width * 0.17
-    bottom_half = width * 0.5
+    top_half = width * 0.15
+    bottom_half = width * 0.42
     span = (bottom_half - top_half) / max(count, 1)
     body = [
         f'<svg class="court-chart" viewBox="0 0 {width} {height}" width="{width}" '
@@ -70,6 +74,18 @@ def court_chart_svg(
             classes += " current"
         if tier.next:
             classes += " next"
+        badge = ""
+        if badge_for is not None:
+            state = "locked"
+            if tier.reached or tier.current:
+                state = "lit"
+            elif tier.next:
+                state = "next"
+            drawn = badge_for(tier.key, state)
+            badge = (
+                f'<g class="court-badge" transform="translate({width - 30} {y + 3}) '
+                f'scale(0.6)">{drawn}</g>'
+            )
         body.append(
             f'<g class="{classes}"><title>{names.get(tier.key, tier.key)}</title>'
             f'<path d="M {middle - half_top:.1f} {y} H {middle + half_top:.1f} '
@@ -77,7 +93,7 @@ def court_chart_svg(
             f'H {middle - half_bottom:.1f} Z" />'
             f'<text x="{middle:.1f}" y="{y + row_height / 2 + 4:.1f}" '
             f'text-anchor="middle">{names.get(tier.key, tier.key)}</text>'
-            "</g>"
+            f"{badge}</g>"
         )
     body.append("</svg>")
     return "".join(body)

@@ -110,6 +110,13 @@ html[data-theme="night"] {
   --viz-sea-1: #080d16;
   --viz-sea-2: #101a2b;
   --on-accent: #121721;
+  --insignia-iron: #7d8798;
+  --insignia-silver: #c9d0da;
+  --insignia-gilt: #d4a72c;
+  --insignia-gold: #e6c05a;
+  --insignia-field: #1e2a3b;
+  --insignia-shadow: rgba(0, 0, 0, 0.45);
+  --insignia-ink: #e8ecf4;
   --heat-1: #1c332c;
   --heat-2: #245044;
   --heat-3: #2e6d5a;
@@ -130,6 +137,13 @@ html[data-theme="parchment"] {
   --viz-sea-1: #e4d8b8;
   --viz-sea-2: #f2e9d3;
   --on-accent: #fdf6e6;
+  --insignia-iron: #6d7787;
+  --insignia-silver: #9aa5b1;
+  --insignia-gilt: #b58a2e;
+  --insignia-gold: #9a6f1c;
+  --insignia-field: #ecdcb4;
+  --insignia-shadow: rgba(90, 68, 30, 0.22);
+  --insignia-ink: #2c2114;
   --heat-1: #dcefe8;
   --heat-2: #aedacb;
   --heat-3: #6fbc9f;
@@ -292,6 +306,16 @@ html[data-theme="parchment"] {
 
 /* The header of the hall of the honours, the gates of the next title
    and the proposals of a muster. */
+.honours-header {
+  display: grid;
+  gap: 1rem;
+}
+
+.honours-header .insignia-hall {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
 .honours-header .progress {
   margin: 0.5rem 0 1rem;
 }
@@ -305,8 +329,24 @@ html[data-theme="parchment"] {
 .gate {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.15rem 0;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.gate + .gate {
+  margin-top: 0.15rem;
+}
+
+.gate.satisfied {
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.gate.open:hover {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
 }
 
 .gate-mark {
@@ -580,6 +620,25 @@ textarea {
   color: var(--text);
   font-family: inherit;
   font-size: 0.94rem;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+/* The field that is being written in says so. */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--text-muted) 75%, transparent);
+}
+
+label {
+  font-weight: 500;
 }
 
 textarea {
@@ -917,9 +976,11 @@ label {
 .empty {
   text-align: center;
   color: var(--text-muted);
-  padding: 2.2rem 1rem;
-  border: 1px dashed var(--border);
+  padding: 2.4rem 1.2rem;
+  border: 1px dashed color-mix(in srgb, var(--border) 80%, transparent);
   border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%);
 }
 
 .flash {
@@ -1998,4 +2059,301 @@ table tbody tr:hover {
   border-radius: 999px;
   display: block;
   height: 100%;
+}
+
+/* ---------- the insignia of the ranks ---------- */
+
+/* Every badge is drawn by the code. The metals are the tokens of the
+   theme, so the badge follows the night and the parchment. */
+.insignia-badge {
+  --insignia-metal: var(--insignia-iron);
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 2px 4px var(--insignia-shadow));
+}
+
+.insignia-badge .insignia-shield {
+  fill: var(--insignia-field);
+}
+
+.insignia-badge .insignia-rim {
+  fill: none;
+  stroke: var(--insignia-metal);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.insignia-badge .insignia-band,
+.insignia-badge .insignia-crown-points {
+  fill: var(--insignia-metal);
+}
+
+.insignia-badge .insignia-arch {
+  fill: none;
+  stroke: var(--insignia-metal);
+  stroke-width: 2.4;
+}
+
+.insignia-badge .insignia-orb circle {
+  fill: var(--insignia-metal);
+}
+
+.insignia-badge .insignia-cross path {
+  fill: var(--insignia-ink);
+}
+
+.insignia-badge .insignia-pearl circle {
+  fill: var(--insignia-field);
+  stroke: var(--insignia-metal);
+  stroke-width: 1.2;
+}
+
+.insignia-badge .insignia-spike {
+  stroke: var(--insignia-metal);
+  stroke-width: 1.4;
+}
+
+.insignia-badge .insignia-leaf path,
+.insignia-badge .insignia-leaf line {
+  fill: var(--insignia-metal);
+  stroke: var(--insignia-metal);
+  stroke-width: 1.2;
+}
+
+.insignia-badge .insignia-cross-patte path,
+.insignia-badge .insignia-fleur path {
+  fill: var(--insignia-metal);
+}
+
+.insignia-badge .insignia-blade {
+  fill: var(--insignia-field);
+  stroke: var(--insignia-metal);
+  stroke-width: 1.6;
+}
+
+.insignia-badge .insignia-guard,
+.insignia-badge .insignia-grip,
+.insignia-badge .insignia-pommel,
+.insignia-badge .insignia-lance,
+.insignia-badge .insignia-finial,
+.insignia-badge .insignia-flag,
+.insignia-badge .insignia-spur-star {
+  fill: var(--insignia-metal);
+}
+
+.insignia-badge .insignia-flag-cross {
+  fill: var(--insignia-field);
+}
+
+.insignia-badge .insignia-rowel {
+  fill: none;
+  stroke: var(--insignia-metal);
+  stroke-width: 1.4;
+}
+
+.insignia-badge .insignia-neck {
+  fill: none;
+  stroke: var(--insignia-metal);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.insignia-badge .insignia-island path {
+  fill: var(--insignia-metal);
+}
+
+.insignia-badge .insignia-wave {
+  fill: none;
+  stroke: var(--insignia-field);
+  stroke-width: 1.6;
+}
+
+.insignia-badge .insignia-ray {
+  stroke: var(--insignia-metal);
+  stroke-width: 1.6;
+  opacity: 0.75;
+}
+
+.insignia-badge .insignia-stud.filled {
+  fill: var(--insignia-metal);
+}
+
+.insignia-badge .insignia-stud.hollow {
+  fill: none;
+  stroke: var(--insignia-metal);
+  stroke-width: 1.2;
+  opacity: 0.8;
+}
+
+.insignia-badge .insignia-lock path {
+  fill: var(--insignia-ink);
+}
+
+.insignia-badge .insignia-lock .insignia-lock-shackle {
+  fill: none;
+  stroke: var(--insignia-ink);
+  stroke-width: 2;
+}
+
+.insignia-badge .insignia-progress rect {
+  fill: none;
+  stroke: var(--insignia-gold);
+  stroke-width: 2;
+  opacity: 0.9;
+}
+
+/* The three states of a badge: the earned one shines, the locked one
+   is dim and carries a lock, the next one waits with its frame. */
+.insignia-badge.insignia-lit {
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--insignia-gold) 30%, transparent));
+}
+
+.insignia-badge.insignia-locked {
+  opacity: 0.5;
+  filter: grayscale(0.85);
+}
+
+.insignia-badge.insignia-next {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--insignia-gold) 25%, transparent));
+}
+
+/* The rack of the ribbons. */
+.ribbon-rack {
+  display: block;
+}
+
+.ribbon-rack .ribbon-band {
+  fill: var(--ribbon-color);
+}
+
+.ribbon-rack .ribbon-stripe {
+  stroke: rgba(0, 0, 0, 0.3);
+  stroke-width: 1.6;
+  fill: none;
+}
+
+.ribbon-rack .ribbon-stripe circle {
+  fill: rgba(0, 0, 0, 0.3);
+  stroke: none;
+}
+
+.ribbon-rack .ribbon-pip {
+  fill: var(--pip-color);
+  stroke: var(--bg-elevated);
+  stroke-width: 1.4;
+}
+
+.ribbon-rack .ribbon.locked {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+
+/* The hall: the badge of the user, its studs and the rack. */
+.insignia-hall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.insignia-hall .insignia-current {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+}
+
+.insignia-hall .insignia-current figcaption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.insignia-rack-wrap {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+
+.insignia-rack-wrap figcaption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* The case of the insignia: the shelf of every badge. */
+.insignia-case {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.9rem;
+}
+
+.insignia-slot {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.9rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--text) 3%, transparent),
+      transparent 40%),
+    var(--bg-elevated);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 140ms ease, border-color 140ms ease;
+}
+
+.insignia-slot:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.insignia-slot .insignia-slot-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.insignia-slot .insignia-slot-state {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.insignia-slot.earned {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.insignia-slot.next {
+  border-color: color-mix(in srgb, var(--info) 45%, var(--border));
+}
+
+.insignia-card {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+}
+
+.insignia-card .insignia-card-note {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.insignia-card h3 {
+  margin: 0;
+}
+
+.insignia-footnote {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* The badges of the court chart sit in their own column. */
+.court-chart .insignia-badge {
+  overflow: visible;
 }
