@@ -91,31 +91,23 @@ def _gate_glyph(key: str, virtue_colour: str) -> str:
     )
 
 
-def _tick_points(radius: float, tick: float) -> list[tuple[float, float, float, float]]:
-    """The twelve notches of a frame."""
-    points = []
-    for index in range(12):
-        angle = math.radians(30 * index)
-        points.append(
-            (
-                (radius - tick) * math.cos(angle),
-                (radius - tick) * math.sin(angle),
-                radius * math.cos(angle),
-                radius * math.sin(angle),
-            )
+def _rivets(radius: float, count: int, dot: float) -> str:
+    """The rivets that hold the rim of a medallion."""
+    return "".join(
+        f'<circle class="skill-rivet" cx="{(radius - dot) * math.cos(angle):.1f}" '
+        f'cy="{(radius - dot) * math.sin(angle):.1f}" r="{dot * 0.42:.1f}" />'
+        for angle in (
+            math.radians(360 / count * index) for index in range(count)
         )
-    return points
+    )
 
 
-def _frame(radius: float, tick: float = 9.0) -> str:
-    """The ring around a node: the notched frame of the game."""
+def _frame(radius: float, count: int = 12) -> str:
+    """The rim around a node: the gold ring of a medallion."""
     return (
         f'<circle class="skill-frame" r="{radius:.1f}" />'
-        + "".join(
-            f'<line class="skill-tick" x1="{x1:.1f}" y1="{y1:.1f}" '
-            f'x2="{x2:.1f}" y2="{y2:.1f}" />'
-            for x1, y1, x2, y2 in _tick_points(radius, tick)
-        )
+        f'<circle class="skill-frame-inner" r="{radius - 7:.1f}" />'
+        + _rivets(radius, count, 6.0)
     )
 
 
@@ -185,11 +177,11 @@ def render_skill_tree(
         if source is None or target is None:
             continue
         if edge.state == OPEN:
-            colour, cls, width, dash = GOLD, "skill-path open", 9, ""
+            colour, cls, width, dash = GOLD, "skill-path open", 5, ""
         elif edge.state == READY:
-            colour, cls, width, dash = GOLD_BRIGHT, "skill-path ready", 9, ""
+            colour, cls, width, dash = GOLD_BRIGHT, "skill-path ready", 5, ""
         else:
-            colour, cls, width, dash = GREY, "skill-path locked", 6, "12 11"
+            colour, cls, width, dash = GREY, "skill-path locked", 3, "9 8"
         if source.kind == "rank" and target.kind == "rank":
             # The road of the ladder runs from the right of a rank to the
             # left of the next one.
@@ -209,7 +201,7 @@ def render_skill_tree(
             road = f"M {x1:.1f} {y1:.1f} L {x2:.1f} {y2:.1f}"
         body.append(
             f'<path class="{cls} skill-edge" d="{road}" stroke="{DARK}" '
-            f'stroke-width="{width + 5}" fill="none" stroke-linecap="round" />'
+            f'stroke-width="{width + 4}" fill="none" stroke-linecap="round" />'
         )
         body.append(
             f'<path class="{cls}" d="{road}" stroke="{colour}" '
@@ -220,9 +212,9 @@ def render_skill_tree(
             middle_x = (x1 + x2) / 2
             middle_y = (y1 + y2) / 2
             body.append(
-                f'<path class="skill-knot" d="M {middle_x:.1f} {middle_y - 7:.1f} '
-                f"L {middle_x + 6:.1f} {middle_y:.1f} L {middle_x:.1f} {middle_y + 7:.1f} "
-                f'L {middle_x - 6:.1f} {middle_y:.1f} Z" fill="{colour}" />'
+                f'<path class="skill-knot" d="M {middle_x:.1f} {middle_y - 5:.1f} '
+                f"L {middle_x + 4:.1f} {middle_y:.1f} L {middle_x:.1f} {middle_y + 5:.1f} "
+                f'L {middle_x - 4:.1f} {middle_y:.1f} Z" fill="{colour}" />'
             )
 
     # The gates: the small medallions that hang under the ranks.
@@ -239,18 +231,11 @@ def render_skill_tree(
             f'hx-target="#tree-detail" hx-swap="innerHTML show:#tree-detail">'
         )
         body.append(f"<title>{node.label}</title>")
-        body.append(f'<circle class="skill-disc" r="{GATE_RADIUS + 3:.1f}" />')
+        body.append(f'<circle class="skill-disc" r="{GATE_RADIUS + 2:.1f}" />')
         body.append(
-            f'<circle class="skill-medallion" r="{GATE_RADIUS - 3:.1f}" />'
+            f'<circle class="skill-medallion" r="{GATE_RADIUS - 2:.1f}" />'
         )
-        rivets = []
-        for index in range(6):
-            angle = math.radians(30 + 60 * index)
-            rivets.append(
-                f'<circle class="skill-rivet" cx="{(GATE_RADIUS - 6) * math.cos(angle):.1f}" '
-                f'cy="{(GATE_RADIUS - 6) * math.sin(angle):.1f}" r="1.2" />'
-            )
-        body.append("".join(rivets))
+        body.append(_rivets(GATE_RADIUS, 8, 4.0))
         body.append(
             f'<g class="skill-glyph" fill="{GOLD if node.satisfied else GREY}" '
             f'stroke="{GOLD if node.satisfied else GREY}" stroke-width="1.6">'
