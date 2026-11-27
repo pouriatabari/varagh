@@ -156,3 +156,33 @@ def test_the_rack_of_the_ribbons_speaks_the_lexicon() -> None:
     for title in re.findall(r"<title>([^<]*)</title>", svg):
         assert "bronze" not in title
         assert "silver" not in title
+
+
+def test_the_names_of_the_titles_agree() -> None:
+    """The two families of the names of a title say the same thing.
+
+    The ladder of the hall and the description of a badge carry the name
+    of a title; they must not drift apart.
+    """
+    from app.i18n.fa_medieval import STRINGS as medieval
+    from app.i18n.fa_plain import STRINGS as plain
+
+    keys = [
+        "page",
+        "squire",
+        "knight",
+        "banneret",
+        "baron",
+        "viscount",
+        "earl",
+        "marquess",
+        "duke",
+        "prince",
+        "king",
+        "bretwalda",
+    ]
+    for key in keys:
+        name = plain[f"honours.title.{key}"]
+        assert medieval[f"honours.title.{key}"] == name
+        assert plain[f"title_{key}"].endswith(name)
+        assert medieval[f"title_{key}"] == name
