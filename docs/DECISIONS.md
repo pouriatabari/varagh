@@ -289,3 +289,45 @@ together with its rationale.
   determinism also lets the pictures be tested: a snapshot of every picture
   is kept in the repository, and a change of a picture is a change that
   must be read in the diff.
+
+## D31 — The map is the real geography, and the realms are taken next to each other
+
+- **Decision:** The ground of the map is the real geography of Great
+  Britain: the coastline and the county borders come from Natural Earth
+  (public domain), are thinned once and are kept in the repository as
+  paths. The realms are written in `data/realms.json`, with their names,
+  their legend, the ground they cover and the realms that touch them. A
+  realm is taken by the user for one of their domains, and it may only be
+  taken next to a realm that is already taken; the first realm of the map
+  is the exception. Every counted medal of a domain lights the next of
+  the three castles of its realm, and the third castle claims it. The
+  hidden realm opens with the order of the scholar.
+- **Why:** The map is the picture of the work, so it must be the work
+  itself and not a decoration: real counties, real coast, real names of
+  the places the work is done in. The rule of the neighbours keeps the
+  map a campaign — the ground is won from the ground that is already
+  held, never scattered — and the castles keep the reward honest, since
+  a realm is only claimed by three counted medals of its own domain and
+  not by a claim that was written down.
+
+## D32 — The colours of the pictures are checked, not chosen by eye
+
+- **Decision:** Every picture of the app takes its colours from the
+  theme: the six steps of a categorical palette (the six virtues of the
+  round table, the series of a chart), one gold ramp for the states that
+  are ordered (the progress of a realm and the claim), one teal ramp for
+  the heat of the days, and the surfaces of the theme for the ground. The
+  steps of the palette were checked with a validator: the contrast
+  against the surface of the theme, the separation of the neighbours under
+  the deuteranopia, the protanopia and the tritanopia, the lightness of
+  every step and the monotony of every ramp. The states of the map are
+  never told by the colour alone: the fog is hatched, the hidden realm is
+  dotted, and every state has its word in the key of the map and in the
+  table under it.
+- **Why:** The eye is a poor judge of a palette: two colours that look
+  apart on the screen can fall together under the colour blindness of one
+  reader in six, and a colour that is pretty against a white paper can
+  vanish against a dark one. The check is cheap and the answer is
+  written down, so the next theme or the next chart is checked the same
+  way and not by taste. The texture and the word keep the picture honest
+  for the reader who does not see the colour at all.

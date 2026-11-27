@@ -23,6 +23,7 @@ from app.ai.schemas import (
     DailyPlanDraft,
     JournalProposal,
     QuickAddDraft,
+    RealmSuggestionDraft,
     ReviewDraft,
     SyllabusDraft,
 )
@@ -96,6 +97,14 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "used_dates (list of strings). Use only the data in the payload. "
         + CHARTS
         + " "
+        + JSON_ONLY
+        + " "
+        + PERSIAN
+    ),
+    "suggest_realm": (
+        "You choose the realm of the map that fits the craft of a domain. "
+        "You may only answer one of the realm keys that are offered in the "
+        "payload. Return JSON with: realm_key (string), reason_fa (string). "
         + JSON_ONLY
         + " "
         + PERSIAN
@@ -239,6 +248,26 @@ def ask_payload(question: str, data: dict[str, Any]) -> dict[str, Any]:
     """Build the payload of the «ask my data» feature."""
     return {"question": question, "data": data, "series": data.get("series", {})}
 
+
+def suggest_realm(
+    session: Session,
+    provider: AIProvider,
+    *,
+    domain_name: str,
+    candidates: list[dict[str, Any]],
+) -> RealmSuggestionDraft:
+    """Ask the AI which of the free realms fits the craft of a domain.
+
+    The answer is checked again: the AI may only name a realm that was
+    offered to it.
+    """
+    payload = {"domain": domain_name, "candidates": candidates}
+    answer = _call(session, provider, feature="suggest_realm", payload=payload)
+    draft = _validate(RealmSuggestionDraft, answer)
+    allowed = {str(item["key"]) for item in candidates}
+    if draft.realm_key not in allowed:
+        raise AIError(f"the answer names an unknown realm: {draft.realm_key}")
+    return draft
 
 def draft_to_dict(draft: Any, payload: dict[str, Any] | None = None) -> dict[str, Any]:
     """Render a draft as plain JSON data.

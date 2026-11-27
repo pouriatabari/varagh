@@ -275,7 +275,8 @@ async def review_confirm(
     session.flush()
     review.status = "finished"
     session.flush()
-    return _redirect("/achievements", flash="flash.review_updated")
+    # The muster is given: the map shows the ceremony of the new realm.
+    return _redirect("/realms?ceremony=1", flash="flash.review_updated")
 
 
 @router.get("/reviews/{review_id}/export.md", response_class=PlainTextResponse)
@@ -323,7 +324,14 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
                 for rule in config.titles
             },
         ),
-        round_table=court.round_table_svg(honours.seats(session)),
+        round_table=court.round_table_svg(
+            honours.seats(session),
+            labels={
+                seat.virtue: str(translate(f"honours.virtue.{seat.virtue}", lexicon))
+                for seat in honours.seats(session)
+            },
+            centre=str(sum(1 for medal in medals if medal.value_counted > 0)),
+        ),
         honours_seats=honours.seats(session),
         heraldry=heraldry.heraldry_svg(
             title_key=state.current,

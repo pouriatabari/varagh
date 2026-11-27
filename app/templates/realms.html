@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% from "partials/icons.html" import iso_icon %}
+{% block title %}{{ t('realms.title') }}{% endblock %}
+{% block content %}
+<h1>{{ t('realms.title') }}</h1>
+<p class="small muted">{{ t('realms.intro') }}</p>
+
+{% if suggested %}
+<div class="flash">{{ t('realms.suggested', name=suggested) }}</div>
+{% endif %}
+
+<div class="card realm-map-card {{ 'ceremony' if ceremony else '' }}">
+  <div class="card-title">
+    <h2>{{ t('realms.map_title') }}</h2>
+    <span class="chip">{{ t('realms.claimed_count', count=realm_claimed) }}</span>
+  </div>
+  <div class="realm-map-stage" id="realm-map-stage">
+    <div class="realm-map-viewport" id="realm-map-viewport">
+      {{ realm_map_svg | safe }}
+    </div>
+    <div class="realm-map-controls">
+      <button type="button" class="btn" data-map-action="zoom-in" aria-label="{{ t('realms.zoom_in') }}">+</button>
+      <button type="button" class="btn" data-map-action="zoom-out" aria-label="{{ t('realms.zoom_out') }}">−</button>
+      <button type="button" class="btn" data-map-action="reset" aria-label="{{ t('realms.zoom_reset') }}">{{ t('realms.zoom_reset') }}</button>
+    </div>
+    <div class="realm-hover" id="realm-hover" hidden>
+      <strong id="realm-hover-name"></strong>
+      <span id="realm-hover-state" class="chip"></span>
+      <p id="realm-hover-legend"></p>
+      <p id="realm-hover-castles" class="small muted"></p>
+    </div>
+  </div>
+  <ul class="realm-legend">
+    <li><span class="realm-mark state-fog"></span>{{ t('realms.state.fog') }}</li>
+    <li><span class="realm-mark state-progress"></span>{{ t('realms.state.progress') }}</li>
+    <li><span class="realm-mark state-claimed"></span>{{ t('realms.state.claimed') }}</li>
+    <li><span class="realm-mark state-hidden"></span>{{ t('realms.state.hidden') }}</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('realms.assign_title') }}</h2></div>
+  <p class="small muted">{{ t('realms.assign_hint') }}</p>
+  {% if realm_candidates and realm_domains %}
+  <form class="realm-assign-form" action="/realms/assign" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label>
+      {{ t('realms.domain') }}
+      <select name="domain_id" required>
+        {% for domain in realm_domains %}
+        <option value="{{ domain.id }}" {{ 'selected' if domain.id == suggested_domain else '' }}>
+          {{ domain.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      {{ t('realms.realm') }}
+      <select name="realm_key" required>
+        {% for realm in realm_candidates %}
+        <option value="{{ realm.key }}" {{ 'selected' if realm.key == suggested else '' }}>
+          {{ realm.name_fa }} — {{ realm.coverage_fa }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-primary" type="submit">{{ t('realms.assign') }}</button>
+  </form>
+  <form class="realm-suggest-form" action="/realms/suggest" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="domain_id" value="{{ suggested_domain }}" />
+    <button class="btn" type="submit">{{ t('realms.suggest') }}</button>
+    <span class="small muted">{{ t('realms.suggest_hint') }}</span>
+  </form>
+  {% else %}
+  <p class="small muted">{{ t('realms.no_candidates') }}</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title"><h2>{{ t('realms.table_title') }}</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ t('realms.realm') }}</th>
+          <th>{{ t('realms.state_label') }}</th>
+          <th>{{ t('realms.castles') }}</th>
+          <th>{{ t('realms.domain') }}</th>
+          <th>{{ t('realms.coverage') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for state in realm_states %}
+        <tr>
+          <td>{{ state.realm.name_fa }}</td>
+          <td>
+            <span class="realm-mark state-{{ state.state }}"></span>
+            {{ t('realms.state.' ~ state.state) }}
+          </td>
+          <td>{{ state.castles_lit | digits }} / {{ state.realm.castles | digits }}</td>
+          <td>{{ state.domain_name or '—' }}</td>
+          <td>{{ state.realm.coverage_fa }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/realm-map.js" defer></script>
+{% endblock %}

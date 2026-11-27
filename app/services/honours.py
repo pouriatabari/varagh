@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from app.models.review import Achievement, Review
 from app.models.rewards import Medal, MedalEvidence, Order, Quest, RealmClaim, TitleHistory
 from app.models.task import Domain, Task
-from app.services import court, rewards
+from app.services import court, realms, rewards
 from app.services.rewards_config import VIRTUES, RewardsConfig
 from app.utils.jalali import jalali_of
 from app.utils.time import utcnow
@@ -183,6 +183,7 @@ def award_medals(
     session.flush()
 
     recount_month(session, key, config)
+    light_realms(session)
     return AwardResult(
         medals=list_medals(session), created=created, skipped=skipped
     )
@@ -252,6 +253,23 @@ def domain_key_of(session: Session, medal: Medal) -> str | None:
         return None
     domain = session.get(Domain, medal.domain_id)
     return domain.name if domain is not None else None
+
+
+def light_realms(session: Session) -> None:
+    """Light the castles of the realms that the counted medals reached.
+
+    Every counted medal of a domain lights the next castle of the realm
+    of that domain; the third one claims the realm.
+    """
+    domain_ids = {
+        medal.domain_id
+        for medal in list_medals(session)
+        if medal.domain_id is not None and medal.value_counted > 0
+    }
+    if domain_ids:
+        realms.assign_start_realm(session, min(domain_ids))
+    for domain_id in sorted(domain_ids):
+        realms.sync_castles(session, domain_id)
 
 
 def list_orders(session: Session) -> list[Order]:

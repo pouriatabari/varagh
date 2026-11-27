@@ -89,6 +89,53 @@ html[data-theme="parchment"] {
   color-scheme: light;
 }
 
+/* The colours of the pictures. The charts, the court chart, the round
+   table and the map of the realms all speak with these steps, and every
+   theme chooses its own. The steps were checked with the validator of the
+   palette: the contrast against the surface of the theme, the separation
+   of the neighbours under the colour-blindness of the deuteranopia, the
+   protanopia and the tritanopia, and the lightness of every step. */
+:root,
+html[data-theme="night"] {
+  --viz-1: #338ced;
+  --viz-2: #e76624;
+  --viz-3: #00a888;
+  --viz-4: #d28e05;
+  --viz-5: #e24d8b;
+  --viz-6: #0aac23;
+  --viz-progress: #8a6a20;
+  --viz-claimed: #d9b45a;
+  --viz-grid: #26324a;
+  --viz-axis: #3d4a63;
+  --viz-sea-1: #080d16;
+  --viz-sea-2: #101a2b;
+  --on-accent: #121721;
+  --heat-1: #1c332c;
+  --heat-2: #245044;
+  --heat-3: #2e6d5a;
+  --heat-4: #3f9b7d;
+}
+
+html[data-theme="parchment"] {
+  --viz-1: #257de0;
+  --viz-2: #f47230;
+  --viz-3: #00b894;
+  --viz-4: #f2a600;
+  --viz-5: #ee7fac;
+  --viz-6: #008a17;
+  --viz-progress: #b58a2e;
+  --viz-claimed: #9a6f1c;
+  --viz-grid: #e3d4ae;
+  --viz-axis: #b39b6c;
+  --viz-sea-1: #e4d8b8;
+  --viz-sea-2: #f2e9d3;
+  --on-accent: #fdf6e6;
+  --heat-1: #dcefe8;
+  --heat-2: #aedacb;
+  --heat-3: #6fbc9f;
+  --heat-4: #2e8a6e;
+}
+
 /* The court chart, the round table and the heraldry. The lit tiers glow
    and the locked ones are dimmed with a lock glyph, so the state never
    rests on the colour alone. */
@@ -140,34 +187,50 @@ html[data-theme="parchment"] {
 }
 
 .round-table .table-top {
-  fill: var(--bg-elevated);
+  fill: color-mix(in srgb, var(--text) 4%, transparent);
   stroke: var(--border);
+  stroke-width: 1;
 }
 
 .round-table .table-hole {
-  fill: var(--bg);
+  fill: var(--bg-sunken);
   stroke: var(--border);
 }
 
-.round-table .seat path {
-  fill: var(--bg-elevated);
+.round-table .seat-track {
+  fill: color-mix(in srgb, var(--text) 6%, transparent);
   stroke: var(--border);
-  opacity: 0.5;
+  stroke-width: 1;
 }
 
-.round-table .seat.lit path {
-  fill: var(--accent);
-  opacity: 0.9;
-  filter: drop-shadow(0 0 5px var(--glow));
+/* The lit part of the seat: the colour tells the virtue, the length of
+   the arc tells how many medals it has. */
+.round-table .seat.lit .seat-bar {
+  fill: var(--seat-color);
+  stroke: var(--bg-elevated);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--seat-color) 40%, transparent));
 }
 
 .round-table .seat text {
   fill: var(--text);
   font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--bg-elevated);
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 
 .round-table .seat.locked text {
   fill: var(--text-muted);
+  font-weight: 400;
+}
+
+.round-table .table-centre {
+  fill: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .seat-legend {
@@ -190,8 +253,8 @@ html[data-theme="parchment"] {
 }
 
 .seat-mark.lit {
-  background: var(--accent);
-  box-shadow: 0 0 5px var(--glow);
+  background: var(--seat-color, var(--accent));
+  box-shadow: 0 0 5px color-mix(in srgb, var(--seat-color, var(--accent)) 40%, transparent);
 }
 
 .seat-mark.locked {
@@ -810,27 +873,19 @@ label {
   background: var(--bg-sunken);
 }
 
+/* The heat of the days: one hue, from the lightest to the darkest. */
 .heatmap .cell.l1 {
-  background: #cfe6dd;
+  background: var(--heat-1);
 }
 .heatmap .cell.l2 {
-  background: #9fcbba;
+  background: var(--heat-2);
 }
 .heatmap .cell.l3 {
-  background: #62a68d;
+  background: var(--heat-3);
 }
 .heatmap .cell.l4 {
-  background: var(--accent);
-}
-
-html[data-theme="night"] .heatmap .cell.l1 {
-  background: #23443a;
-}
-html[data-theme="night"] .heatmap .cell.l2 {
-  background: #2f6454;
-}
-html[data-theme="night"] .heatmap .cell.l3 {
-  background: #3f8a72;
+  background: var(--heat-4);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--heat-4) 45%, transparent);
 }
 
 /* ---------- progress ---------- */
@@ -1180,7 +1235,12 @@ label.inline {
   padding: 0.85rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--bg-elevated);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--text) 3%, transparent),
+      transparent 35%),
+    var(--bg-elevated);
+  box-shadow: var(--shadow);
 }
 
 .chart figcaption {
@@ -1243,46 +1303,37 @@ label.inline {
   gap: 0.75rem;
 }
 
-.medal {
-  padding: 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  text-align: center;
+/* The disc of a medal: the tier tells itself by the metal of the disc
+   and by the name that stands beside it. */
+.medal-disc {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 0 6px color-mix(in srgb, currentColor 45%, transparent);
+  background: currentColor;
 }
 
-.medal.locked {
-  opacity: 0.6;
+.medal-disc.tier-gold {
+  color: #d4a72c;
 }
 
-.medal.tier-gold {
-  border-color: #d4a72c;
+.medal-disc.tier-silver {
+  color: #9aa5b1;
 }
 
-.medal.tier-silver {
-  border-color: #9aa5b1;
-}
-
-.medal.tier-bronze {
-  border-color: #b06a3b;
+.medal-disc.tier-bronze {
+  color: #b06a3b;
 }
 
 .medal-icon {
   display: flex;
   justify-content: center;
   margin-bottom: 0.4rem;
-}
-
-.medal.tier-gold .medal-icon {
-  color: #d4a72c;
-}
-
-.medal.tier-silver .medal-icon {
-  color: #8e99a5;
-}
-
-.medal.tier-bronze .medal-icon {
-  color: #b06a3b;
+  color: var(--accent);
 }
 
 .medal-title {
@@ -1349,4 +1400,602 @@ label.inline {
   display: block;
   max-width: 100%;
   border-radius: var(--radius-sm);
+}
+
+/* --- the map of the realms --- */
+
+/* The map is a picture of the campaign: a dark sea, the coast of the
+   land, and every realm in the state it is in. The states are told by
+   the colour and by the texture of the ground, so the map is still
+   readable without the eye that sees the colour. */
+.realm-map-card {
+  overflow: hidden;
+  border-color: var(--border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent) 5%, transparent), transparent 40%),
+    var(--bg-elevated);
+}
+
+.realm-map-stage {
+  position: relative;
+  height: 70vh;
+  min-height: 440px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse at 50% 40%, var(--viz-sea-2), var(--viz-sea-1) 78%);
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.45);
+  cursor: grab;
+  touch-action: none;
+}
+
+.realm-map-stage.dragging {
+  cursor: grabbing;
+}
+
+.realm-map-viewport {
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  transition: transform 120ms ease-out;
+}
+
+.realm-map {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* The sea: the ground of the picture, with a soft light on it. */
+.realm-map .map-sea {
+  fill: url(#sea-light);
+}
+
+/* The coast of the land: a wide, soft shadow under a thin line. */
+.realm-map .map-coast path {
+  fill: none;
+  stroke: var(--viz-axis);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.realm-map .realm-ground path {
+  fill: var(--bg-elevated);
+  stroke: var(--border);
+  stroke-width: 1;
+  transition: fill 400ms ease, opacity 400ms ease;
+}
+
+/* The fog: a realm nobody has reached yet. The ground is hatched and
+   dimmed, and the hatching is the sign that says "nothing here yet". */
+.realm-map .realm[data-state="fog"] .realm-ground path {
+  fill: url(#fog-hatch);
+  stroke: var(--viz-axis);
+  stroke-dasharray: 6 4;
+  opacity: 0.75;
+}
+
+.realm-map .realm[data-state="fog"] .realm-label {
+  fill: var(--text-muted);
+  opacity: 0.65;
+}
+
+/* The progress: the realm is lit, but not claimed yet. */
+.realm-map .realm[data-state="progress"] .realm-ground path {
+  fill: var(--viz-progress);
+  stroke: color-mix(in srgb, var(--viz-claimed) 70%, transparent);
+  stroke-width: 1.5;
+  opacity: 0.92;
+}
+
+.realm-map .realm[data-state="progress"] .realm-label {
+  fill: var(--text);
+}
+
+/* The claim: the realm is won, and it shines. */
+.realm-map .realm[data-state="claimed"] .realm-ground path {
+  fill: var(--viz-claimed);
+  stroke: var(--viz-claimed);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 7px var(--glow));
+}
+
+.realm-map .realm[data-state="claimed"] .realm-label {
+  fill: var(--text);
+  font-weight: 700;
+}
+
+/* The hidden realm: it is there, but it is not for everyone. */
+.realm-map .realm[data-state="hidden"] .realm-ground path {
+  fill: url(#hidden-hatch);
+  stroke: var(--info);
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.realm-map .realm[data-state="hidden"] .realm-label {
+  fill: var(--text-muted);
+  opacity: 0.55;
+}
+
+.realm-map .realm-label {
+  fill: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--viz-sea-1);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+
+/* The castles of a realm: locked ones are hollow, lit ones are gold. */
+.realm-map .castle path {
+  fill: var(--viz-sea-1);
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+
+.realm-map .castle.lit path {
+  fill: var(--viz-claimed);
+  stroke: var(--viz-claimed);
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--glow));
+}
+
+/* The road of the campaign: the way the user came. */
+.realm-map .campaign-route {
+  fill: none;
+  stroke: var(--accent-2);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 12 9;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 4px var(--glow-2));
+}
+
+.realm-map .route-node {
+  fill: var(--accent-2);
+  stroke: var(--viz-sea-1);
+  stroke-width: 2;
+}
+
+.realm-map-controls {
+  position: absolute;
+  top: 0.75rem;
+  inset-inline-start: 0.75rem;
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+}
+
+/* The card that follows the pointer over a realm. */
+.realm-hover {
+  position: absolute;
+  min-width: 16rem;
+  max-width: 21rem;
+  padding: 0.75rem 0.9rem;
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.realm-hover strong {
+  color: var(--text);
+}
+
+.realm-hover p {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.realm-hover .realm-hover-state {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+/* The key of the map: what every state looks like. */
+.realm-legend {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.realm-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.realm-mark {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex: none;
+}
+
+.realm-mark.state-fog {
+  background:
+    repeating-linear-gradient(45deg,
+      var(--bg-sunken) 0 3px, transparent 3px 6px),
+    var(--bg-sunken);
+  border-style: dashed;
+}
+
+.realm-mark.state-progress {
+  background: var(--viz-progress);
+  border-color: var(--viz-claimed);
+}
+
+.realm-mark.state-claimed {
+  background: var(--viz-claimed);
+  border-color: var(--viz-claimed);
+  box-shadow: 0 0 8px var(--glow);
+}
+
+.realm-mark.state-hidden {
+  background:
+    repeating-linear-gradient(45deg,
+      transparent 0 3px, var(--info) 3px 4px),
+    transparent;
+  border-style: dotted;
+  border-color: var(--info);
+}
+
+.realm-assign-form,
+.realm-suggest-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.realm-assign-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* The ceremony of the muster: the fog lifts, the castles light one by
+   one and the road of the campaign draws itself. */
+@media (prefers-reduced-motion: no-preference) {
+  .realm-map-card.ceremony .realm[data-state="fog"] .realm-ground path {
+    animation: realm-fog-lift 1.4s ease-out forwards;
+  }
+
+  .realm-map-card.ceremony .realm[data-state="claimed"] .realm-ground path {
+    animation: realm-claim 1.2s ease-out;
+  }
+
+  .realm-map-card.ceremony .castle.lit path {
+    animation: realm-castle-light 700ms ease-out backwards;
+  }
+
+  .realm-map-card.ceremony .realm-castles .castle:nth-child(2).lit path {
+    animation-delay: 300ms;
+  }
+
+  .realm-map-card.ceremony .realm-castles .castle:nth-child(3).lit path {
+    animation-delay: 600ms;
+  }
+
+  .realm-map-card.ceremony .campaign-route {
+    animation: realm-route-draw 2.4s ease-out;
+  }
+}
+
+@keyframes realm-fog-lift {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes realm-claim {
+  from {
+    filter: drop-shadow(0 0 0 rgba(217, 180, 90, 0));
+  }
+  to {
+    filter: drop-shadow(0 0 8px var(--glow));
+  }
+}
+
+@keyframes realm-castle-light {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes realm-route-draw {
+  from {
+    stroke-dashoffset: 600;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0.9;
+  }
+}
+
+/* ---------- the look of the app ---------- */
+
+/* The cards carry a little light of their own, so the page is not a wall
+   of flat boxes. */
+.card {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--text) 3%, transparent),
+      transparent 30%),
+    var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.05rem 1.15rem;
+  box-shadow: var(--shadow);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+/* The title of a card carries a small gold rule of its own. */
+.card-title h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.card-title h2::before {
+  content: "";
+  width: 3px;
+  height: 1.05em;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 30%, transparent));
+}
+
+/* The tiles of the dashboard: the number is the hero of the tile. */
+.stat {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--text) 4%, transparent),
+      transparent 45%),
+    var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.05rem;
+  box-shadow: var(--shadow);
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.stat:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.stat .value {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.stat .label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+/* The tables of the app: quiet lines, a clear head. */
+table th {
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+table td {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+}
+
+table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* The keyboard must always see where it is. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* The charts of the app: the frame of the picture stays quiet. */
+.chart-frame {
+  position: relative;
+  background: color-mix(in srgb, var(--bg-sunken) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+}
+
+/* ---------- the shell of the app ---------- */
+
+/* The sidebar carries a light of its own at the top, so the eye knows
+   where the app begins. */
+.sidebar {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 42%),
+    linear-gradient(180deg, var(--bg-elevated), var(--bg-sunken));
+  border-inline-start: 1px solid var(--border);
+}
+
+.brand .logo {
+  background: linear-gradient(145deg, var(--accent), color-mix(in srgb, var(--accent) 62%, var(--accent-2)));
+  color: var(--on-accent);
+  box-shadow: 0 2px 10px var(--glow);
+  font-weight: 700;
+}
+
+.nav a {
+  transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.nav a:hover {
+  transform: translateX(-2px);
+}
+
+/* The page that is open says so with a bar of gold at its edge. */
+.nav a.active {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    color-mix(in srgb, var(--accent) 4%, transparent));
+  color: var(--accent);
+  box-shadow: inset -3px 0 0 var(--accent);
+}
+
+.topbar {
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+/* The title of the page. */
+.content h1 {
+  font-size: 1.55rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  position: relative;
+}
+
+.content h1::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -1px;
+  width: 4.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* The buttons: a little depth, a clear hover. */
+.btn {
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease,
+    box-shadow 140ms ease;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--accent) 88%, #fff),
+    var(--accent));
+  border-color: color-mix(in srgb, var(--accent) 70%, #000);
+  color: var(--on-accent);
+  font-weight: 600;
+  box-shadow: 0 2px 10px var(--glow);
+}
+
+.btn-primary:hover {
+  filter: none;
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--accent) 78%, #fff),
+    color-mix(in srgb, var(--accent) 92%, #fff));
+}
+
+.btn-danger {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  color: var(--danger);
+}
+
+/* The message of the page: it comes and it goes. */
+.flash {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+.flash.error {
+  background: color-mix(in srgb, var(--danger) 12%, var(--bg-elevated));
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  border-inline-start-color: var(--danger);
+}
+
+/* The little marks of the app: the chips, the badges. */
+.chip {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+/* The bars of the progress: a gradient that ends in the accent. */
+.progress {
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress > span {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent) 70%, var(--accent-2)),
+    var(--accent));
+  border-radius: 999px;
+  display: block;
+  height: 100%;
 }

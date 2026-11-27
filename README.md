@@ -257,6 +257,16 @@ the parchment is the warm paper of a ledger. The setting lives in the
 settings page; the system preference (`prefers-color-scheme`) only decides
 the theme the very first time, before the user has chosen one.
 
+Every picture of the app — the charts, the court chart, the round table
+and the map of the realms — takes its colours from the theme and not from
+its own code, so the whole app changes with the setting. The steps of the
+palette were not chosen by eye: they were checked with a validator for the
+contrast against the surface of the theme, for the separation of the
+neighbours under the three kinds of colour blindness, and for the
+lightness of every step. The states of the map (the fog, the progress, the
+claim, the hidden realm) are told by a colour **and** by a texture and a
+word, so the map is still readable without the eye that sees the colour.
+
 ## The hall of honours
 
 The hall of honours is not a list the user fills in by hand. The honours
@@ -286,6 +296,27 @@ the user and the next title. Below it the court chart shows the pyramid of
 the titles with the tiers that were reached lit, and the round table shows
 the six virtues, each seat lighting as far as the medals of that virtue have
 carried the user.
+
+## The map of the realms
+
+The map is the other half of the hall: the work of the user also wins
+ground. The map holds fourteen realms and one hidden realm (Lyonesse, which
+opens with the order of the scholar), and it is drawn on the real geography
+of Great Britain — the coastline and the county borders come from
+[Natural Earth](https://www.naturalearthdata.com/) (public domain), and the
+steps that made the picture are written down in [docs/MAP.md](docs/MAP.md).
+Nothing is fetched while the page is drawn.
+
+- a realm is taken by the user for one of their domains; a realm may only
+  be taken next to a realm that is already taken;
+- every counted medal of a domain lights the next of the three castles of
+  its realm, and the third castle claims the realm;
+- the hidden realm stays closed until the order of the scholar is earned;
+- the map can be panned and zoomed with the pointer, every realm has a card
+  that follows the pointer, and a plain table under the map says the same
+  in words — the picture is never the only way to read the map;
+- when a muster is confirmed, the ceremony plays: the fog lifts, the
+  castles light one by one and the road of the campaign draws itself.
 
 ## Project structure
 
@@ -331,10 +362,11 @@ app/
 - [x] M10 — the two lexicons, the two themes, the icon manifest and the credits
 - [x] M11 — the reward engine: the musters, the medals, the degrees and the titles
 - [x] M12 — the hall: the court chart, the round table and the heraldry
+- [x] M13 — the map of the realms: the ground, the fog, the castles and the campaign road
 
 Still open:
 
-- The realm map and the saga of the musters are not written yet.
+- The saga of the musters is not written yet.
 - The learning report is generated per item; a yearly summary page is missing.
 - The dashboard heatmap is a flat 90-day grid; a calendar-shaped heatmap would
   read better.

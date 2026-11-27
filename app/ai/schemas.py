@@ -150,3 +150,14 @@ class AnswerDraft(StrictModel):
     used_task_ids: list[int] = Field(default_factory=list)
     used_dates: list[str] = Field(default_factory=list)
     charts: list[ChartSpec] = Field(default_factory=list, max_length=6)
+
+
+class RealmSuggestionDraft(StrictModel):
+    """The realm the AI suggests for a domain.
+
+    Only the key of a realm that was offered may be answered; the server
+    checks it again before the realm is written.
+    """
+
+    realm_key: str = Field(min_length=1, max_length=40)
+    reason_fa: str = Field(default="", max_length=300)

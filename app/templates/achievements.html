@@ -52,7 +52,8 @@
       {{ round_table | safe }}
       <ul class="seat-legend">
         {% for seat in honours_seats %}
-        <li><span class="seat-mark {{ 'lit' if seat.count else 'locked' }}"></span>
+        <li><span class="seat-mark {{ 'lit' if seat.count else 'locked' }}"
+              style="--seat-color: var(--viz-{{ loop.index }})"></span>
           {{ t('honours.virtue.' + seat.virtue) }}: {{ seat.count | digits }}</li>
         {% endfor %}
       </ul>
@@ -80,7 +81,10 @@
       <tbody>
         {% for medal in honours_medals %}
         <tr class="{{ 'counted' if medal.value_counted > 0 else 'uncounted' }}">
-          <td>{{ t('medals.tier.' + medal.tier) }}</td>
+          <td>
+            <span class="medal-disc tier-{{ medal.tier }}" aria-hidden="true"></span>
+            {{ t('medals.tier.' + medal.tier) }}
+          </td>
           <td>{{ t('honours.virtue.' + medal.virtue) }}</td>
           <td>{{ medal.value_counted | digits }}</td>
           <td><bdi>{{ medal.month_key }}</bdi></td>

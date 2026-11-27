@@ -281,14 +281,38 @@ document.addEventListener("submit", function (event) {
 });
 
 /* Charts of the AI answers. The data comes from the server: the model only
-   chooses which series of the database it wants to show. */
+   chooses which series of the database it wants to show. The colours are
+   the steps of the theme: they are read from the stylesheet, so the chart
+   follows the night and the parchment without knowing them. */
 (function () {
-  const PALETTE = ["#2f6f5e", "#c2703d", "#4a6fa5", "#8a6fa5", "#b0553f", "#5a8a4a"];
   const ROUND_TYPES = ["doughnut", "pie"];
+
+  /* The six steps of the categorical palette of the theme, in a fixed
+     order. They are never cycled: a seventh series is folded away. */
+  function varaghPalette() {
+    const style = window.getComputedStyle(document.documentElement);
+    const colours = [];
+    for (let index = 1; index <= 6; index += 1) {
+      const value = style.getPropertyValue("--viz-" + index).trim();
+      if (value) colours.push(value);
+    }
+    return colours.length ? colours : ["#338ced"];
+  }
+
+  function varaghInk(name, fallback) {
+    const style = window.getComputedStyle(document.documentElement);
+    const value = style.getPropertyValue(name).trim();
+    return value || fallback;
+  }
 
   function varaghRenderChart(canvas, spec) {
     if (!canvas || !spec || typeof Chart === "undefined") return null;
     const round = ROUND_TYPES.indexOf(spec.type) !== -1;
+    const palette = varaghPalette();
+    const grid = varaghInk("--viz-grid", "rgba(0, 0, 0, 0.08)");
+    const axis = varaghInk("--viz-axis", "rgba(0, 0, 0, 0.2)");
+    const text = varaghInk("--text-muted", "#666");
+    const surface = varaghInk("--bg-elevated", "#fff");
     return new Chart(canvas, {
       type: spec.type || "bar",
       data: {
@@ -297,17 +321,46 @@ document.addEventListener("submit", function (event) {
           {
             label: spec.unit || "",
             data: spec.values || [],
-            backgroundColor: round ? PALETTE : PALETTE[0],
-            borderColor: round ? "#ffffff" : "transparent",
+            backgroundColor: round ? palette : palette[0],
+            borderColor: round ? surface : "transparent",
             borderWidth: round ? 2 : 0,
-            borderRadius: round ? 0 : 6,
+            borderRadius: round ? 0 : 4,
+            borderSkipped: round ? "middle" : "bottom",
+            maxBarThickness: 48,
           },
         ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: round } },
-        scales: round ? {} : { y: { beginAtZero: true } },
+        maintainAspectRatio: true,
+        aspectRatio: round ? 1.4 : 1.9,
+        plugins: {
+          legend: {
+            display: round,
+            position: "bottom",
+            labels: { color: text, boxWidth: 10, boxHeight: 10, usePointStyle: true },
+          },
+          tooltip: {
+            backgroundColor: surface,
+            titleColor: varaghInk("--text", "#111"),
+            bodyColor: varaghInk("--text-muted", "#666"),
+            borderColor: axis,
+            borderWidth: 1,
+            padding: 10,
+            displayColors: true,
+          },
+        },
+        scales: round
+          ? {}
+          : {
+              x: { grid: { display: false }, border: { color: axis }, ticks: { color: text } },
+              y: {
+                beginAtZero: true,
+                grid: { color: grid },
+                border: { display: false },
+                ticks: { color: text },
+              },
+            },
       },
     });
   }
