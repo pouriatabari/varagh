@@ -27,16 +27,14 @@ jobs:
   flutter:
     name: The checks of the desktop app
     runs-on: ubuntu-latest
+    # The official image of Flutter: the SDK is already there, so the
+    # workflow does not have to resolve a version of it.
+    container: ghcr.io/cirruslabs/flutter:stable
     defaults:
       run:
         working-directory: flutter_app
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: stable
-          cache: true
       - name: Write the platform folders
         run: VARAGH_PLATFORMS=linux,android bash tool/bootstrap.sh
       - name: Look for mistakes
