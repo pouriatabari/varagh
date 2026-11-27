@@ -9,9 +9,12 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../domain/rewards.dart';
+import 'desktop_factory_stub.dart'
+    if (dart.library.io) 'desktop_factory_io.dart';
+
+export 'package:sqflite/sqflite.dart' show Database;
 
 /// The name of the file of the journal.
 const String kDatabaseName = 'varagh.db';
@@ -21,11 +24,9 @@ const int kDatabaseVersion = 1;
 
 /// Open the journal of the user and make sure its shape is there.
 Future<Database> openJournal({String? directory}) async {
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  }
-  String folder = directory ?? p.join((await getApplicationSupportDirectory()).path, 'varagh');
+  prepareDatabaseFactory();
+  final String folder =
+      directory ?? p.join((await getApplicationSupportDirectory()).path, 'varagh');
   await Directory(folder).create(recursive: true);
   return openDatabase(
     p.join(folder, kDatabaseName),
@@ -45,13 +46,29 @@ Future<void> _createShape(Database db) async {
     CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
-      notes TEXT NOT NULL DEFAULT '',
-      status TEXT NOT NULL DEFAULT 'open',
+      description_md TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'todo',
+      priority INTEGER NOT NULL DEFAULT 2,
+      origin TEXT NOT NULL DEFAULT 'self_initiated',
+      context TEXT NOT NULL DEFAULT 'personal',
       domain_id INTEGER,
-      due_date TEXT,
-      estimate_minutes INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL,
-      completed_at TEXT
+      due_at TEXT,
+      effort_minutes_estimate INTEGER,
+      started_at TEXT,
+      completed_at TEXT,
+      last_activity_at TEXT,
+      deleted_at TEXT,
+      is_private INTEGER NOT NULL DEFAULT 1,
+      counts_for_medals INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL
+    )
+  ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS domains (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      color TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
     )
   ''');
   await db.execute('''
@@ -87,6 +104,27 @@ Future<void> _createShape(Database db) async {
       value_raw INTEGER NOT NULL DEFAULT 0,
       value_counted INTEGER NOT NULL DEFAULT 0,
       awarded_at TEXT NOT NULL
+    )
+  ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS medal_proposals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      review_id INTEGER,
+      title TEXT NOT NULL,
+      tier TEXT NOT NULL,
+      virtue TEXT NOT NULL DEFAULT 'prowess',
+      evidence_task_ids TEXT NOT NULL DEFAULT '[]',
+      impact_note INTEGER NOT NULL DEFAULT 0,
+      concrete INTEGER NOT NULL DEFAULT 0,
+      domain_name TEXT
+    )
+  ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS medal_evidence (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      medal_id INTEGER NOT NULL,
+      task_id INTEGER NOT NULL,
+      UNIQUE (task_id)
     )
   ''');
   await db.execute('''

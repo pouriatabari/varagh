@@ -40,7 +40,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
     int open = 0;
     for (final Map<String, Object?> row in rows) {
-      if (row['status'] == 'open') open++;
+      final String status = row['status'] as String? ?? 'todo';
+      if (status == 'todo' || status == 'doing') open++;
     }
     final SkillTree tree = buildSkillTree(
       medals: snapshot.medals,

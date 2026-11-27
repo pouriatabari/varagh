@@ -4,19 +4,18 @@ library;
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'data/database.dart';
 import 'domain/rewards_config.dart';
-import 'domain/skill_tree.dart';
 import 'i18n.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/honours_screen.dart';
 import 'screens/learning_screen.dart';
 import 'screens/reviews_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/tasks_screen.dart';
 import 'theme.dart';
 
 /// The app of the user: the journal, in Persian, on every screen.
-class VaraghApp extends StatelessWidget {
+class VaraghApp extends StatefulWidget {
   const VaraghApp({
     super.key,
     required this.database,
@@ -29,9 +28,20 @@ class VaraghApp extends StatelessWidget {
   final String themeName;
 
   @override
+  State<VaraghApp> createState() => _VaraghAppState();
+}
+
+class _VaraghAppState extends State<VaraghApp> {
+  late String _themeName = widget.themeName;
+
+  void _changeTheme(String name) {
+    setState(() => _themeName = name);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final AppPalette palette =
-        themeName == 'parchment' ? AppPalette.parchment : AppPalette.night;
+        _themeName == 'parchment' ? AppPalette.parchment : AppPalette.night;
     return MaterialApp(
       title: Fa.t('app.name'),
       debugShowCheckedModeBanner: false,
@@ -44,7 +54,13 @@ class VaraghApp extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: HomeShell(database: database, config: config, palette: palette),
+      home: HomeShell(
+        database: widget.database,
+        config: widget.config,
+        palette: palette,
+        themeName: _themeName,
+        onThemeChanged: _changeTheme,
+      ),
     );
   }
 }
@@ -65,11 +81,15 @@ class HomeShell extends StatefulWidget {
     required this.database,
     required this.config,
     required this.palette,
+    required this.themeName,
+    required this.onThemeChanged,
   });
 
   final Database database;
   final RewardsConfig config;
   final AppPalette palette;
+  final String themeName;
+  final ValueChanged<String> onThemeChanged;
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -100,7 +120,11 @@ class _HomeShellState extends State<HomeShell> {
       _Page(
         'reviews',
         Icons.assessment_outlined,
-        (BuildContext context) => ReviewsScreen(database: widget.database),
+        (BuildContext context) => ReviewsScreen(
+          database: widget.database,
+          config: widget.config,
+          onChanged: () {},
+        ),
       ),
       _Page(
         'honours',
@@ -108,6 +132,15 @@ class _HomeShellState extends State<HomeShell> {
         (BuildContext context) => HonoursScreen(
           database: widget.database,
           config: widget.config,
+        ),
+      ),
+      _Page(
+        'settings',
+        Icons.settings_outlined,
+        (BuildContext context) => SettingsScreen(
+          database: widget.database,
+          themeName: widget.themeName,
+          onThemeChanged: widget.onThemeChanged,
         ),
       ),
     ];
@@ -168,20 +201,4 @@ class _HomeShellState extends State<HomeShell> {
       },
     );
   }
-}
-
-/// The tree of the ranks, built out of the journal of the user.
-Future<SkillTree> buildTreeOfUser(
-  Database database,
-  RewardsConfig config,
-) async {
-  final HonoursSnapshot snapshot = await HonoursSnapshot.read(database);
-  return buildSkillTree(
-    medals: snapshot.medals,
-    musters: snapshot.musters,
-    reachedTitles: snapshot.reachedTitles,
-    config: config,
-    titleName: Fa.title,
-    gateName: Fa.gate,
-  );
 }

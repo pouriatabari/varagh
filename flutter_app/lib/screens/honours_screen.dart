@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../data/database.dart';
 import '../domain/rewards_config.dart';
 import '../domain/skill_tree.dart';
 import '../i18n.dart';
@@ -164,7 +165,7 @@ class _NodePanel extends StatelessWidget {
       );
     }
 
-    final TitleRule? rule = _ruleOf(widget.config, picked.titleKey);
+    final TitleRule? rule = _ruleOf(config, picked.titleKey);
 
     return Card(
       child: Padding(

@@ -9,8 +9,8 @@ import 'domain/rewards_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final Database database = await openJournal();
-  final RewardsConfig config = await RewardsConfig.load();
-  final String themeName = await readSetting(database, 'theme') ?? 'night';
+  final database = await openJournal();
+  final config = await RewardsConfig.load();
+  final themeName = await readSetting(database, 'theme') ?? 'night';
   runApp(VaraghApp(database: database, config: config, themeName: themeName));
 }
