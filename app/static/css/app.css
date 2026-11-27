@@ -89,6 +89,144 @@ html[data-theme="parchment"] {
   color-scheme: light;
 }
 
+/* The court chart, the round table and the heraldry. The lit tiers glow
+   and the locked ones are dimmed with a lock glyph, so the state never
+   rests on the colour alone. */
+.court-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.court-chart .court-tier path {
+  fill: var(--bg-elevated);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.court-chart .court-tier text {
+  fill: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.court-chart .court-tier.lit path {
+  fill: var(--accent);
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 6px var(--glow));
+}
+
+.court-chart .court-tier.lit text {
+  fill: var(--text);
+}
+
+.court-chart .court-tier.locked path {
+  opacity: 0.45;
+}
+
+.court-chart .court-tier.locked text::after {
+  content: " \2714";
+}
+
+.court-chart .court-tier.current path {
+  stroke: var(--accent-2);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px var(--glow-2));
+}
+
+.court-chart .court-tier.next path {
+  stroke-dasharray: 4 3;
+}
+
+.round-table .table-top {
+  fill: var(--bg-elevated);
+  stroke: var(--border);
+}
+
+.round-table .table-hole {
+  fill: var(--bg);
+  stroke: var(--border);
+}
+
+.round-table .seat path {
+  fill: var(--bg-elevated);
+  stroke: var(--border);
+  opacity: 0.5;
+}
+
+.round-table .seat.lit path {
+  fill: var(--accent);
+  opacity: 0.9;
+  filter: drop-shadow(0 0 5px var(--glow));
+}
+
+.round-table .seat text {
+  fill: var(--text);
+  font-size: 11px;
+}
+
+.round-table .seat.locked text {
+  fill: var(--text-muted);
+}
+
+.seat-legend {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.15rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.seat-mark {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+.seat-mark.lit {
+  background: var(--accent);
+  box-shadow: 0 0 5px var(--glow);
+}
+
+.seat-mark.locked {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.heraldry-frame {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.heraldry {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .court-chart .court-tier.current path,
+  .round-table .seat.lit path {
+    animation: court-glow 4s ease-in-out infinite;
+  }
+}
+
+@keyframes court-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}
+
 /* The header of the hall of the honours, the gates of the next title
    and the proposals of a muster. */
 .honours-header .progress {

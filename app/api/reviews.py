@@ -9,11 +9,11 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_bool, form_int, form_str
-from app.i18n import t
+from app.i18n import t, translate
 from app.security import validate_csrf
 from app.services import achievements as achievement_service
 from app.services import charts as chart_service
-from app.services import honours, rewards, rewards_config
+from app.services import court, heraldry, honours, rewards, rewards_config
 from app.services import reviews as review_service
 from app.services import settings as settings_service
 from app.templating import templates
@@ -302,6 +302,7 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
     """
     rows = achievement_service.list_achievements(session)
     config = rewards_config.load_config()
+    lexicon = settings_service.lexicon(session)
     state = honours.title_state(session, config)
     medals = honours.list_medals(session)
     context = base_context(
@@ -315,6 +316,20 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
         honours=state,
         honours_medals=medals,
         honours_config=config,
+        court_chart=court.court_chart_svg(
+            honours.court_tiers(session, config),
+            labels={
+                rule.key: str(translate(f"honours.title.{rule.key}", lexicon))
+                for rule in config.titles
+            },
+        ),
+        round_table=court.round_table_svg(honours.seats(session)),
+        honours_seats=honours.seats(session),
+        heraldry=heraldry.heraldry_svg(
+            title_key=state.current,
+            domains=honours.top_domains(session),
+            virtues=list(state.virtues),
+        ),
     )
     return templates.TemplateResponse(request, "achievements.html", context)
 

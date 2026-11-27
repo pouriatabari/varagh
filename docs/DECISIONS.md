@@ -273,3 +273,19 @@ together with its rationale.
   could be raised freely, the evidence would be a decoration. The draft
   keeps the reading and the giving apart, so the user always stands
   between the work and its honour.
+
+## D30 — The pictures of the hall are read from the database, never drawn by the AI
+
+- **Decision:** The arms, the court chart and the round table are generated
+  by the server from the state of the honours: the title gives the crown,
+  the domains the user works in give the colours of the field, the virtues
+  the medals stand for give the charges, and the counted medals give the
+  lit tiers and the lit seats. The generator is deterministic — the same
+  state always gives the same SVG — and it never asks the AI for a picture.
+- **Why:** A picture that an AI draws may be beautiful, but it would also
+  be a picture that could say anything. The arms of the hall must be a
+  reading of the work and not a story about it, so the colours, the
+  charges and the crown are taken from the database and nothing else. The
+  determinism also lets the pictures be tested: a snapshot of every picture
+  is kept in the repository, and a change of a picture is a change that
+  must be read in the diff.

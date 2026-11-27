@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from app.models.review import Achievement, Review
 from app.models.rewards import Medal, MedalEvidence, Order, Quest, RealmClaim, TitleHistory
 from app.models.task import Domain, Task
-from app.services import rewards
+from app.services import court, rewards
 from app.services.rewards_config import VIRTUES, RewardsConfig
 from app.utils.jalali import jalali_of
 from app.utils.time import utcnow
@@ -299,3 +299,58 @@ def achievement_of_medal(session: Session, medal: Medal) -> Achievement | None:
     if medal.achievement_id is None:
         return None
     return session.get(Achievement, medal.achievement_id)
+
+
+def top_domains(session: Session, limit: int = 3) -> list[str]:
+    """The domains the user works in most, by the medals that counted."""
+    rows = session.execute(
+        select(Medal.domain_id, func.count(Medal.id))
+        .where(Medal.domain_id.isnot(None), Medal.value_counted > 0)
+        .group_by(Medal.domain_id)
+        .order_by(func.count(Medal.id).desc())
+    ).all()
+    names = []
+    for domain_id, _count in rows:
+        domain = session.get(Domain, domain_id)
+        if domain is not None:
+            names.append(domain.name)
+    return names[:limit]
+
+
+def virtue_counts(session: Session) -> dict[str, int]:
+    """The counted medals of every virtue."""
+    rows = session.execute(
+        select(Medal.virtue, func.count(Medal.id))
+        .where(Medal.value_counted > 0)
+        .group_by(Medal.virtue)
+    ).all()
+    return {virtue: int(count) for virtue, count in rows}
+
+
+def court_tiers(session: Session, config: RewardsConfig) -> list[court.CourtTier]:
+    """The tiers of the pyramid, from the page at the bottom to the king."""
+    state = title_state(session, config)
+    reached = set(state.reached)
+    tiers = []
+    for rule in config.titles:
+        tiers.append(
+            court.CourtTier(
+                key=rule.key,
+                reached=rule.key in reached,
+                current=rule.key == state.current,
+                next=rule.key == state.next_title,
+            )
+        )
+    return tiers
+
+
+def seats(session: Session) -> list[court.Seat]:
+    """The six seats of the round table, with the medals of each virtue."""
+    counts = virtue_counts(session)
+    highest = max(counts.values(), default=0)
+    seats = []
+    for virtue in court.VIRTUE_ORDER:
+        count = counts.get(virtue, 0)
+        share = (count / highest) if highest else 0.0
+        seats.append(court.Seat(virtue=virtue, count=count, share=share))
+    return seats

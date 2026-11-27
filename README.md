@@ -278,6 +278,15 @@ before it gives anything:
 Every number of the engine lives in `config/rewards.yaml` and is validated
 when it is read, so a wrong number is reported instead of breaking a muster.
 
+The hall is drawn, not written: the header of the hall carries the arms of
+the user (a deterministic coat of arms — the colour of the domain the work
+is in, the charges of the virtues the medals stand for, the crown of the
+title), the degrees that were earned and the gates that still stand between
+the user and the next title. Below it the court chart shows the pyramid of
+the titles with the tiers that were reached lit, and the round table shows
+the six virtues, each seat lighting as far as the medals of that virtue have
+carried the user.
+
 ## Project structure
 
 ```
@@ -321,11 +330,10 @@ app/
 - [x] M9 — export, backup/restore, seed data, final polish
 - [x] M10 — the two lexicons, the two themes, the icon manifest and the credits
 - [x] M11 — the reward engine: the musters, the medals, the degrees and the titles
+- [x] M12 — the hall: the court chart, the round table and the heraldry
 
 Still open:
 
-- The court chart, the round table and the heraldry of the hall of the honours
-  are not drawn yet.
 - The realm map and the saga of the musters are not written yet.
 - The learning report is generated per item; a yearly summary page is missing.
 - The dashboard heatmap is a flat 90-day grid; a calendar-shaped heatmap would
