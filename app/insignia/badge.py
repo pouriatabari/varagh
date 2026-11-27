@@ -133,6 +133,7 @@ def render_badge(
     title: Title | None = title_of(title_key)
     emblem = title.emblem if title is not None else Emblem(kind="plain_shield")
     metal = title.metal if title is not None else "iron"
+    tincture = title.field if title is not None else "sable"
     width, height = SIZES.get(size, SIZES["md"])
     if state not in STATES:
         state = "lit"
@@ -144,7 +145,7 @@ def render_badge(
         body.append(f'<g class="insignia-rays">{shapes.rays(emblem.rays)}</g>')
     body.append(f'<g class="insignia-crest">{_coronet(emblem)}</g>')
 
-    ground = [shapes.shield(), shapes.rim(metal)]
+    ground = [shapes.shield(metal), shapes.field(tincture)]
     if emblem.kind == "spurs":
         ground.append(f'<g class="insignia-charge">{shapes.spurs(emblem.count)}</g>')
     elif emblem.kind == "sword":

@@ -14,9 +14,15 @@ import math
 VIEWBOX = "0 0 100 118"
 
 # The heater shield: flat at the top, straight at the sides, a point at
-# the bottom.
+# the bottom. The border of the shield is the metal of the title, and
+# the field inside it is the tincture of the title.
 SHIELD_PATH = (
-    "M 15 34 H 85 V 64 C 85 86 70 100 50 109 C 30 100 15 86 15 64 Z"
+    "M 14 30 H 86 V 60 C 86 85 68 103 50 112 C 32 103 14 85 14 60 Z"
+)
+
+# The field of the shield: the same shield, drawn inside the border.
+FIELD_PATH = (
+    "M 22 38 H 78 V 60 C 78 78 63 94 50 102 C 37 94 22 78 22 60 Z"
 )
 
 # The band that every coronet and every crown stands on.
@@ -55,16 +61,19 @@ def _points(count: int, left: float, right: float) -> list[float]:
     return [left + index * step for index in range(count)]
 
 
-def shield() -> str:
-    """The ground of the badge: a plain heater shield."""
-    return f'<path class="insignia-shield" d="{SHIELD_PATH}" />'
-
-
-def rim(metal: str) -> str:
-    """The frame of the shield, in the metal of the title."""
+def shield(metal: str) -> str:
+    """The border of the shield, in the metal of the title."""
     return (
-        f'<path class="insignia-rim" d="{SHIELD_PATH}" '
+        f'<path class="insignia-bordure" d="{SHIELD_PATH}" '
         f'style="--insignia-metal: var(--insignia-{metal})" />'
+    )
+
+
+def field(tincture: str) -> str:
+    """The field of the shield, in the tincture of the title."""
+    return (
+        f'<path class="insignia-field" d="{FIELD_PATH}" '
+        f'style="--insignia-tincture: var(--insignia-{tincture})" />'
     )
 
 
@@ -216,7 +225,7 @@ def island() -> str:
     return (
         '<g class="insignia-island">'
         f'<path d="{ISLAND_PATH}" />'
-        '<path class="insignia-wave" d="M 26 84 Q 34 80 42 84 T 58 84 T 74 84" />'
+        '<path class="insignia-wave" d="M 30 82 Q 37 78 45 82 T 60 82 T 71 82" />'
         "</g>"
     )
 
@@ -234,8 +243,8 @@ def studs(filled: int, total: int) -> str:
     rows = [drawn] if drawn <= 6 else [6, drawn - 6]
     index = 0
     for row, count in enumerate(rows):
-        y = 86 + row * 11
-        for x in _points(count, 27, 73):
+        y = 79 + row * 11
+        for x in _points(count, 30, 70):
             filled_stud = index < filled
             body.append(
                 f'<circle class="insignia-stud {"filled" if filled_stud else "hollow"}" '

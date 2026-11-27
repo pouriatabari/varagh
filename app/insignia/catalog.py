@@ -45,6 +45,7 @@ class Title:
     level: int
     family: str
     metal: str
+    field: str
     emblem: Emblem
     note_fa: str
 
@@ -124,6 +125,7 @@ def load_titles() -> dict[str, Title]:
             level=int(raw.get("level", 0)),
             family=str(raw.get("family", "service")),
             metal=str(raw.get("metal", "iron")),
+            field=str(raw.get("field", "sable")),
             emblem=_emblem(raw.get("emblem", {}) or {}),
             note_fa=str(raw.get("note_fa", "")),
         )
