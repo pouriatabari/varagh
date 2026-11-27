@@ -38,9 +38,12 @@
     <span class="chip info"><bdi>{{ name }}</bdi></span>
     {% endfor %}
     <a class="btn btn-sm" href="/tasks/{{ task.id }}">{{ t('common.edit') }}</a>
-    <form method="post" action="/tasks/{{ task.id }}/delete" data-confirm="{{ t('tasks.delete_confirm_one') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <button class="btn btn-sm btn-danger" type="submit">{{ t('tasks.delete_one') }}</button>
-    </form>
+    <button
+      class="btn btn-sm btn-danger"
+      type="button"
+      @click="deleteOne('/tasks/{{ task.id }}/delete')"
+    >
+      {{ t('tasks.delete_one') }}
+    </button>
   </div>
 </li>

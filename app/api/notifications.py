@@ -5,7 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from markupsafe import escape
 from sqlalchemy import select
 
 from app.api.deps import SessionDep
@@ -121,10 +122,10 @@ async def notifications_test(channel: str, session: SessionDep) -> JSONResponse:
     return JSONResponse({"ok": ok}, status_code=200 if ok else 502)
 
 
-@router.post("/settings/notifications")
-async def settings_notifications(request: Request, session: SessionDep) -> JSONResponse:
+@router.post("/settings/notifications", response_class=HTMLResponse)
+async def settings_notifications(request: Request, session: SessionDep) -> HTMLResponse:
     """Save the notification settings."""
     form = await request.form()
     config = _form_config(form)
     settings_service.update_settings(session, {"notifications": config})
-    return JSONResponse({"ok": True})
+    return HTMLResponse(f'<span class="muted">{escape(t("settings.saved"))}</span>')

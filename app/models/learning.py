@@ -32,6 +32,7 @@ class LearningItem(Base, TimestampMixin):
     started_at: Mapped[date | None] = mapped_column(Date)
     finished_at: Mapped[date | None] = mapped_column(Date)
     notes_md: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class LearningUnit(Base, TimestampMixin):

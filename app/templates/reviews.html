@@ -7,28 +7,82 @@
 </div>
 
 {% if reviews %}
-<table class="table">
-  <thead>
-    <tr>
-      <th>{{ t('reviews.period_type') }}</th>
-      <th>{{ t('reviews.period_range') }}</th>
-      <th>{{ t('reviews.rating') }}</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for review in reviews %}
-    <tr>
-      <td>{{ t('reviews.period_type.' + review.period_type) }}</td>
-      <td dir="ltr">{{ review.period_start }} → {{ review.period_end }}</td>
-      <td>{{ review.rating | digits if review.rating else '—' }}</td>
-      <td>
-        <a class="btn btn-sm" href="/reviews/{{ review.id }}">{{ t('common.edit') }}</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div
+  x-data="varaghSelection({{ review_ids | tojson }})"
+  data-confirm="{{ t('tasks.delete_confirm') }}"
+  data-confirm-one="{{ t('tasks.delete_confirm_one') }}"
+>
+  <div class="bulk-bar">
+    <label class="inline">
+      <input type="checkbox" @change="toggleAll($event.target.checked)" />
+      {{ t('tasks.select_all') }}
+    </label>
+    <span class="small muted" x-text="selected.length + ' ' + '{{ t('tasks.selected_unit') }}'"></span>
+    <button
+      class="btn btn-sm btn-danger"
+      type="button"
+      :disabled="selected.length === 0"
+      @click="deleteAll('/reviews/delete', 'review_ids')"
+    >
+      {{ t('tasks.delete_selected') }}
+    </button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>{{ t('reviews.period_type') }}</th>
+        <th>{{ t('reviews.period_range') }}</th>
+        <th>{{ t('reviews.status') }}</th>
+        <th>{{ t('reviews.rating') }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for review in reviews %}
+      <tr>
+        <td>
+          <input
+            type="checkbox"
+            name="review_ids"
+            value="{{ review.id }}"
+            x-model="selected"
+            aria-label="{{ t('common.select') }}"
+          />
+        </td>
+        <td>{{ t('reviews.period_type.' + review.period_type) }}</td>
+        <td dir="ltr">{{ review.period_start }} → {{ review.period_end }}</td>
+        <td>
+          {% if review.rating or review.user_final_md %}
+          <span class="chip">{{ t('reviews.status_finished') }}</span>
+          {% else %}
+          <span class="chip">{{ t('reviews.status_draft') }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if review.rating %}
+          <bdi>{{ review.rating | rating }}</bdi>
+          {% else %}
+          —
+          {% endif %}
+        </td>
+        <td class="row">
+          <a class="btn btn-sm" href="/reviews/{{ review.id }}?view=1">{{ t('reviews.view') }}</a>
+          <a class="btn btn-sm" href="/reviews/{{ review.id }}">{{ t('common.edit') }}</a>
+          <button
+            class="btn btn-sm btn-danger"
+            type="button"
+            @click="deleteOne('/reviews/{{ review.id }}/delete')"
+          >
+            {{ t('tasks.delete_one') }}
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
 <p class="muted">{{ t('reviews.empty') }}</p>
 {% endif %}

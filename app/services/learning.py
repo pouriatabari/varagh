@@ -56,17 +56,42 @@ def create_item(
     return item
 
 
-def list_items(session: Session, status: str | None = None) -> list[LearningItem]:
+def list_items(
+    session: Session, status: str | None = None, include_deleted: bool = False
+) -> list[LearningItem]:
     """Return the learning items, optionally filtered by status."""
     query = select(LearningItem).order_by(LearningItem.created_at.desc())
+    if not include_deleted:
+        query = query.where(LearningItem.deleted_at.is_(None))
     if status:
         query = query.where(LearningItem.status == status)
     return list(session.scalars(query).all())
 
 
-def get_item(session: Session, item_id: int) -> LearningItem | None:
+def get_item(
+    session: Session, item_id: int, include_deleted: bool = False
+) -> LearningItem | None:
     """Return a learning item by id."""
-    return session.get(LearningItem, item_id)
+    item = session.get(LearningItem, item_id)
+    if item is None:
+        return None
+    if item.deleted_at is not None and not include_deleted:
+        return None
+    return item
+
+
+def soft_delete(session: Session, item: LearningItem, now: datetime) -> LearningItem:
+    """Soft-delete a learning item (kept for the audit trail)."""
+    item.deleted_at = now
+    session.flush()
+    return item
+
+
+def restore(session: Session, item: LearningItem) -> LearningItem:
+    """Undo a soft delete."""
+    item.deleted_at = None
+    session.flush()
+    return item
 
 
 def set_status(session: Session, item: LearningItem, status: str, now: datetime) -> LearningItem:

@@ -78,11 +78,6 @@
     });
   }
 
-  function csrfToken() {
-    const input = document.querySelector("input[name='csrf_token']");
-    return input ? input.value : "";
-  }
-
   function markRead(id) {
     return fetch("/api/notifications/" + id + "/read", {
       method: "POST",
@@ -125,18 +120,90 @@
   }
 })();
 
-/* The selection of the task list: the checkboxes of the tasks and the bulk
-   actions of the page. */
-function taskSelection(ids) {
+/* The CSRF token of the page: the hidden field of a form, or the cookie. */
+function csrfToken() {
+  const input = document.querySelector("input[name='csrf_token']");
+  if (input) return input.value;
+  const match = document.cookie.match(/(?:^|;\s*)varagh_csrf=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+window.csrfToken = csrfToken;
+
+/* The reason of a time entry is required when the kind is overtime. */
+function varaghToggleOvertimeReason() {
+  var select = document.getElementById("kind");
+  var reason = document.getElementById("reason");
+  if (!select || !reason) return;
+  var apply = function () {
+    reason.required = select.value === "overtime";
+  };
+  select.addEventListener("change", apply);
+  apply();
+}
+document.addEventListener("DOMContentLoaded", varaghToggleOvertimeReason);
+
+/* A form that is built in the browser and sent right away. It keeps the
+   checkboxes of a list out of the page, so a list may hold its own forms. */
+function varaghPost(url, fields) {
+  var form = document.createElement("form");
+  form.method = "post";
+  form.action = url;
+  var token = document.createElement("input");
+  token.type = "hidden";
+  token.name = "csrf_token";
+  token.value = csrfToken();
+  form.appendChild(token);
+  Object.keys(fields || {}).forEach(function (name) {
+    var values = Array.isArray(fields[name]) ? fields[name] : [fields[name]];
+    values.forEach(function (value) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    });
+  });
+  document.body.appendChild(form);
+  form.submit();
+}
+window.varaghPost = varaghPost;
+
+/* The selection of a list: the checkboxes of the rows and the actions of the
+   page. The ids are the values of the checkboxes, as strings. */
+function varaghSelection(ids) {
   return {
     selected: [],
-    ids: ids || [],
+    /* The ids are the values of the checkboxes: strings. */
+    ids: (ids || []).map(String),
     toggleAll(value) {
       this.selected = value ? this.ids.slice() : [];
     },
+    confirmMessage(attribute) {
+      var root = this.$root;
+      if (!root || !root.getAttribute) return "";
+      return root.getAttribute(attribute) || "";
+    },
+    deleteAll(url, field) {
+      if (!this.selected.length) return;
+      var message = this.confirmMessage("data-confirm");
+      if (message && !window.confirm(message)) return;
+      var payload = {};
+      payload[field] = this.selected.slice();
+      varaghPost(url, payload);
+    },
+    deleteOne(url) {
+      var message = this.confirmMessage("data-confirm-one");
+      if (message && !window.confirm(message)) return;
+      varaghPost(url, {});
+    },
   };
 }
-window.taskSelection = taskSelection;
+window.varaghSelection = varaghSelection;
+
+/* Alpine calls this event before it evaluates the first expression. */
+document.addEventListener("alpine:init", function () {
+  window.varaghSelection = varaghSelection;
+});
 
 /* A form may ask for a confirmation before it is sent. */
 document.addEventListener("submit", function (event) {

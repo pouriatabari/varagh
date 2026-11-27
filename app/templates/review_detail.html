@@ -3,6 +3,9 @@
 {% block content %}
 <div class="card-title">
   <h1>{{ t('reviews.period_type.' + review.period_type) }}</h1>
+  {% if readonly %}
+  <a class="btn" href="/reviews/{{ review.id }}">{{ t('common.edit') }}</a>
+  {% endif %}
   <a class="btn" href="/reviews/{{ review.id }}/export.md">{{ t('reviews.export') }}</a>
 </div>
 <p class="muted" dir="ltr">{{ review.period_start }} → {{ review.period_end }}</p>
@@ -89,6 +92,23 @@
   {% endif %}
   {% endif %}
   <div class="divider"></div>
+  {% if readonly %}
+  <p class="small muted">{{ t('reviews.readonly_hint') }}</p>
+  {% if review.user_final_md %}
+  <div class="markdown-body" dir="auto">{{ review.user_final_md | markdown }}</div>
+  {% else %}
+  <p class="muted">{{ t('reviews.empty') }}</p>
+  {% endif %}
+  <p>
+    <strong>{{ t('reviews.rating') }}:</strong>
+    {% if review.rating %}
+    <bdi>{{ review.rating | rating }}</bdi>
+    {% else %}
+    —
+    {% endif %}
+    <span class="small muted">{{ t('reviews.rating_hint') }}</span>
+  </p>
+  {% else %}
   <form method="post" action="/reviews/{{ review.id }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div class="field">
@@ -96,10 +116,12 @@
       <textarea id="user_final_md" name="user_final_md" dir="auto">{{ review.user_final_md }}</textarea>
     </div>
     <div class="field">
-      <label for="rating">{{ t('reviews.rating') }}</label>
+      <label for="rating">{{ t('reviews.rating') }} ({{ t('reviews.rating_of').format(max='۵') }})</label>
       <input type="number" id="rating" name="rating" min="1" max="5" value="{{ review.rating or '' }}" />
+      <p class="small muted">{{ t('reviews.rating_hint') }}</p>
     </div>
     <button class="btn btn-primary" type="submit">{{ t('common.save') }}</button>
   </form>
+  {% endif %}
 </div>
 {% endblock %}

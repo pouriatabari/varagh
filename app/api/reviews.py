@@ -4,18 +4,19 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_int, form_str
+from app.security import validate_csrf
 from app.services import achievements as achievement_service
 from app.services import reviews as review_service
 from app.services import settings as settings_service
 from app.templating import templates
 from app.utils.time import utcnow
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(validate_csrf)])
 
 
 def _redirect(url: str, flash: str | None = None, error: str | None = None) -> RedirectResponse:
@@ -45,11 +46,13 @@ def _period_from_request(request: Request) -> review_service.PeriodSelection:
 @router.get("/reviews", response_class=HTMLResponse)
 async def review_list(request: Request, session: SessionDep) -> HTMLResponse:
     """List the saved reviews."""
+    rows = review_service.list_reviews(session)
     context = base_context(
         request,
         session,
         active_page="reviews",
-        reviews=review_service.list_reviews(session),
+        reviews=rows,
+        review_ids=[review.id for review in rows],
     )
     return templates.TemplateResponse(request, "reviews.html", context)
 
@@ -138,8 +141,38 @@ async def review_detail(request: Request, review_id: int, session: SessionDep) -
         review=review,
         previous=previous,
         comparison=comparison,
+        readonly=request.query_params.get("view") == "1",
     )
     return templates.TemplateResponse(request, "review_detail.html", context)
+
+
+@router.post("/reviews/{review_id}/delete")
+async def review_delete(request: Request, review_id: int, session: SessionDep) -> RedirectResponse:
+    """Delete a review."""
+    review = review_service.get_review(session, review_id)
+    if review is None:
+        return _redirect("/reviews", error="error.not_found")
+    review_service.delete_review(session, review)
+    return _redirect("/reviews", flash="flash.review_deleted")
+
+
+@router.post("/reviews/delete")
+async def reviews_delete(request: Request, session: SessionDep) -> RedirectResponse:
+    """Delete every review of the selection."""
+    form = await request.form()
+    ids = [int(value) for value in form.getlist("review_ids") if str(value).isdigit()]
+    if not ids:
+        return _redirect("/reviews", error="error.validation")
+    deleted = 0
+    for review_id in ids:
+        review = review_service.get_review(session, review_id)
+        if review is None:
+            continue
+        review_service.delete_review(session, review)
+        deleted += 1
+    if not deleted:
+        return _redirect("/reviews", error="error.not_found")
+    return _redirect(f"/reviews?flash=flash.reviews_deleted&count={deleted}")
 
 
 @router.post("/reviews/{review_id}")
@@ -181,6 +214,7 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
         session,
         active_page="achievements",
         achievements=rows,
+        achievement_ids=[row.id for row in rows],
         linked_tasks={row.id: achievement_service.linked_task_ids(session, row) for row in rows},
     )
     return templates.TemplateResponse(request, "achievements.html", context)
@@ -218,6 +252,37 @@ async def achievement_confirm(
         return _redirect("/achievements", error="error.not_found")
     achievement_service.confirm(session, achievement)
     return _redirect("/achievements", flash="flash.achievement_created")
+
+
+@router.post("/achievements/{achievement_id}/delete")
+async def achievement_delete(
+    request: Request, achievement_id: int, session: SessionDep
+) -> RedirectResponse:
+    """Delete an achievement."""
+    achievement = achievement_service.get_achievement(session, achievement_id)
+    if achievement is None:
+        return _redirect("/achievements", error="error.not_found")
+    achievement_service.delete_achievement(session, achievement)
+    return _redirect("/achievements", flash="flash.achievement_deleted")
+
+
+@router.post("/achievements/delete")
+async def achievements_delete(request: Request, session: SessionDep) -> RedirectResponse:
+    """Delete every achievement of the selection."""
+    form = await request.form()
+    ids = [int(value) for value in form.getlist("achievement_ids") if str(value).isdigit()]
+    if not ids:
+        return _redirect("/achievements", error="error.validation")
+    deleted = 0
+    for achievement_id in ids:
+        achievement = achievement_service.get_achievement(session, achievement_id)
+        if achievement is None:
+            continue
+        achievement_service.delete_achievement(session, achievement)
+        deleted += 1
+    if not deleted:
+        return _redirect("/achievements", error="error.not_found")
+    return _redirect(f"/achievements?flash=flash.achievements_deleted&count={deleted}")
 
 
 @router.get("/achievements/{achievement_id}/export.md", response_class=PlainTextResponse)

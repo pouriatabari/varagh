@@ -89,10 +89,12 @@
       </div>
     </div>
 
+    {# app.js comes before Alpine: the script of Alpine starts in a microtask,
+       so the helpers of the page must exist before it runs. #}
     <script src="/static/vendor/htmx.min.js" defer></script>
-    <script src="/static/vendor/alpine.min.js" defer></script>
     <script src="/static/vendor/chart.umd.min.js" defer></script>
     <script src="/static/js/app.js" defer></script>
+    <script src="/static/vendor/alpine.min.js" defer></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

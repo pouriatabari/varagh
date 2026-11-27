@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_int, form_str
+from app.security import validate_csrf
 from app.services import learning as learning_service
 from app.templating import templates
 from app.utils.time import utcnow
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(validate_csrf)])
 
 
 def _redirect(url: str, flash: str | None = None, error: str | None = None) -> RedirectResponse:
@@ -36,6 +37,7 @@ async def learning_list(request: Request, session: SessionDep) -> HTMLResponse:
         session,
         active_page="learning",
         items=items,
+        item_ids=[item.id for item in items],
         progress={item.id: learning_service.progress(session, item) for item in items},
         stale=[
             item
@@ -90,6 +92,36 @@ async def learning_detail(request: Request, item_id: int, session: SessionDep) -
         progress=learning_service.progress(session, item),
     )
     return templates.TemplateResponse(request, "learning_detail.html", context)
+
+
+@router.post("/learning/{item_id}/delete")
+async def learning_delete(request: Request, item_id: int, session: SessionDep) -> RedirectResponse:
+    """Soft-delete a learning item."""
+    item = learning_service.get_item(session, item_id)
+    if item is None:
+        return _redirect("/learning", error="error.not_found")
+    learning_service.soft_delete(session, item, utcnow())
+    return _redirect("/learning", flash="flash.learning_deleted")
+
+
+@router.post("/learning/delete")
+async def learning_delete_many(request: Request, session: SessionDep) -> RedirectResponse:
+    """Soft-delete every learning item of the selection."""
+    form = await request.form()
+    ids = [int(value) for value in form.getlist("item_ids") if str(value).isdigit()]
+    if not ids:
+        return _redirect("/learning", error="error.validation")
+    now = utcnow()
+    deleted = 0
+    for item_id in ids:
+        item = learning_service.get_item(session, item_id)
+        if item is None:
+            continue
+        learning_service.soft_delete(session, item, now)
+        deleted += 1
+    if not deleted:
+        return _redirect("/learning", error="error.not_found")
+    return _redirect(f"/learning?flash=flash.learning_deleted_many&count={deleted}")
 
 
 @router.post("/learning/{item_id}/status")

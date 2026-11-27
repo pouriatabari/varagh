@@ -278,6 +278,12 @@ def _days_with_entries(entries: list[Any], timezone: str, kind: str | None = Non
     return sorted(days)
 
 
+def delete_review(session: Session, review: Review) -> None:
+    """Delete a review with its statistics snapshot."""
+    session.delete(review)
+    session.flush()
+
+
 def list_reviews(session: Session) -> list[Review]:
     """Return every review, newest period first."""
     query = select(Review).order_by(Review.period_end.desc(), Review.id.desc())

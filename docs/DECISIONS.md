@@ -157,3 +157,31 @@ together with its rationale.
   charts too: a model that sends its own numbers could show a bar that no
   time entry ever produced. Naming a series keeps the figure in the database
   and lets the labels stay in the app's own Persian wording.
+
+## D19 — Every list shares one selection, and the deletion is a form built in the browser
+
+- **Decision:** The task list, the learning items, the achievements and the
+  reviews share the same Alpine component: a checkbox per row, a «select all»
+  that ticks every box of the page, and a bulk action that deletes the
+  selection. The request is a small form that the browser builds and sends,
+  not a wrapping `<form>` around the list.
+- **Why:** A wrapping form would put the per-row forms inside it, and nested
+  forms are invalid HTML — the browsers drop them, which is why a per-row
+  delete did nothing. Building the form in the browser keeps every page valid
+  and lets the same component serve the four lists.
+
+## D20 — The learning items are soft-deleted
+
+- **Decision:** A deleted learning item keeps its row with a `deleted_at`
+  marker (migration `0003`); the list and the detail page skip the deleted
+  items. The tasks behave the same way.
+- **Why:** The study logs of a learning item and the time entries that point
+  at it must stay intact; a hard delete would take the history with it.
+
+## D21 — The overtime has a form of its own
+
+- **Decision:** The calendar carries a dedicated card for the overtime, next
+  to the general time entry. The reason is mandatory there, and the reason of
+  the general form becomes mandatory as soon as its kind is `overtime`.
+- **Why:** The overtime is reported apart from the regular working time, with
+  its own reason. It must be a deliberate act, not an accident of a dropdown.

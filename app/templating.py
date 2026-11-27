@@ -53,7 +53,18 @@ def _minutes_filter(context: Any, value: object) -> str:
     return format_minutes(value if isinstance(value, int) else None, mode)
 
 
+@pass_context
+def _rating_filter(context: Any, value: object) -> str:
+    """Render a rating with its scale, e.g. ۴ از ۵."""
+    mode = context.get("digits", "persian")
+    if value is None or value == "":
+        return ""
+    scale = t("reviews.rating_of").format(max=apply_digits("5", mode))
+    return f"{apply_digits(str(value), mode)} {scale}"
+
+
 templates.env.filters["digits"] = _digits_filter
+templates.env.filters["rating"] = _rating_filter
 templates.env.filters["fa_digits"] = to_persian_digits
 templates.env.filters["markdown"] = lambda value: Markup(render_markdown(value))
 templates.env.filters["nl2br"] = lambda value: Markup(str(value or "").replace("\n", "<br />"))

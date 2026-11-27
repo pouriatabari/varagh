@@ -95,6 +95,17 @@ def confirm(session: Session, achievement: Achievement) -> Achievement:
     return achievement
 
 
+def delete_achievement(session: Session, achievement: Achievement) -> None:
+    """Delete an achievement together with its links to the tasks."""
+    links = session.scalars(
+        select(AchievementTask).where(AchievementTask.achievement_id == achievement.id)
+    ).all()
+    for link in links:
+        session.delete(link)
+    session.delete(achievement)
+    session.flush()
+
+
 def export_markdown(session: Session, achievement: Achievement) -> str:
     """Render the achievement as Markdown."""
     task_ids = linked_task_ids(session, achievement)

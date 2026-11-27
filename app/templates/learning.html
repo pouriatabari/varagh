@@ -21,26 +21,59 @@
 {% endif %}
 
 {% if items %}
-{% for item in items %}
-<div class="card">
-  <div class="card-title">
-    <h2><bdi>{{ item.title }}</bdi></h2>
-    <span class="chip">{{ t('learning.kind.' + item.kind) }}</span>
-    <span class="chip">{{ t('learning.status.' + item.status) }}</span>
+<div
+  x-data="varaghSelection({{ item_ids | tojson }})"
+  data-confirm="{{ t('tasks.delete_confirm') }}"
+  data-confirm-one="{{ t('tasks.delete_confirm_one') }}"
+>
+  <div class="bulk-bar">
+    <label class="inline">
+      <input type="checkbox" @change="toggleAll($event.target.checked)" />
+      {{ t('tasks.select_all') }}
+    </label>
+    <span class="small muted" x-text="selected.length + ' ' + '{{ t('tasks.selected_unit') }}'"></span>
+    <button
+      class="btn btn-sm btn-danger"
+      type="button"
+      :disabled="selected.length === 0"
+      @click="deleteAll('/learning/delete', 'item_ids')"
+    >
+      {{ t('tasks.delete_selected') }}
+    </button>
   </div>
-  {% set item_progress = progress[item.id] %}
-  <div class="progress">
-    <span style="width: {{ item_progress.percent }}%"></span>
+
+  {% for item in items %}
+  <div class="card">
+    <div class="card-title">
+      <h2><bdi>{{ item.title }}</bdi></h2>
+      <label class="inline">
+        <input type="checkbox" name="item_ids" value="{{ item.id }}" x-model="selected" />
+        {{ t('common.select') }}
+      </label>
+      <span class="chip">{{ t('learning.kind.' + item.kind) }}</span>
+      <span class="chip">{{ t('learning.status.' + item.status) }}</span>
+    </div>
+    {% set item_progress = progress[item.id] %}
+    <div class="progress">
+      <span style="width: {{ item_progress.percent }}%"></span>
+    </div>
+    <p class="small muted">
+      {{ item_progress.percent | digits }}٪ —
+      {{ item_progress.done_units | digits }}/{{ item_progress.total_units | digits }}
+      {{ t('learning.units') }} —
+      {{ item_progress.minutes | duration }}
+    </p>
+    <a class="btn btn-sm" href="/learning/{{ item.id }}">{{ t('common.edit') }}</a>
+    <button
+      class="btn btn-sm btn-danger"
+      type="button"
+      @click="deleteOne('/learning/{{ item.id }}/delete')"
+    >
+      {{ t('tasks.delete_one') }}
+    </button>
   </div>
-  <p class="small muted">
-    {{ item_progress.percent | digits }}٪ —
-    {{ item_progress.done_units | digits }}/{{ item_progress.total_units | digits }}
-    {{ t('learning.units') }} —
-    {{ item_progress.minutes | duration }}
-  </p>
-  <a class="btn btn-sm" href="/learning/{{ item.id }}">{{ t('common.edit') }}</a>
+  {% endfor %}
 </div>
-{% endfor %}
 {% else %}
 <p class="muted">{{ t('learning.empty') }}</p>
 {% endif %}

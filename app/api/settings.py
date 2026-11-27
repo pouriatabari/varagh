@@ -129,8 +129,8 @@ async def settings_ai_test(request: Request, session: SessionDep) -> HTMLRespons
     return HTMLResponse(f'<p class="muted">{escape(t("ai.test_ok"))}</p>')
 
 
-@router.post("/settings/general")
-async def settings_general(request: Request, session: SessionDep) -> JSONResponse:
+@router.post("/settings/general", response_class=HTMLResponse)
+async def settings_general(request: Request, session: SessionDep) -> HTMLResponse:
     """Save the general display settings."""
     form = await request.form()
     weekend = [index for index in range(7) if form_bool(form, f"weekend_{index}")]
@@ -142,7 +142,7 @@ async def settings_general(request: Request, session: SessionDep) -> JSONRespons
         "weekend_weekdays": weekend or [6],
     }
     settings_service.update_settings(session, values)
-    return JSONResponse({"ok": True})
+    return HTMLResponse(f'<span class="muted">{escape(t("settings.saved"))}</span>')
 
 
 @router.post("/settings/holidays/add")

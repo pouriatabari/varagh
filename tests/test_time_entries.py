@@ -171,6 +171,14 @@ def test_manual_entry_route(client: TestClient, session: Session) -> None:
     assert entries[0].duration_minutes == 45
 
 
+def test_the_calendar_has_a_dedicated_overtime_form(client: TestClient) -> None:
+    """The calendar offers a separate form for the overtime."""
+    response = client.get("/calendar")
+    assert response.status_code == 200
+    assert "ثبت اضافه‌کاری" in response.text
+    assert 'name="kind" value="overtime"' in response.text
+
+
 def test_overtime_route_requires_a_reason(client: TestClient, session: Session) -> None:
     """The calendar refuses overtime without a reason."""
     response = client.post(

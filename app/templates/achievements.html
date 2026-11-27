@@ -42,10 +42,35 @@
 </div>
 
 {% if achievements %}
+<div
+  x-data="varaghSelection({{ achievement_ids | tojson }})"
+  data-confirm="{{ t('tasks.delete_confirm') }}"
+  data-confirm-one="{{ t('tasks.delete_confirm_one') }}"
+>
+  <div class="bulk-bar">
+    <label class="inline">
+      <input type="checkbox" @change="toggleAll($event.target.checked)" />
+      {{ t('tasks.select_all') }}
+    </label>
+    <span class="small muted" x-text="selected.length + ' ' + '{{ t('tasks.selected_unit') }}'"></span>
+    <button
+      class="btn btn-sm btn-danger"
+      type="button"
+      :disabled="selected.length === 0"
+      @click="deleteAll('/achievements/delete', 'achievement_ids')"
+    >
+      {{ t('tasks.delete_selected') }}
+    </button>
+  </div>
+
 {% for achievement in achievements %}
 <div class="card">
   <div class="card-title">
     <h2><bdi>{{ achievement.title }}</bdi></h2>
+    <label class="inline">
+      <input type="checkbox" name="achievement_ids" value="{{ achievement.id }}" x-model="selected" />
+      {{ t('common.select') }}
+    </label>
     <span class="chip">{{ t('achievements.kind.' + achievement.kind) }}</span>
     {% if achievement.confirmed %}
     <span class="chip">{{ t('achievements.confirmed') }}</span>
@@ -73,9 +98,17 @@
     <a class="btn btn-sm" href="/achievements/{{ achievement.id }}/export.md">
       {{ t('achievements.export') }}
     </a>
+    <button
+      class="btn btn-sm btn-danger"
+      type="button"
+      @click="deleteOne('/achievements/{{ achievement.id }}/delete')"
+    >
+      {{ t('tasks.delete_one') }}
+    </button>
   </div>
 </div>
 {% endfor %}
+</div>
 {% else %}
 <p class="muted">{{ t('achievements.empty') }}</p>
 {% endif %}
