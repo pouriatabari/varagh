@@ -5,7 +5,15 @@
     style="left: {{ item.x }}px; top: {{ item.y }}px;"
     data-item-id="{{ item.id }}"
   >
+    {% if item.type == "drawing" %}
+    <img
+      class="board-drawing"
+      src="/drawings/{{ item.payload.drawing | default('') }}"
+      alt="{{ t('tasks.drawing') }}"
+    />
+    {% else %}
     <div class="sticky-body" dir="auto"><bdi>{{ item.content }}</bdi></div>
+    {% endif %}
     <div class="sticky-actions">
       <form
         hx-post="/tasks/{{ task_id }}/board/{{ item.id }}/delete"

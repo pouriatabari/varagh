@@ -47,6 +47,18 @@ DEMO_LEARNING = (
     ("مقالهٔ معماری مدرن", "article", "مقدمه", "بدنه", "جمع‌بندی"),
 )
 
+# The marks that tell the demo rows from the rows of the user: the seed may
+# run again at any time, and it must only ever remove what it wrote itself.
+DEMO_TASK_MARK = "یادداشت نمونه"
+DEMO_ENTRY_NOTE = "ثبت نمونه"
+DEMO_LEARNING_NOTE = "مورد نمونه."
+DEMO_REVIEW_TEXT = "این یک ارزیابی نمونه است."
+DEMO_JOURNAL_TEXTS = (
+    "امروز روی گزارش ماهانه کار کردم و در پایان یک نسخهٔ اولیه آماده شد.",
+    "جلسهٔ هفتگی برگزار شد؛ سه تصمیم گرفته شد و یک تسک جدید ساخته شد.",
+    "کمی کتاب خواندم و دو فصل را جلو رفتم.",
+)
+
 
 def _seed_tasks(session: Session, now: dt.datetime) -> None:
     """Create the demo domains and tasks."""
@@ -56,10 +68,11 @@ def _seed_tasks(session: Session, now: dt.datetime) -> None:
         domains.append(existing or task_service.create_domain(session, name))
 
     for index, (title, _context, task_context, priority) in enumerate(DEMO_TASKS):
+        created_at = now - dt.timedelta(days=index + 1)
         task = task_service.create_task(
             session,
             title=title,
-            now=now - dt.timedelta(days=index + 1),
+            now=created_at,
             description_md=f"یادداشت نمونه برای «{title}».",
             context=task_context,
             priority=priority,
@@ -67,7 +80,11 @@ def _seed_tasks(session: Session, now: dt.datetime) -> None:
         )
         task_service.set_task_domains(session, task, [domains[index % len(domains)].id], now)
         if index % 3 == 0:
-            task_service.set_status(session, task, "done", now - dt.timedelta(days=index))
+            # A task that is done is done a few hours after it was opened:
+            # the elapsed time of the demo stays a working one.
+            task_service.set_status(
+                session, task, "done", created_at + dt.timedelta(hours=3, minutes=20 * index)
+            )
 
 
 def _seed_time_entries(session: Session, now: dt.datetime) -> None:
@@ -87,8 +104,9 @@ def _seed_time_entries(session: Session, now: dt.datetime) -> None:
                 kind=random.choice(["work", "work", "study"]),
                 started_at=started_at,
                 now=started_at + dt.timedelta(minutes=minutes),
+                ended_at=started_at + dt.timedelta(minutes=minutes),
                 duration_minutes=minutes,
-                note="ثبت نمونه",
+                note=DEMO_ENTRY_NOTE,
                 policy=policy,
             )
         if day_offset % 7 == 3:
@@ -99,9 +117,10 @@ def _seed_time_entries(session: Session, now: dt.datetime) -> None:
                 kind="overtime",
                 started_at=overtime_start,
                 now=overtime_start + dt.timedelta(minutes=90),
+                ended_at=overtime_start + dt.timedelta(minutes=90),
                 duration_minutes=90,
                 reason="کار فوری",
-                note="ثبت نمونه",
+                note=DEMO_ENTRY_NOTE,
                 policy=policy,
             )
 
@@ -110,11 +129,7 @@ def _seed_journal(session: Session, now: dt.datetime) -> None:
     """Create the demo journal entries."""
     from app.models.timing import DailyJournal
 
-    texts = (
-        "امروز روی گزارش ماهانه کار کردم و در پایان یک نسخهٔ اولیه آماده شد.",
-        "جلسهٔ هفتگی برگزار شد؛ سه تصمیم گرفته شد و یک تسک جدید ساخته شد.",
-        "کمی کتاب خواندم و دو فصل را جلو رفتم.",
-    )
+    texts = DEMO_JOURNAL_TEXTS
     for offset, text in enumerate(texts):
         day = now.date() - dt.timedelta(days=offset)
         if session.scalars(select(DailyJournal).where(DailyJournal.date == day)).first():
@@ -156,6 +171,54 @@ def _seed_review(session: Session, now: dt.datetime) -> None:
     )
 
 
+def _clear_demo_data(session: Session, now: dt.datetime) -> None:
+    """Remove the demo rows, and only those.
+
+    The seed may run again at any time. Without this, every run would pile
+    its demo rows on top of the ones of the previous run and the reports
+    would count the same work over and over again. The rows of the user are
+    never touched: only the ones the seed itself wrote are removed.
+    """
+    from app.models.learning import LearningItem
+    from app.models.review import Review
+    from app.models.timing import DailyJournal, TimeEntry
+
+    demo_tasks = session.scalars(
+        select(Task).where(Task.description_md.like(f"{DEMO_TASK_MARK}%"))
+    ).all()
+    for task in demo_tasks:
+        task_service.soft_delete(session, task, now)
+    session.flush()
+
+    demo_entries = session.scalars(
+        select(TimeEntry).where(TimeEntry.note == DEMO_ENTRY_NOTE)
+    ).all()
+    for entry in demo_entries:
+        session.delete(entry)
+    session.flush()
+
+    demo_journals = session.scalars(
+        select(DailyJournal).where(DailyJournal.raw_text.in_(DEMO_JOURNAL_TEXTS))
+    ).all()
+    for journal in demo_journals:
+        session.delete(journal)
+    session.flush()
+
+    demo_items = session.scalars(
+        select(LearningItem).where(LearningItem.notes_md == DEMO_LEARNING_NOTE)
+    ).all()
+    for item in demo_items:
+        session.delete(item)
+    session.flush()
+
+    demo_reviews = session.scalars(
+        select(Review).where(Review.user_final_md == DEMO_REVIEW_TEXT)
+    ).all()
+    for review in demo_reviews:
+        session.delete(review)
+    session.flush()
+
+
 def seed(force: bool = False) -> int:
     """Insert the demo data; returns the number of tasks created."""
     session = get_session_factory()()
@@ -165,13 +228,17 @@ def seed(force: bool = False) -> int:
             print("the database already holds tasks; nothing was seeded (use --force)")
             return 0
         now = utcnow()
+        if force:
+            _clear_demo_data(session, now)
         _seed_tasks(session, now)
         _seed_time_entries(session, now)
         _seed_journal(session, now)
         _seed_learning(session, now)
         _seed_review(session, now)
         session.commit()
-        count = len(session.scalars(select(Task)).all())
+        count = len(
+            session.scalars(select(Task).where(Task.deleted_at.is_(None))).all()
+        )
         print(f"seeded {count} demo tasks")
         return count
     except Exception:

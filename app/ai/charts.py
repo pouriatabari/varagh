@@ -43,7 +43,11 @@ def validate_charts(charts: list[Any], payload: dict[str, Any] | None) -> None:
             raise AIError(f"the answer cites an unknown series: {chart.series}")
 
 
-def resolve_charts(charts: list[Any], payload: dict[str, Any] | None) -> list[dict[str, Any]]:
+def resolve_charts(
+    charts: list[Any],
+    payload: dict[str, Any] | None,
+    id_prefix: str = "chart",
+) -> list[dict[str, Any]]:
     """Turn the chart specs of an answer into renderable data."""
     available = series_map(payload)
     resolved: list[dict[str, Any]] = []
@@ -58,7 +62,7 @@ def resolve_charts(charts: list[Any], payload: dict[str, Any] | None) -> list[di
         unit = str(series.get("unit", ""))
         resolved.append(
             {
-                "id": f"chart-{index}",
+                "id": f"{id_prefix}-{index}",
                 "type": chart.type,
                 "title": chart.title_fa,
                 "labels": labels,

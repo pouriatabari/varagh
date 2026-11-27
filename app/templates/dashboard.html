@@ -26,7 +26,8 @@
       <h2>{{ t('dashboard.hours_by_kind') }}</h2>
       <span class="chip">{{ t('time.basis.measured') }}</span>
     </div>
-    <canvas id="hours-chart" height="220"></canvas>
+    {% set charts = charts %}
+    {% include "partials/charts.html" %}
     <p class="small muted">{{ t('time.basis.explain') }}</p>
   </div>
 
@@ -146,32 +147,5 @@
       },
     };
   }
-</script>
-<script>
-  (function () {
-    const canvas = document.getElementById("hours-chart");
-    if (!canvas || typeof Chart === "undefined") return;
-    const labels = {{ chart_labels | tojson }};
-    const values = {{ chart_values | tojson }};
-    new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "دقیقه",
-            data: values,
-            backgroundColor: "#2f6f5e",
-            borderRadius: 6,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } },
-      },
-    });
-  })();
 </script>
 {% endblock %}

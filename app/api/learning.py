@@ -7,7 +7,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_int, form_str
+from app.i18n import t
 from app.security import validate_csrf
+from app.services import charts as chart_service
 from app.services import learning as learning_service
 from app.templating import templates
 from app.utils.time import utcnow
@@ -32,12 +34,31 @@ def _redirect(url: str, flash: str | None = None, error: str | None = None) -> R
 async def learning_list(request: Request, session: SessionDep) -> HTMLResponse:
     """List the learning items with their progress."""
     items = learning_service.list_items(session)
+    charts = chart_service.build_charts(
+        [
+            {
+                "type": "bar",
+                "series": "progress_by_item",
+                "title_fa": t("learning.progress_chart"),
+                "basis": "measured",
+            },
+            {
+                "type": "bar",
+                "series": "minutes_by_item",
+                "title_fa": t("learning.minutes_chart"),
+                "basis": "measured",
+            },
+        ],
+        learning_service.progress_series(session, items),
+        id_prefix="learning",
+    )
     context = base_context(
         request,
         session,
         active_page="learning",
         items=items,
         item_ids=[item.id for item in items],
+        charts=charts,
         progress={item.id: learning_service.progress(session, item) for item in items},
         stale=[
             item

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.services import dashboard as dashboard_service
 from app.services import tasks as task_service
 from app.services import time_entries as time_service
+from app.utils.time import utcnow
 
 NOW = dt.datetime(2024, 8, 5, 9, 0, tzinfo=dt.UTC)
 
@@ -64,9 +65,19 @@ def test_heatmap_has_ninety_days(session: Session) -> None:
     assert stats.heatmap[-1]["minutes"] == 0
 
 
-def test_dashboard_page_renders_the_chart(client: TestClient) -> None:
+def test_dashboard_page_renders_the_chart(client: TestClient, session: Session) -> None:
     """The dashboard renders the Chart.js canvas and the counters."""
+    now = utcnow()
+    time_service.create_entry(
+        session,
+        kind="work",
+        started_at=now - dt.timedelta(hours=2),
+        now=now,
+        duration_minutes=60,
+    )
+    session.flush()
     response = client.get("/")
     assert response.status_code == 200
-    assert "hours-chart" in response.text
+    assert "dashboard-0" in response.text
+    assert "varaghRenderChart" in response.text
     assert "داشبورد" in response.text

@@ -20,6 +20,18 @@
 </div>
 {% endif %}
 
+{% if charts %}
+<div class="card" style="margin-bottom: 1rem;">
+  <div class="card-title">
+    <h2>{{ t('learning.charts_title') }}</h2>
+    <span class="chip">{{ t('time.basis.measured') }}</span>
+  </div>
+  {% set charts = charts %}
+  {% include "partials/charts.html" %}
+  <p class="small muted">{{ t('time.basis.explain') }}</p>
+</div>
+{% endif %}
+
 {% if items %}
 <div
   x-data="varaghSelection({{ item_ids | tojson }})"

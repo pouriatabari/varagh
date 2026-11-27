@@ -16,12 +16,34 @@ from app.utils.text import apply_digits, format_minutes, to_persian_digits
 from app.utils.time import format_date, format_datetime
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+STATIC_DIR = Path(__file__).parent / "static"
+ICON_DIR = STATIC_DIR / "icons"
+
+_ICON_CACHE: dict[str, str] = {}
+
+
+def read_icon(name: str) -> str:
+    """Return the SVG of an icon, or an empty string when it is missing.
+
+    The icons are read once and kept in memory: a page may hold a few of
+    them, and the files never change while the app runs.
+    """
+    if name not in _ICON_CACHE:
+        path = ICON_DIR / name
+        try:
+            _ICON_CACHE[name] = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            _ICON_CACHE[name] = ""
+    return _ICON_CACHE[name]
+
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals["t"] = t
 templates.env.globals["persian_months"] = PERSIAN_MONTHS
 templates.env.globals["app_name"] = "ورق"
 templates.env.globals["jalali_of"] = jalali_of
+templates.env.globals["ICON_DIR"] = str(ICON_DIR) + "/"
+templates.env.globals["read_icon"] = read_icon
 
 
 @pass_context

@@ -79,7 +79,38 @@ def test_manual_entry_uses_the_given_duration(session: Session) -> None:
         session, kind="work", started_at=NOW, now=NOW, duration_minutes=90
     )
     assert entry.duration_minutes == 90
-    assert entry.ended_at is None
+    assert entry.ended_at == NOW + dt.timedelta(minutes=90)
+
+
+def test_a_manual_entry_is_not_a_running_timer(session: Session) -> None:
+    """An entry with a duration is finished: it never runs in the background."""
+    entry = time_service.create_entry(
+        session, kind="work", started_at=NOW, now=NOW, duration_minutes=90
+    )
+    assert time_service.running_entry(session) is None
+    assert entry.ended_at is not None
+
+
+def test_stopping_the_timer_keeps_the_manual_entries_intact(
+    client: TestClient, session: Session
+) -> None:
+    """The stop of the timer touches the timer only, not the old entries."""
+    client.post(
+        "/time/entries",
+        data={
+            "date": "1403/05/14",
+            "start_time": "09:00",
+            "duration_minutes": "45",
+            "kind": "work",
+        },
+        follow_redirects=False,
+    )
+    manual = time_service.list_entries(session)[0]
+    client.post("/time/start", data={"kind": "work"}, follow_redirects=False)
+    client.post("/time/stop", follow_redirects=False)
+    session.refresh(manual)
+    assert manual.duration_minutes == 45
+    assert manual.ended_at == manual.started_at + dt.timedelta(minutes=45)
 
 
 def test_entry_duration_is_derived_from_start_and_end(session: Session) -> None:

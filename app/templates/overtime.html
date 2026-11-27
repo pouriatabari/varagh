@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}{{ t('overtime.title') }}{% endblock %}
+{% block content %}
+<div class="card-title">
+  <h1>{{ t('overtime.title') }}</h1>
+</div>
+<p class="muted">{{ t('time.overtime_hint') }}</p>
+
+<div class="grid" style="margin-top: 1rem;">
+  <div class="stat">
+    <div class="value">{{ overtime_total | duration }}</div>
+    <div class="label">{{ t('overtime.total') }}</div>
+  </div>
+  <div class="stat">
+    <div class="value">{{ overtime_off_day | duration }}</div>
+    <div class="label">{{ t('overtime.off_day') }}</div>
+  </div>
+  <div class="stat">
+    <div class="value">{{ overtime_regular | duration }}</div>
+    <div class="label">{{ t('overtime.regular') }}</div>
+  </div>
+</div>
+
+<div class="grid-2" style="margin-top: 1rem;">
+  <div class="card">
+    <div class="card-title">
+      <h2>{{ t('overtime.add') }}</h2>
+      <span class="chip">{{ t('time.basis.measured') }}</span>
+    </div>
+    <form method="post" action="/time/entries">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="kind" value="overtime" />
+      <div class="row">
+        <div class="field">
+          <label for="overtime_date">{{ t('common.date') }} (۱۴۰۴/۰۸/۰۵)</label>
+          <input
+            type="text"
+            id="overtime_date"
+            name="date"
+            dir="ltr"
+            value="{{ today_local | jalali_input }}"
+          />
+        </div>
+        <div class="field">
+          <label for="overtime_start_time">{{ t('common.time') }}</label>
+          <input type="text" id="overtime_start_time" name="start_time" dir="ltr" placeholder="18:00" />
+        </div>
+        <div class="field">
+          <label for="overtime_duration">{{ t('time.duration') }} ({{ t('common.minutes') }})</label>
+          <input type="number" id="overtime_duration" name="duration_minutes" min="0" />
+        </div>
+        <div class="field">
+          <label for="overtime_task">{{ t('common.tasks') }}</label>
+          <input type="number" id="overtime_task" name="task_id" min="1" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="overtime_reason">{{ t('common.reason') }}</label>
+        <input type="text" id="overtime_reason" name="reason" dir="auto" required />
+      </div>
+      <div class="field">
+        <label for="overtime_note">{{ t('common.note') }}</label>
+        <input type="text" id="overtime_note" name="note" dir="auto" />
+      </div>
+      <button class="btn btn-primary" type="submit">{{ t('overtime.add') }}</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <h2>{{ t('overtime.by_day') }}</h2>
+      <span class="chip">{{ t('time.basis.measured') }}</span>
+    </div>
+    {% set charts = overtime_charts %}
+    {% include "partials/charts.html" %}
+    <p class="small muted">{{ t('time.basis.explain') }}</p>
+  </div>
+</div>
+
+<div class="card" style="margin-top: 1rem;">
+  <div class="card-title">
+    <h2>{{ t('overtime.entries') }}</h2>
+    <span class="chip">{{ t('overtime.last_days', days=overtime_days) }}</span>
+  </div>
+  {% if overtime_rows %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>{{ t('common.date') }}</th>
+        <th>{{ t('time.duration') }}</th>
+        <th>{{ t('common.reason') }}</th>
+        <th>{{ t('common.tasks') }}</th>
+        <th>{{ t('time.off_day') }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in overtime_rows %}
+      <tr>
+        <td>{{ row.date | jdate }}</td>
+        <td>{{ row.minutes | duration }}</td>
+        <td><bdi>{{ row.entry.reason or '—' }}</bdi></td>
+        <td>
+          {% if row.task_title %}
+          <bdi>{{ row.task_title }}</bdi>
+          {% else %}
+          —
+          {% endif %}
+        </td>
+        <td>
+          {% if row.is_off_day %}
+          <span class="chip warn">{{ t('time.off_day') }}</span>
+          {% else %}
+          <span class="chip">{{ t('overtime.regular_day') }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="/time/entries/{{ row.entry.id }}/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-sm btn-danger" type="submit">{{ t('tasks.delete_one') }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">{{ t('overtime.empty') }}</p>
+  {% endif %}
+</div>
+{% endblock %}

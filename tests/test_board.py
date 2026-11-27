@@ -85,3 +85,62 @@ def test_board_route_creates_and_moves_a_sticky(client: TestClient) -> None:
     deleted = client.post(f"/tasks/{task_id}/board/{item.id}/delete")
     assert deleted.status_code == 200
     assert 'class="sticky' not in deleted.text
+
+
+def test_a_drawing_is_put_on_the_board(client: TestClient, session: Session) -> None:
+    """A drawing is saved and shown on the board."""
+    task = task_service.create_task(session, title="تسک", now=NOW)
+    session.flush()
+    png = (
+        "data:image/png;base64,"
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    )
+    response = client.post(
+        f"/tasks/{task.id}/board/drawing",
+        data={"data_url": png},
+        follow_redirects=False,
+    )
+    assert response.status_code == 200
+    items = board_service.list_items(session, task.id)
+    assert len(items) == 1
+    assert items[0].type == "drawing"
+    name = board_service.drawing_name(items[0])
+    assert name.endswith(".png")
+    page = client.get(f"/tasks/{task.id}")
+    assert "drawing-area" in page.text
+
+
+def test_a_drawing_that_is_not_a_png_is_refused(client: TestClient, session: Session) -> None:
+    """Only a PNG may be put on the board."""
+    task = task_service.create_task(session, title="تسک", now=NOW)
+    session.flush()
+    response = client.post(
+        f"/tasks/{task.id}/board/drawing",
+        data={"data_url": "data:text/plain;base64,aGk="},
+        follow_redirects=False,
+    )
+    assert response.status_code == 400
+    assert board_service.list_items(session, task.id) == []
+
+
+def test_a_drawing_is_served_as_a_png(client: TestClient, session: Session) -> None:
+    """The picture of a board item is served back."""
+    task = task_service.create_task(session, title="تسک", now=NOW)
+    session.flush()
+    png = (
+        "data:image/png;base64,"
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    )
+    client.post(f"/tasks/{task.id}/board/drawing", data={"data_url": png})
+    item = board_service.list_items(session, task.id)[0]
+    name = board_service.drawing_name(item)
+    response = client.get(f"/drawings/{name}")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.content.startswith(b"\x89PNG")
+
+
+def test_an_unknown_drawing_is_not_found(client: TestClient) -> None:
+    """A file name that is not ours is refused."""
+    response = client.get("/drawings/../../etc/passwd")
+    assert response.status_code == 404

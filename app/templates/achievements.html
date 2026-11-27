@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/icons.html" import iso_icon %}
 {% block title %}{{ t('achievements.title') }}{% endblock %}
 {% block content %}
 <h1>{{ t('achievements.title') }}</h1>
@@ -40,6 +41,32 @@
     <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
   </form>
 </div>
+
+{% if medals %}
+<div class="card" style="margin-bottom: 1rem;">
+  <div class="card-title">
+    <h2>{{ t('medals.title') }}</h2>
+    <span class="chip">{{ t('medals.earned_count', count=earned_medals) }}</span>
+  </div>
+  <p class="small muted">{{ t('medals.hint') }}</p>
+  <div class="medal-grid">
+    {% for medal in medals %}
+    <div class="medal {{ 'earned' if medal.earned else 'locked' }} tier-{{ medal.tier or 'none' }}">
+      <div class="medal-icon">{{ iso_icon(medal.icon, 44) }}</div>
+      <div class="medal-title">{{ medal.title }}</div>
+      <div class="medal-value">
+        {{ medal.value | digits }} {{ t('medals.unit.' + medal.unit) }}
+        {% if not medal.earned %}
+        <span class="small muted">/ {{ medal.next | digits }}</span>
+        {% endif %}
+      </div>
+      <div class="progress"><span style="width: {{ medal.percent }}%"></span></div>
+      <div class="small muted">{{ t('medals.tier.' + (medal.tier or 'none')) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 
 {% if achievements %}
 <div

@@ -82,6 +82,12 @@ def create_entry(
         raise ValueError("duration_minutes_required")
     if duration_minutes is not None and duration_minutes < 0:
         raise ValueError("duration_non_negative")
+    if ended_at is None and duration_minutes is not None:
+        # An entry with a duration is a finished measurement. Leaving it open
+        # would make it look like a running timer, and the next stop of the
+        # timer would freeze it with the whole span between the two dates —
+        # days, instead of the minutes the user wrote down.
+        ended_at = started_at + timedelta(minutes=duration_minutes)
 
     off_day_policy = policy or build_off_day_policy(frozenset({6}))
     entry = TimeEntry(

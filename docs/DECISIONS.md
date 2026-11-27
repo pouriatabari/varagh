@@ -185,3 +185,43 @@ together with its rationale.
   the general form becomes mandatory as soon as its kind is `overtime`.
 - **Why:** The overtime is reported apart from the regular working time, with
   its own reason. It must be a deliberate act, not an accident of a dropdown.
+
+## D22 — An entry with a duration is a finished measurement
+
+- **Decision:** `create_entry` closes an entry that was given a duration: it
+  sets `ended_at` to the start plus the duration. Only `start_timer` leaves an
+  entry open.
+- **Why:** An open entry is the running timer of the app. A manual entry that
+  stayed open was picked up by the next stop of the timer, which froze it
+  with the whole span between the two dates — days instead of the minutes the
+  user wrote down. The reports then showed hundreds of hours that no one
+  ever measured.
+
+## D23 — The seed resets its own rows before it seeds again
+
+- **Decision:** `python -m app.seed --force` removes the demo rows it wrote
+  before it writes them again. The rows are recognised by their marks (the
+  description of a demo task, the note of a demo entry, the text of a demo
+  journal and review); the rows of the user are never touched.
+- **Why:** Without the reset every run piled its demo rows on top of the
+  previous ones, so the same work was counted again and again and the
+  reports grew with every seed.
+
+## D24 — The medals are computed, never stored
+
+- **Decision:** A medal is a function of the database: the number of the
+  finished tasks, the measured hours, the confirmed achievements, the finished
+  learning items, the rated reviews and the streak of the days. The page
+  computes them on every request and stores nothing.
+- **Why:** A medal has to mean what it says. If the progress that earned it
+  disappears — a task is undone, an item is deleted — the medal has to go
+  away with it. Storing the medals would let a stale one stay in the list.
+
+## D25 — The drawing of the board is a picture in the data directory
+
+- **Decision:** The marker of the board draws on a canvas; the picture is
+  sent as a PNG, saved in `data/drawings` and put on the board as an item of
+  the type `drawing`. The board item only holds the name of the file.
+- **Why:** A board holds pictures of many sizes; storing them as blobs in the
+  database would make every load of the board heavy, and the notes of the
+  task are Markdown — a picture does not belong in them.

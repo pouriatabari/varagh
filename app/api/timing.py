@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -12,8 +12,10 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_int, form_optional_str, form_str
+from app.i18n import t
 from app.models.timing import DailyJournal
 from app.security import validate_csrf
+from app.services import charts as chart_service
 from app.services import settings as settings_service
 from app.services import tasks as task_service
 from app.services import time_entries as time_service
@@ -24,12 +26,14 @@ from app.utils.jalali import (
     days_in_jalali_month,
     jalali_month_grid,
     jalali_of,
+    jalali_short,
 )
 from app.utils.time import parse_jalali_date, parse_jalali_date_and_time, to_local, utcnow
 
 router = APIRouter(dependencies=[Depends(validate_csrf)])
 
 VALID_KINDS = {"work", "overtime", "study", "learning"}
+OVERTIME_DAYS = 60
 
 
 def _redirect(url: str, flash: str | None = None, error: str | None = None) -> RedirectResponse:
@@ -106,6 +110,75 @@ async def calendar(request: Request, session: SessionDep) -> HTMLResponse:
         next_month=1 if month == 12 else month + 1,
     )
     return templates.TemplateResponse(request, "calendar.html", context)
+
+
+@router.get("/overtime", response_class=HTMLResponse)
+async def overtime_page(request: Request, session: SessionDep) -> HTMLResponse:
+    """Show the overtime: a form of its own, the totals and the recent entries."""
+    timezone = settings_service.timezone_name(session)
+    now = utcnow()
+    local_now = to_local(now, timezone)
+    policy = time_service.policy_from_settings(session)
+    first_day = local_now.date() - timedelta(days=OVERTIME_DAYS - 1)
+    start = datetime.combine(first_day, datetime.min.time(), tzinfo=local_now.tzinfo)
+
+    entries = time_service.list_entries(session, start=start, end=now, kind="overtime")
+    rows = []
+    total = 0
+    off_day_total = 0
+    by_day: dict[date, int] = {}
+    for entry in entries:
+        minutes = entry.duration_minutes or 0
+        local = to_local(entry.started_at, timezone)
+        is_off_day = time_service.compute_is_off_day(local.date(), policy)
+        task = task_service.get_task(session, entry.task_id) if entry.task_id else None
+        rows.append(
+            {
+                "entry": entry,
+                "date": local.date(),
+                "minutes": minutes,
+                "is_off_day": is_off_day,
+                "task_title": task.title if task is not None else None,
+            }
+        )
+        total += minutes
+        if is_off_day:
+            off_day_total += minutes
+        by_day[local.date()] = by_day.get(local.date(), 0) + minutes
+
+    days = sorted(by_day)
+    series = {
+        "overtime_minutes_by_day": {
+            "labels": [jalali_short(day) for day in days],
+            "values": [by_day[day] for day in days],
+            "unit": "units.minutes",
+        }
+    }
+    charts = chart_service.build_charts(
+        [
+            {
+                "type": "bar",
+                "series": "overtime_minutes_by_day",
+                "title_fa": t("overtime.by_day"),
+                "basis": "measured",
+            }
+        ],
+        series,
+        id_prefix="overtime",
+    )
+    context = base_context(
+        request,
+        session,
+        active_page="overtime",
+        overtime_rows=rows,
+        overtime_total=total,
+        overtime_off_day=off_day_total,
+        overtime_regular=total - off_day_total,
+        overtime_days=OVERTIME_DAYS,
+        overtime_charts=charts,
+        today_local=local_now.date(),
+    )
+    return templates.TemplateResponse(request, "overtime.html", context)
 
 
 @router.post("/time/start")

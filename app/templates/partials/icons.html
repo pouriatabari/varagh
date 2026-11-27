@@ -1,0 +1,21 @@
+{# The isometric icons.
+
+   Every icon is a small SVG file in ``app/static/icons``. The macro reads
+   the file and inlines it, so the icon takes the colour of the text and
+   needs no extra request. A missing icon falls back to a neutral shape,
+   so a page never breaks over a missing file. #}
+
+{% set ICON_DIR = ICON_DIR %}
+{% macro iso_icon(name, size=24, class_name="") -%}
+{%- set path = (ICON_DIR ~ name ~ ".svg") -%}
+{%- set svg = read_icon(path) -%}
+<span class="iso {{ class_name }}" style="--iso-size: {{ size }}px" aria-hidden="true">
+{%- if svg -%}
+{{ svg }}
+{%- else -%}
+<svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" focusable="false">
+  <path d="M12 3 21 8v8l-9 5-9-5V8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+</svg>
+{%- endif -%}
+</span>
+{%- endmacro %}

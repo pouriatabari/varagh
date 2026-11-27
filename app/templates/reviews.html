@@ -6,6 +6,16 @@
   <a class="btn btn-primary" href="/reviews/new">{{ t('reviews.new') }}</a>
 </div>
 
+{% if charts %}
+<div class="card" style="margin-bottom: 1rem;">
+  <div class="card-title">
+    <h2>{{ t('reviews.charts_title') }}</h2>
+  </div>
+  {% set charts = charts %}
+  {% include "partials/charts.html" %}
+</div>
+{% endif %}
+
 {% if reviews %}
 <div
   x-data="varaghSelection({{ review_ids | tojson }})"

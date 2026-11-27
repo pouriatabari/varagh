@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -190,6 +191,32 @@ def progress(session: Session, item: LearningItem) -> ItemProgress:
         minutes=minutes,
         last_activity_at=last_activity,
     )
+
+
+def progress_series(
+    session: Session, items: list[LearningItem]
+) -> dict[str, dict[str, Any]]:
+    """Return the series of the progress and the study minutes of the items."""
+    labels: list[str] = []
+    percents: list[float] = []
+    minutes: list[float] = []
+    for item in items:
+        item_progress = progress(session, item)
+        labels.append(item.title)
+        percents.append(float(item_progress.percent))
+        minutes.append(float(item_progress.minutes))
+    return {
+        "progress_by_item": {
+            "labels": labels,
+            "values": percents,
+            "unit": "units.percent",
+        },
+        "minutes_by_item": {
+            "labels": labels,
+            "values": minutes,
+            "unit": "units.minutes",
+        },
+    }
 
 
 def stale_items(

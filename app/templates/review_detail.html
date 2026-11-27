@@ -33,6 +33,18 @@
   <p class="small muted">{{ t('time.basis.explain') }}</p>
 </div>
 
+{% if charts %}
+<div class="card">
+  <div class="card-title">
+    <h2>{{ t('reviews.charts_title') }}</h2>
+    <span class="chip">{{ t('time.basis.measured') }}</span>
+  </div>
+  {% set charts = charts %}
+  {% include "partials/charts.html" %}
+  <p class="small muted">{{ t('time.basis.explain') }}</p>
+</div>
+{% endif %}
+
 <div class="card">
   <div class="card-title"><h2>{{ t('reviews.comparison') }}</h2></div>
   {% if comparison.has_previous %}

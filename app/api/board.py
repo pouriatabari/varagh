@@ -7,8 +7,10 @@ from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_str
+from app.config import get_settings
 from app.models.task import BoardItem
 from app.services import board as board_service
+from app.services import drawings as drawing_service
 from app.services import tasks as task_service
 from app.templating import templates
 
@@ -51,6 +53,44 @@ async def board_create(request: Request, task_id: int, session: SessionDep) -> H
     return templates.TemplateResponse(
         request, "partials/board.html", _board_context(request, session, task.id)
     )
+
+
+@router.post("/tasks/{task_id}/board/drawing", response_class=HTMLResponse)
+async def board_drawing(
+    request: Request, task_id: int, session: SessionDep
+) -> HTMLResponse:
+    """Save a drawing of the board and put it on the board."""
+    task = task_service.get_task(session, task_id)
+    if task is None:
+        return templates.TemplateResponse(
+            request, "partials/board.html", _board_context(request, session, task_id)
+        )
+    form = await request.form()
+    data_url = form_str(form, "data_url")
+    try:
+        name = drawing_service.save_png(get_settings().data_dir, data_url)
+    except ValueError:
+        return templates.TemplateResponse(
+            request,
+            "partials/board.html",
+            _board_context(request, session, task.id),
+            status_code=400,
+        )
+    board_service.create_drawing(session, task_id=task.id, name=name)
+    return templates.TemplateResponse(
+        request, "partials/board.html", _board_context(request, session, task.id)
+    )
+
+
+@router.get("/drawings/{name}")
+async def drawing_file(name: str) -> Response:
+    """Serve a drawing of a board."""
+    if not drawing_service.valid_name(name):
+        return Response(status_code=404)
+    path = drawing_service.drawings_dir(get_settings().data_dir) / name
+    if not path.exists():
+        return Response(status_code=404)
+    return Response(path.read_bytes(), media_type="image/png")
 
 
 @router.post("/tasks/{task_id}/board/{item_id}/move")

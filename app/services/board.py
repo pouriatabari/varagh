@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.models.task import BoardItem
 
-VALID_TYPES = ("sticky", "text")
+VALID_TYPES = ("sticky", "text", "drawing")
 VALID_COLORS = ("yellow", "green", "blue", "pink", "grey")
 
 
@@ -53,6 +53,35 @@ def create_item(
     session.add(item)
     session.flush()
     return item
+
+
+def create_drawing(
+    session: Session, *, task_id: int, name: str, x: float = 0.0, y: float = 0.0
+) -> BoardItem:
+    """Put a drawing on the board.
+
+    The picture itself lives in the data directory; the board item only
+    holds its name, so the board stays cheap to load.
+    """
+    item = BoardItem(
+        task_id=task_id,
+        type="drawing",
+        content="",
+        color="white",
+        x=float(x),
+        y=float(y),
+        payload={"drawing": name},
+    )
+    session.add(item)
+    session.flush()
+    return item
+
+
+def drawing_name(item: BoardItem) -> str:
+    """Return the file name of the drawing of a board item, if it has one."""
+    payload = item.payload or {}
+    name = str(payload.get("drawing", ""))
+    return name
 
 
 def move_item(session: Session, item: BoardItem, x: float, y: float) -> BoardItem:

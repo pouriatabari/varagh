@@ -9,8 +9,12 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
 from app.api.forms import form_int, form_str
+from app.i18n import t
 from app.security import validate_csrf
 from app.services import achievements as achievement_service
+from app.services import charts as chart_service
+from app.services import dashboard as dashboard_service
+from app.services import medals as medal_service
 from app.services import reviews as review_service
 from app.services import settings as settings_service
 from app.templating import templates
@@ -47,12 +51,31 @@ def _period_from_request(request: Request) -> review_service.PeriodSelection:
 async def review_list(request: Request, session: SessionDep) -> HTMLResponse:
     """List the saved reviews."""
     rows = review_service.list_reviews(session)
+    charts = chart_service.build_charts(
+        [
+            {
+                "type": "bar",
+                "series": "rating_by_review",
+                "title_fa": t("reviews.rating_chart"),
+                "basis": "measured",
+            }
+        ],
+        {
+            "rating_by_review": {
+                "labels": [f"{review.period_start} → {review.period_end}" for review in rows],
+                "values": [float(review.rating or 0) for review in rows],
+                "unit": "units.rating",
+            }
+        },
+        id_prefix="reviews",
+    )
     context = base_context(
         request,
         session,
         active_page="reviews",
         reviews=rows,
         review_ids=[review.id for review in rows],
+        charts=charts,
     )
     return templates.TemplateResponse(request, "reviews.html", context)
 
@@ -134,6 +157,24 @@ async def review_detail(request: Request, review_id: int, session: SessionDep) -
     comparison = review_service.compare_stats(
         review.stats or {}, previous.stats if previous else None
     )
+    charts = chart_service.build_charts(
+        [
+            {
+                "type": "doughnut",
+                "series": "measured_minutes_by_kind",
+                "title_fa": t("reviews.hours_by_kind"),
+                "basis": "measured",
+            },
+            {
+                "type": "bar",
+                "series": "measured_minutes_by_day",
+                "title_fa": t("reviews.minutes_by_day"),
+                "basis": "measured",
+            },
+        ],
+        (review.stats or {}).get("series") or {},
+        id_prefix="review",
+    )
     context = base_context(
         request,
         session,
@@ -141,6 +182,7 @@ async def review_detail(request: Request, review_id: int, session: SessionDep) -
         review=review,
         previous=previous,
         comparison=comparison,
+        charts=charts,
         readonly=request.query_params.get("view") == "1",
     )
     return templates.TemplateResponse(request, "review_detail.html", context)
@@ -209,6 +251,11 @@ async def review_export(request: Request, review_id: int, session: SessionDep) -
 async def achievement_list(request: Request, session: SessionDep) -> HTMLResponse:
     """List the achievements."""
     rows = achievement_service.list_achievements(session)
+    timezone = settings_service.timezone_name(session)
+    stats = dashboard_service.collect_stats(session, now=utcnow(), timezone=timezone)
+    medals = medal_service.compute_medals(
+        session, now=utcnow(), streak_days=stats.streak_days
+    )
     context = base_context(
         request,
         session,
@@ -216,6 +263,8 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
         achievements=rows,
         achievement_ids=[row.id for row in rows],
         linked_tasks={row.id: achievement_service.linked_task_ids(session, row) for row in rows},
+        medals=medal_service.medal_context(medals),
+        earned_medals=sum(1 for medal in medals if medal.earned),
     )
     return templates.TemplateResponse(request, "achievements.html", context)
 
