@@ -202,16 +202,24 @@ def compute_medals(
     ]
 
 
+def _value_text(value: float) -> str:
+    """Return the value of a medal as text: a count has no decimal."""
+    if float(value).is_integer():
+        return str(int(value))
+    return f"{value:g}"
+
+
 def medal_context(medals: list[Medal]) -> list[dict[str, Any]]:
     """Turn the medals into the values the template renders."""
     return [
         {
             "key": medal.key,
             "title": medal.title_fa,
-            "icon": medal.icon,
+            "icon": f"medal_{medal.tier}" if medal.tier else "medal",
             "tier": medal.tier,
             "earned": medal.earned,
             "value": medal.value,
+            "value_text": _value_text(medal.value),
             "percent": medal.percent,
             "next": medal.next_threshold,
             "unit": medal.unit,

@@ -1,3 +1,4 @@
+{% from "partials/icons.html" import iso_icon %}
 <!doctype html>
 <html lang="fa" dir="rtl" data-theme="light">
   <head>
@@ -30,14 +31,30 @@
           <span>{{ t('app.name') }}</span>
         </div>
         <nav class="nav">
-          <a href="/" class="{{ 'active' if active_page == 'dashboard' }}">{{ t('nav.dashboard') }}</a>
-          <a href="/tasks" class="{{ 'active' if active_page == 'tasks' }}">{{ t('nav.tasks') }}</a>
-          <a href="/calendar" class="{{ 'active' if active_page == 'calendar' }}">{{ t('nav.calendar') }}</a>
-          <a href="/overtime" class="{{ 'active' if active_page == 'overtime' }}">{{ t('nav.overtime') }}</a>
-          <a href="/learning" class="{{ 'active' if active_page == 'learning' }}">{{ t('nav.learning') }}</a>
-          <a href="/achievements" class="{{ 'active' if active_page == 'achievements' }}">{{ t('nav.achievements') }}</a>
-          <a href="/reviews" class="{{ 'active' if active_page == 'reviews' }}">{{ t('nav.reviews') }}</a>
-          <a href="/settings" class="{{ 'active' if active_page == 'settings' }}">{{ t('nav.settings') }}</a>
+          <a href="/" class="{{ 'active' if active_page == 'dashboard' }}">
+            {{ iso_icon('dashboard', 20) }}<span>{{ t('nav.dashboard') }}</span>
+          </a>
+          <a href="/tasks" class="{{ 'active' if active_page == 'tasks' }}">
+            {{ iso_icon('tasks', 20) }}<span>{{ t('nav.tasks') }}</span>
+          </a>
+          <a href="/calendar" class="{{ 'active' if active_page == 'calendar' }}">
+            {{ iso_icon('calendar', 20) }}<span>{{ t('nav.calendar') }}</span>
+          </a>
+          <a href="/overtime" class="{{ 'active' if active_page == 'overtime' }}">
+            {{ iso_icon('clock', 20) }}<span>{{ t('nav.overtime') }}</span>
+          </a>
+          <a href="/learning" class="{{ 'active' if active_page == 'learning' }}">
+            {{ iso_icon('book', 20) }}<span>{{ t('nav.learning') }}</span>
+          </a>
+          <a href="/achievements" class="{{ 'active' if active_page == 'achievements' }}">
+            {{ iso_icon('trophy', 20) }}<span>{{ t('nav.achievements') }}</span>
+          </a>
+          <a href="/reviews" class="{{ 'active' if active_page == 'reviews' }}">
+            {{ iso_icon('report', 20) }}<span>{{ t('nav.reviews') }}</span>
+          </a>
+          <a href="/settings" class="{{ 'active' if active_page == 'settings' }}">
+            {{ iso_icon('settings', 20) }}<span>{{ t('nav.settings') }}</span>
+          </a>
         </nav>
       </aside>
 

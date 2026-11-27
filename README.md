@@ -216,6 +216,18 @@ make seed                                    # Persian demo data
 entries, notes, board items, journal, learning items, reviews, achievements,
 settings).
 
+## The isometric icons
+
+The icons of the app are drawn by hand in an isometric style: a cube, a
+trophy, a book, a report, a clock. Every icon is a small SVG file in
+`app/static/icons`, and the pages inline it, so an icon takes the colour of
+the text it sits in and costs no extra request.
+
+```bash
+# the icons are plain files; open one in a browser to see it
+open app/static/icons/cube.svg
+```
+
 ## Project structure
 
 ```
@@ -225,7 +237,7 @@ app/
 ├── models/     # SQLAlchemy 2.0 models
 ├── schemas/    # Pydantic v2 schemas
 ├── templates/  # Jinja2 templates (RTL)
-├── static/     # CSS / JS / vendored fonts
+├── static/     # CSS / JS / the isometric icons / vendored fonts
 ├── ai/         # AIProvider interface and implementations
 ├── notify/     # notification channels and rules
 ├── worker/     # APScheduler worker

@@ -26,6 +26,43 @@ def test_the_csrf_helper_is_reachable_from_the_page() -> None:
     assert "window.csrfToken = csrfToken;" in source
 
 
+def test_the_navigation_carries_the_isometric_icons(client: TestClient) -> None:
+    """Every entry of the navigation shows an icon of its own."""
+    source = (ROOT / "app/templates/base.html").read_text(encoding="utf-8")
+    for name in (
+        "dashboard",
+        "tasks",
+        "calendar",
+        "clock",
+        "book",
+        "trophy",
+        "report",
+        "settings",
+    ):
+        assert f"iso_icon('{name}'" in source
+
+
+def test_the_icons_are_markup_and_not_text(client: TestClient) -> None:
+    """An icon is drawn as a picture, not shown as its own source."""
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "<svg" in response.text
+    assert "&lt;svg" not in response.text
+
+
+def test_every_icon_file_is_valid_svg() -> None:
+    """The icon files are well-formed SVG."""
+    import xml.etree.ElementTree as ET
+
+    directory = ROOT / "app/static/icons"
+    files = sorted(directory.glob("*.svg"))
+    assert files
+    for path in files:
+        root = ET.fromstring(path.read_text(encoding="utf-8"))
+        assert root.tag.endswith("svg")
+        assert list(root)
+
+
 def test_the_selection_attribute_stays_parsable(client: TestClient, session: Session) -> None:
     """The ids of the list go into the attribute without breaking it."""
     task_service.create_task(session, title="تسک", now=utcnow())

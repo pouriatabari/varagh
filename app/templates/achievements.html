@@ -55,7 +55,7 @@
       <div class="medal-icon">{{ iso_icon(medal.icon, 44) }}</div>
       <div class="medal-title">{{ medal.title }}</div>
       <div class="medal-value">
-        {{ medal.value | digits }} {{ t('medals.unit.' + medal.unit) }}
+        {{ medal.value_text | digits }} {{ t('medals.unit.' + medal.unit) }}
         {% if not medal.earned %}
         <span class="small muted">/ {{ medal.next | digits }}</span>
         {% endif %}

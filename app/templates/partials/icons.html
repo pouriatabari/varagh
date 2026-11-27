@@ -11,7 +11,9 @@
 {%- set svg = read_icon(path) -%}
 <span class="iso {{ class_name }}" style="--iso-size: {{ size }}px" aria-hidden="true">
 {%- if svg -%}
-{{ svg }}
+{# The SVG comes from our own files, so it is safe to inline it: it has to
+   be markup and not text, and it has to keep the colour of the text. #}
+{{ svg | safe }}
 {%- else -%}
 <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" focusable="false">
   <path d="M12 3 21 8v8l-9 5-9-5V8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>

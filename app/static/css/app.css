@@ -191,6 +191,15 @@ h3 {
   font-size: 0.94rem;
 }
 
+.nav a .iso {
+  flex: 0 0 auto;
+  opacity: 0.8;
+}
+
+.nav a.active .iso {
+  opacity: 1;
+}
+
 .nav a:hover {
   background: var(--bg-sunken);
   color: var(--text);
