@@ -126,3 +126,33 @@ def test_no_title_without_the_gates(session: Session) -> None:
     counted_medal(session, 6)
     session.flush()
     assert honours.promote_if_ready(session, config) is None
+
+
+def test_no_page_shows_a_raw_placeholder(client: TestClient) -> None:
+    """No page shows the name of a placeholder instead of a word."""
+    for path in ("/achievements", "/guide", "/insignia", "/reviews"):
+        body = client.get(path).text
+        assert "{count}" not in body, path
+        assert "{max}" not in body, path
+
+
+def test_the_rack_of_the_ribbons_speaks_the_lexicon() -> None:
+    """The tooltips of the rack are in the words of the caller."""
+    from app.insignia import render_ribbon_rack
+
+    svg = render_ribbon_rack(
+        {"prowess": {"bronze": 2}},
+        tier_labels={"bronze": "مدال برنزی", "silver": "مدال نقره‌ای", "gold": "مدال طلایی"},
+        labels={"prowess": "چابکی"},
+        label="روبان‌های فضیلت",
+        digits=lambda value: str(value),
+    )
+    assert "روبان‌های فضیلت" in svg
+    assert "مدال برنزی" in svg
+    # The words of the tooltips are the ones of the caller; the English
+    # names live only in the data attributes of the picture.
+    import re
+
+    for title in re.findall(r"<title>([^<]*)</title>", svg):
+        assert "bronze" not in title
+        assert "silver" not in title

@@ -293,7 +293,10 @@ The hall is drawn, not written: the header of the hall carries the arms of
 the user (a deterministic coat of arms — the colour of the domain the work
 is in, the charges of the virtues the medals stand for, the crown of the
 title), the degrees that were earned and the gates that still stand between
-the user and the next title. Below it the court chart shows the pyramid of
+the user and the next title. It also says how far the next degree is: the
+value of the counted medals and how many of the six points of a degree are
+already won, so the number of the table and the number of the ladder are
+never a puzzle. Below it the court chart shows the pyramid of
 the titles with the tiers that were reached lit, and the round table shows
 the six virtues, each seat lighting as far as the medals of that virtue have
 carried the user.

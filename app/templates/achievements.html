@@ -15,7 +15,7 @@
         {% if insignia_reign is not none %}
         {{ t('insignia.reign') }}: {{ insignia_reign | digits }}
         {% else %}
-        {{ t('insignia.studs') }}: {{ insignia_studs[0] | digits }} / {{ insignia_studs[1] | digits }}
+        {{ t('honours.degrees_in_title') }}: {{ insignia_studs[0] | digits }} / {{ insignia_studs[1] | digits }}
         {% endif %}
       </figcaption>
     </figure>
@@ -29,13 +29,17 @@
     <div class="card-title">
       <h2>{{ t('honours.current_title') }}: {{ t('honours.title.' ~ honours.current) }}</h2>
       <span class="chip">
-        {{ t('honours.degree', count=honours.degrees) }} · {{ t('honours.value', count=honours.total_value) }}
+        {{ t('honours.degree', count=honours.degrees | digits) }} ·
+        {{ t('honours.value', count=honours.total_value | digits) }}
       </span>
     </div>
   </div>
   <div class="progress" title="{{ t('honours.progress_to_next_degree') }}">
     <span style="width: {{ (honours.progress_to_next_degree * 100) | round(1) }}%"></span>
   </div>
+  <p class="small muted">
+    {{ t('honours.value_to_next_degree', value=honours_value_in_degree | digits, size=honours_degree_size | digits) }}
+  </p>
   {% if honours.next_title %}
   <h3>{{ t('honours.next_title') }}: {{ t('honours.title.' ~ honours.next_title) }}</h3>
   <ul class="gate-list">
@@ -91,7 +95,7 @@
         <tr>
           <th>{{ t('honours.tier') }}</th>
           <th>{{ t('honours.virtue') }}</th>
-          <th>{{ t('honours.value') }}</th>
+          <th>{{ t('honours.value_header') }}</th>
           <th>{{ t('honours.month') }}</th>
         </tr>
       </thead>

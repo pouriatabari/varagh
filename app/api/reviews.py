@@ -20,6 +20,7 @@ from app.services import reviews as review_service
 from app.services import settings as settings_service
 from app.services.rewards_config import VIRTUES, RewardsConfig
 from app.templating import templates
+from app.utils.text import apply_digits
 from app.utils.time import utcnow
 
 router = APIRouter(dependencies=[Depends(validate_csrf)])
@@ -345,11 +346,18 @@ def _ribbon_rack(session: Session, lexicon: str, theme: str) -> str:
         virtue: str(translate(f"honours.virtue.{virtue}", lexicon))
         for virtue in VIRTUES
     }
+    tier_labels = {
+        tier: str(translate(f"medals.tier.{tier}", lexicon))
+        for tier in rewards_config.TIERS
+    }
     return render_ribbon_rack(
         honours.virtue_tier_counts(session),
         theme,
         "md",
         labels=labels,
+        tier_labels=tier_labels,
+        label=str(translate("insignia.rack", lexicon)),
+        digits=lambda value: apply_digits(str(value), settings_service.digit_mode(session)),
     )
 
 
@@ -401,6 +409,8 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
             virtues=list(state.virtues),
         ),
         insignia_badge=_badge_of(state, config, lexicon, theme),
+        honours_value_in_degree=state.total_value % config.degree_size,
+        honours_degree_size=config.degree_size,
         insignia_studs=honours.title_studs(config, state),
         insignia_reign=honours.reign_years(session, state.current),
         insignia_rack=_ribbon_rack(session, lexicon, theme),

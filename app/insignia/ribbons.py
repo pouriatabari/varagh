@@ -8,6 +8,8 @@ that virtue. A virtue with no medal keeps its ribbon locked.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from app.insignia.catalog import load_virtues
 
 # The three tiers of the medals, from the lowest to the highest.
@@ -67,13 +69,19 @@ def render_ribbon_rack(
     size: str = "md",
     *,
     labels: dict[str, str] | None = None,
+    tier_labels: dict[str, str] | None = None,
+    label: str | None = None,
+    digits: Callable[[int], str] | None = None,
 ) -> str:
     """Draw the rack of the six ribbons.
 
     ``virtue_stats`` says, for every virtue, how many medals of every
-    tier were earned. The names of the virtues are given by the caller,
-    so the words of the interface stay in the lexicon pack.
+    tier were earned. The names of the virtues and of the tiers are
+    given by the caller, so the words of the interface stay in the
+    lexicon pack.
     """
+    tier_names = tier_labels or {}
+    number = digits or (lambda value: str(value))
     ribbons = load_virtues()
     names = labels or {}
     width, height = SIZES.get(size, SIZES["md"])
@@ -89,8 +97,10 @@ def render_ribbon_rack(
         x = left + index * step
         tooltip = names.get(key, key)
         if tier is not None:
-            tooltip = f"{tooltip} — " + ", ".join(
-                f"{name}: {int(counts.get(name, 0))}" for name in TIERS
+            tooltip = f"{tooltip} — " + "، ".join(
+                f"{tier_names.get(name, name)}: "
+                f"{number(int(counts.get(name, 0)))}"
+                for name in TIERS
             )
         classes = "ribbon lit" if tier else "ribbon locked"
         body.append(f'<g class="{classes}" data-virtue="{key}" data-tier="{tier or ""}">')
@@ -117,7 +127,7 @@ def render_ribbon_rack(
     return (
         f'<svg class="ribbon-rack" data-theme="{theme}" '
         f'width="{width}" height="{height}" viewBox="0 0 120 60" role="img" '
-        f'aria-label="ribbon rack">'
-        f"<title>ribbon rack</title>"
+        f'aria-label="{label or "ribbon rack"}">'
+        f"<title>{label or 'ribbon rack'}</title>"
         f"{_patterns()}{''.join(body)}</svg>"
     )

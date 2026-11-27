@@ -679,4 +679,9 @@ STRINGS: dict[str, str] = {
     "guide.monthly_cap": "سقفِ ماهانه",
     "guide.diminishing": "ارزشِ نشانِ دومِ یک پیشه",
     "guide.degree_value": "ارزشِ یک درجه",
+    "honours.value_header": "ارزش",
+    "honours.degrees_in_title": "درجه‌های این لقب",
+    "honours.value_to_next_degree": (
+        "{value} از {size} ارزش تا درجهٔ بعد"
+    ),
 }
