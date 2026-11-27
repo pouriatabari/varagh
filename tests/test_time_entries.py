@@ -134,6 +134,37 @@ def test_timer_start_and_stop(session: Session) -> None:
     assert time_service.running_entry(session) is None
 
 
+def test_a_stale_open_entry_is_not_a_running_timer(session: Session) -> None:
+    """An old row that stayed open must not look like a timer."""
+    entry = time_service.create_entry(
+        session, kind="work", started_at=NOW, now=NOW, duration_minutes=90
+    )
+    # The row of an older version of the app: a duration, but no end.
+    entry.ended_at = None
+    session.flush()
+    assert time_service.running_entry(session) is None
+
+
+def test_a_second_timer_stops_the_first_one(session: Session) -> None:
+    """Only one timer runs: the first one is frozen with its duration."""
+    first = time_service.start_timer(session, now=NOW, kind="work")
+    second = time_service.start_timer(
+        session, now=NOW + dt.timedelta(minutes=30), kind="work"
+    )
+    assert first.ended_at == NOW + dt.timedelta(minutes=30)
+    assert first.duration_minutes == 30
+    assert time_service.running_entry(session) is second
+
+
+def test_a_measurement_cannot_be_stopped(session: Session) -> None:
+    """Only a timer may be stopped."""
+    entry = time_service.create_entry(
+        session, kind="work", started_at=NOW, now=NOW, duration_minutes=90
+    )
+    with pytest.raises(ValueError, match="not_a_running_timer"):
+        time_service.stop_timer(session, entry, NOW + dt.timedelta(minutes=5))
+
+
 def test_minutes_by_day_groups_the_entries(session: Session) -> None:
     """Measured minutes are grouped per day."""
     time_service.create_entry(session, kind="work", started_at=NOW, now=NOW, duration_minutes=60)

@@ -174,10 +174,16 @@ def totals_by_kind(session: Session, start: datetime, end: datetime) -> dict[str
 
 
 def running_entry(session: Session) -> TimeEntry | None:
-    """Return the currently running timer (an entry without ``ended_at``)."""
+    """Return the currently running timer (an entry without ``ended_at``).
+
+    An entry that was given a duration is not a timer: it is a measurement
+    the user wrote down. It is closed when it is created, but an old row
+    from before that rule may still be open — such a row must not be taken
+    for a timer that has been running for days.
+    """
     query = (
         select(TimeEntry)
-        .where(TimeEntry.ended_at.is_(None))
+        .where(TimeEntry.ended_at.is_(None), TimeEntry.duration_minutes.is_(None))
         .order_by(TimeEntry.started_at.desc())
         .limit(1)
     )
@@ -194,9 +200,16 @@ def start_timer(
     reason: str | None = None,
     policy: OffDayPolicy | None = None,
 ) -> TimeEntry:
-    """Start a running timer."""
+    """Start a running timer.
+
+    A timer that is already running is stopped first: its duration is
+    frozen, so the work stays measured and only one timer runs at a time.
+    """
     if kind == OVERTIME and not (reason or "").strip():
         raise ValueError("overtime_reason_required")
+    running = running_entry(session)
+    if running is not None:
+        stop_timer(session, running, now)
     off_day_policy = policy or build_off_day_policy(frozenset({6}))
     entry = TimeEntry(
         task_id=task_id,
@@ -216,6 +229,8 @@ def start_timer(
 
 def stop_timer(session: Session, entry: TimeEntry, now: datetime) -> TimeEntry:
     """Stop a running timer and freeze its duration."""
+    if entry.ended_at is not None or entry.duration_minutes is not None:
+        raise ValueError("not_a_running_timer")
     entry.ended_at = now
     entry.duration_minutes = _duration_minutes(entry.started_at, now) or 0
     session.flush()
