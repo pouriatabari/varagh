@@ -423,17 +423,20 @@ together with its rationale.
 
 ## D37 — The tree of the ranks is drawn from the data, and it is not a canvas to fight with
 
-- **Decision:** The ladder of the titles is drawn as a tree of the ranks: the
-  ranks are the nodes of the spine, the gates of a rank are the medallions
-  beside it, and every node and every path is computed from
-  `config/rewards.yaml` and from the state of the user. The picture is a
-  plain scrolling column of SVG — no zoom, no drag, no panning. Clicking a
-  node loads its panel with HTMX.
+- **Decision:** The ladder of the titles is drawn as a tree of the ranks, in
+  the manner of a skill tree of a game: the ranks are a chain of shields
+  that runs from left to right, and the gates of the ranks hang under them
+  like the pendants of a chain, each on its own stem. Every node and every
+  path is computed from `config/rewards.yaml` and from the state of the
+  user. The picture is a plain scrolling strip of SVG — no zoom, no drag, no
+  panning. Clicking a node loads its panel with HTMX.
 - **Why:** The tree was first drawn as a canvas that could be zoomed and
   dragged. It was fiddly to drive, easy to lose the thread of, and it hid
   the very thing the tree is for: the gates of the rank that waits. A long
   picture that scrolls the way a page scrolls is easier to read and easier
   to keep honest, and the panel of a node gives the detail that the picture
-  has no room for. Nothing of the tree is written by hand: a title that the
-  configuration does not know is never drawn, so the picture cannot drift
-  away from the rules of the reward engine.
+  has no room for. The shape of the picture follows the picture the design
+  was taken from: a chain of nodes with the small medallions hanging under
+  it, not a ladder of a chart. Nothing of the tree is written by hand: a
+  title that the configuration does not know is never drawn, so the picture
+  cannot drift away from the rules of the reward engine.

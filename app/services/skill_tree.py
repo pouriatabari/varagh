@@ -5,15 +5,15 @@ paths that lead into it. Everything comes from the configuration of the
 reward engine and from the state of the user: no node and no path is
 written by hand, and a rank that the data does not know is never drawn.
 
-The spine of the tree is the ladder of the titles, from the page at the
-bottom to the last title at the top. The gates of a rank stand beside
-it, on the left and on the right, and every one of them has a path into
-the rank it belongs to.
+The shape of the picture is the shape of the reference: the ladder of the
+titles is a chain of nodes that runs from left to right, and the gates of
+a rank hang under it like the pendants of a chain, each on its own stem.
+The chain widens where the gates of two neighbouring ranks are many, so
+that no two gates ever stand on each other.
 """
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
@@ -23,16 +23,16 @@ from app.insignia.catalog import title_of
 from app.services import honours, rewards_config
 from app.services.rewards import TitleGate, TitleState
 
-# The place of the nodes on the canvas. The spine of the tree winds a
-# little, the way a road winds, and the gates of a rank fan out on both
-# sides of it.
-RANK_SPACING = 172.0
-SPINE_SWING = 62.0
-GATE_OFFSET = 152.0
-GATE_FAN = 62.0
-GATE_LIFT = 24.0
-CANVAS_WIDTH = 1120.0
-MARGIN_TOP = 120.0
+# The place of the nodes on the canvas. The chain of the ranks runs from
+# left to right; the gates hang under it.
+RANK_PITCH = 132.0
+GATE_PITCH = 32.0
+MARGIN_LEFT = 96.0
+MARGIN_RIGHT = 96.0
+RANK_ROW = 150.0
+GATE_ROW = 302.0
+MARGIN_TOP = 92.0
+MARGIN_BOTTOM = 74.0
 
 # The states of a node and of a path.
 REACHED = "reached"
@@ -112,15 +112,21 @@ def build(
     titles = list(config.titles)
     nodes: list[TreeNode] = []
     edges: list[TreeEdge] = []
-    middle = CANVAS_WIDTH / 2
 
+    # The gates of every rank, so the chain knows how much room each
+    # rank asks for before the next one may come.
+    gates_of: list[tuple[TitleGate, ...]] = [
+        tuple(honours.title_gates(session, config, rule.key)) for rule in titles
+    ]
+
+    # The chain of the ranks: an even row, the way the ranks of a table
+    # sit, and the gates hang under it in a row of their own.
+    places: list[float] = [
+        MARGIN_LEFT + index * RANK_PITCH for index in range(len(titles))
+    ]
+
+    gate_cursor = MARGIN_LEFT
     for index, rule in enumerate(titles):
-        # The first title of the ladder is at the bottom of the tree and
-        # the last one at the top, the way the ladder of the hall is read.
-        level = len(titles) - 1 - index
-        y = MARGIN_TOP + level * RANK_SPACING
-        # The spine winds: the ranks are not stacked in a straight line.
-        x = middle + SPINE_SWING * math.sin(index * 0.85)
         node_state = _rank_state(rule.key, state)
         title = title_of(rule.key)
         nodes.append(
@@ -130,21 +136,18 @@ def build(
                 state=node_state,
                 label=str(translate(f"honours.title.{rule.key}", lexicon)),
                 detail=(title.note_fa if title is not None else ""),
-                x=x,
-                y=y,
+                x=places[index],
+                y=RANK_ROW,
                 title_key=rule.key,
                 degrees=rule.degrees,
             )
         )
 
-        # The gates of the rank stand beside it: the first on the left,
-        # the second on the right, the third on the left again.
-        gates = honours.title_gates(session, config, rule.key)
-        for position, gate in enumerate(gates):
-            side = -1 if position % 2 == 0 else 1
-            fan = position // 2
-            gate_x = x + side * (GATE_OFFSET + fan * GATE_FAN)
-            gate_y = y + (GATE_LIFT if side > 0 else -GATE_LIFT)
+        # The gates of the rank hang under it, each on its own stem. They
+        # stand side by side in a row of their own, the way the small
+        # medallions of the picture stand under the shields.
+        gates = gates_of[index]
+        for gate in gates:
             nodes.append(
                 TreeNode(
                     id=f"gate:{rule.key}:{gate.key}",
@@ -152,8 +155,8 @@ def build(
                     state=MET if gate.satisfied else UNMET,
                     label=_gate_label(gate, lexicon),
                     detail=str(translate(f"honours.gate.{gate.key}", lexicon)),
-                    x=gate_x,
-                    y=gate_y,
+                    x=gate_cursor,
+                    y=GATE_ROW,
                     title_key=rule.key,
                     gate_key=gate.key,
                     required=gate.required,
@@ -161,6 +164,7 @@ def build(
                     satisfied=gate.satisfied,
                 )
             )
+            gate_cursor += GATE_PITCH
             edges.append(
                 TreeEdge(
                     source=f"gate:{rule.key}:{gate.key}",
@@ -169,7 +173,7 @@ def build(
                 )
             )
 
-        # The path of the ladder: from the rank below into this one.
+        # The road of the ladder: from the rank before into this one.
         if index > 0:
             below = titles[index - 1].key
             if node_state in (REACHED, CURRENT):
@@ -186,11 +190,15 @@ def build(
                 )
             )
 
-    height = MARGIN_TOP * 2 + max(len(titles) - 1, 0) * RANK_SPACING
+    width = max(
+        places[-1] + MARGIN_RIGHT if places else MARGIN_LEFT + MARGIN_RIGHT,
+        gate_cursor + MARGIN_RIGHT,
+    )
+    height = MARGIN_TOP + GATE_ROW + MARGIN_BOTTOM
     return SkillTree(
         nodes=tuple(nodes),
         edges=tuple(edges),
-        width=CANVAS_WIDTH,
+        width=width,
         height=height,
         current=state.current,
         next_title=state.next_title,

@@ -31,7 +31,7 @@ def badge_maker(lexicon: str, theme: str) -> Callable[[str, str], str]:
             key,
             state=state,
             theme=theme,
-            size="sm",
+            size="md",
             name=str(translate(f"honours.title.{key}", lexicon)),
             desc=str(translate(f"title_{key}", lexicon)),
         )

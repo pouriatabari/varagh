@@ -297,17 +297,18 @@ the user and the next title. It also says how far the next degree is: the
 value of the counted medals and how many of the six points of a degree are
 already won, so the number of the table and the number of the ladder are
 never a puzzle. Below it the tree of the ranks shows the ladder of the
-titles as a picture: every rank is a node with the shield of its badge, and
-the gates of a rank stand beside it as medallions with a path into the rank.
-The road that has been walked is gold, the road that is open is the bright
-gold, and the road that is closed is grey and dashed; the rank of the user
-carries a crown and a halo. Nothing of the tree is written by hand — every
-node and every path comes from `config/rewards.yaml` and from the state of
-the user, so a title that the data does not know is never drawn. Clicking a
-node opens its panel: the note of the rank, the gates and how far each one
-has come, and the reward that waits at the top. Beside it the round table
-shows the six virtues, each seat lighting as far as the medals of that
-virtue have carried the user.
+titles as a picture, in the manner of a skill tree of a game: the ranks are
+a chain of shields that runs from left to right, and the gates of the ranks
+hang under them like the pendants of a chain, each on its own stem. The
+road that has been walked is gold, the road that is open is the bright gold,
+and the road that is closed is grey and dashed; the rank of the user carries
+a crown and a halo. Nothing of the tree is written by hand — every node and
+every path comes from `config/rewards.yaml` and from the state of the user,
+so a title that the data does not know is never drawn. Clicking a node
+opens its panel: the note of the rank, the gates and how far each one has
+come, and the reward that waits at the top. The round table below shows
+the six virtues, each seat lighting as far as the medals of that virtue have
+carried the user.
 
 ## The guide of the round
 

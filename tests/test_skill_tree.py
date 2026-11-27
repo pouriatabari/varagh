@@ -125,6 +125,21 @@ def test_a_gate_that_is_met_is_open(session: Session) -> None:
     assert open_edges
 
 
+def test_the_ranks_are_a_chain_and_the_gates_hang_under_them(
+    session: Session,
+) -> None:
+    """The picture is a chain of ranks with the gates hanging under it."""
+    config = rewards_config.load_config()
+    tree = skill_tree.build(session, config, "medieval")
+    ranks = [node for node in tree.nodes if node.kind == "rank"]
+    gates = [node for node in tree.nodes if node.kind == "gate"]
+    # The ranks stand in one row, in the order of the ladder.
+    assert len({node.y for node in ranks}) == 1
+    assert [node.x for node in ranks] == sorted(node.x for node in ranks)
+    # The gates hang under the row of the ranks.
+    assert all(gate.y > rank.y for gate in gates for rank in ranks[:1])
+
+
 def test_the_picture_carries_the_nodes_and_the_roads(session: Session) -> None:
     """The drawing shows the nodes and the roads of the data."""
     config = rewards_config.load_config()

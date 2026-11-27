@@ -1,9 +1,9 @@
 """The drawing of the tree of the ranks.
 
 The tree is drawn by the code: the ranks are the shields of the badges
-that the app already draws, the gates are the medallions beside them,
-and the paths between them are the gold of the road that has been walked
-and the grey of the road that has not.
+that the app already draws, the gates are the small medallions that hang
+under them, and the paths between them are the gold of the road that has
+been walked and the grey of the road that has not.
 
 The state of a node is told three times over: by the words in the
 ``<title>``, by the shape of the frame, and by the colour — never by the
@@ -35,8 +35,11 @@ STEEL = "#7d8798"
 INK = "#e8ecf4"
 DARK = "#080c13"
 
-GATE_RADIUS = 30.0
+GATE_RADIUS = 17.0
 RANK_RADIUS = 58.0
+BADGE_SCALE = 0.72
+BADGE_HALF_W = 26.6
+BADGE_HALF_H = 31.3
 
 
 def _gate_glyph(key: str, virtue_colour: str) -> str:
@@ -44,8 +47,8 @@ def _gate_glyph(key: str, virtue_colour: str) -> str:
     if key == "degrees":
         # the chevrons of a rank
         return (
-            '<path d="M -11 -8 L 0 -13 L 11 -8" /><path d="M -11 1 L 0 -4 L 11 1" />'
-            '<path d="M -11 10 L 0 5 L 11 10" />'
+            '<path d="M -8 -6 L 0 -9 L 8 -6" /><path d="M -8 1 L 0 -2 L 8 1" />'
+            '<path d="M -8 8 L 0 5 L 8 8" />'
         )
     if key == "musters":
         # the roll call: a ring of dots
@@ -53,38 +56,38 @@ def _gate_glyph(key: str, virtue_colour: str) -> str:
         for index in range(7):
             angle = math.radians(-90 + 360 * index / 7)
             dots.append(
-                f'<circle cx="{14 * math.cos(angle):.1f}" '
-                f'cy="{14 * math.sin(angle):.1f}" r="3" />'
+                f'<circle cx="{9 * math.cos(angle):.1f}" '
+                f'cy="{9 * math.sin(angle):.1f}" r="2" />'
             )
         return "".join(dots)
     if key == "silver":
         # the crescent
-        return '<path d="M 5 -12 A 13 13 0 1 0 5 12 A 9.5 9.5 0 1 1 5 -12 Z" />'
+        return '<path d="M 4 -9 A 9.5 9.5 0 1 0 4 9 A 7 7 0 1 1 4 -9 Z" />'
     if key == "gold":
         # the sun
         rays = []
         for index in range(8):
             angle = math.radians(22.5 + 45 * index)
             rays.append(
-                f'<line x1="{15 * math.cos(angle):.1f}" y1="{15 * math.sin(angle):.1f}" '
-                f'x2="{11 * math.cos(angle):.1f}" y2="{11 * math.sin(angle):.1f}" />'
+                f'<line x1="{11 * math.cos(angle):.1f}" y1="{11 * math.sin(angle):.1f}" '
+                f'x2="{8 * math.cos(angle):.1f}" y2="{8 * math.sin(angle):.1f}" />'
             )
-        return '<circle cx="0" cy="0" r="7" />' + "".join(rays)
+        return '<circle cx="0" cy="0" r="5" />' + "".join(rays)
     if key == "virtues":
         # two rings, tied
-        return '<circle cx="-6" cy="0" r="8" /><circle cx="6" cy="0" r="8" />'
+        return '<circle cx="-5" cy="0" r="5.5" /><circle cx="5" cy="0" r="5.5" />'
     if key.startswith("virtue:"):
         # the ribbon of the virtue
         return (
-            '<path d="M -6 -12 H 6 V 7 L 0 13 L -6 7 Z" '
+            '<path d="M -4.5 -9 H 4.5 V 5 L 0 10 L -4.5 5 Z" '
             f'fill="{virtue_colour}" stroke="none" />'
         )
     if key == "fiefs":
         # a tower
-        return '<path d="M -9 12 V -5 H -4.5 V -10 H 0 V -5 H 4.5 V -10 H 9 V 12 Z" />'
+        return '<path d="M -7 9 V -4 H -3.5 V -8 H 0 V -4 H 3.5 V -8 H 7 V 9 Z" />'
     # the vigil: the flame of the night watch
     return (
-        '<path d="M 0 -13 C 7 -5 9 0 9 5 A 9 9 0 0 1 -9 5 C -9 0 -5 -4 0 -13 Z" />'
+        '<path d="M 0 -10 C 5 -4 7 0 7 4 A 7 7 0 0 1 -7 4 C -7 0 -4 -3 0 -10 Z" />'
     )
 
 
@@ -113,23 +116,6 @@ def _frame(radius: float, tick: float = 9.0) -> str:
             f'x2="{x2:.1f}" y2="{y2:.1f}" />'
             for x1, y1, x2, y2 in _tick_points(radius, tick)
         )
-    )
-
-
-def _arrow(x: float, y: float, colour: str) -> str:
-    """The head of a path: the road shows where it goes."""
-    return (
-        f'<path class="skill-arrow" d="M {x - 8:.1f} {y - 11:.1f} '
-        f"L {x + 9:.1f} {y:.1f} L {x - 8:.1f} {y + 11:.1f} Z\" fill=\"{colour}\" />"
-    )
-
-
-def _curve(x1: float, y1: float, x2: float, y2: float) -> str:
-    """The path between two nodes: a soft curve, never a hard line."""
-    middle = (y1 + y2) / 2
-    return (
-        f"M {x1:.1f} {y1:.1f} C {x1:.1f} {middle:.1f} "
-        f"{x2:.1f} {middle:.1f} {x2:.1f} {y2:.1f}"
     )
 
 
@@ -205,12 +191,22 @@ def render_skill_tree(
         else:
             colour, cls, width, dash = GREY, "skill-path locked", 6, "12 11"
         if source.kind == "rank" and target.kind == "rank":
-            x1, y1 = source.x, source.y - RANK_RADIUS + 4
-            x2, y2 = target.x, target.y + RANK_RADIUS - 4
+            # The road of the ladder runs from the right of a rank to the
+            # left of the next one.
+            x1 = source.x + RANK_RADIUS - 6
+            x2 = target.x - RANK_RADIUS + 6
+            y1 = y2 = source.y
+            middle = (x1 + x2) / 2
+            road = (
+                f"M {x1:.1f} {y1:.1f} C {middle:.1f} {y1 - 14:.1f} "
+                f"{middle:.1f} {y2 + 14:.1f} {x2:.1f} {y2:.1f}"
+            )
         else:
-            x1, y1 = source.x, source.y
-            x2, y2 = target.x, target.y
-        road = _curve(x1, y1, x2, y2)
+            # The stem of a gate: it hangs straight under its rank.
+            x1 = x2 = source.x
+            y1 = source.y - GATE_RADIUS - 3
+            y2 = target.y + RANK_RADIUS - 6
+            road = f"M {x1:.1f} {y1:.1f} L {x2:.1f} {y2:.1f}"
         body.append(
             f'<path class="{cls} skill-edge" d="{road}" stroke="{DARK}" '
             f'stroke-width="{width + 5}" fill="none" stroke-linecap="round" />'
@@ -228,10 +224,8 @@ def render_skill_tree(
                 f"L {middle_x + 6:.1f} {middle_y:.1f} L {middle_x:.1f} {middle_y + 7:.1f} "
                 f'L {middle_x - 6:.1f} {middle_y:.1f} Z" fill="{colour}" />'
             )
-        if source.kind == "rank" and target.kind == "rank":
-            body.append(_arrow(target.x, target.y + RANK_RADIUS + 4, colour))
 
-    # The gates: the medallions beside the ranks.
+    # The gates: the small medallions that hang under the ranks.
     for node in tree.nodes:
         if node.kind != "gate":
             continue
@@ -242,34 +236,32 @@ def render_skill_tree(
             f'data-node="{node.id}" data-state="{state}" data-x="{node.x:.1f}" '
             f'data-y="{node.y:.1f}" tabindex="0" role="button" '
             f'hx-get="{detail_url.format(id=quote(node.id, safe=""))}" '
-            f'hx-target="#tree-detail" hx-swap="innerHTML">'
+            f'hx-target="#tree-detail" hx-swap="innerHTML show:#tree-detail">'
         )
         body.append(f"<title>{node.label}</title>")
+        body.append(f'<circle class="skill-disc" r="{GATE_RADIUS + 3:.1f}" />')
         body.append(
-            f'<circle class="skill-disc" r="{GATE_RADIUS:.1f}" />'
-        )
-        body.append(
-            f'<circle class="skill-medallion" r="{GATE_RADIUS - 4:.1f}" />'
+            f'<circle class="skill-medallion" r="{GATE_RADIUS - 3:.1f}" />'
         )
         rivets = []
-        for index in range(8):
-            angle = math.radians(22.5 + 45 * index)
+        for index in range(6):
+            angle = math.radians(30 + 60 * index)
             rivets.append(
-                f'<circle class="skill-rivet" cx="{(GATE_RADIUS - 8) * math.cos(angle):.1f}" '
-                f'cy="{(GATE_RADIUS - 8) * math.sin(angle):.1f}" r="1.5" />'
+                f'<circle class="skill-rivet" cx="{(GATE_RADIUS - 6) * math.cos(angle):.1f}" '
+                f'cy="{(GATE_RADIUS - 6) * math.sin(angle):.1f}" r="1.2" />'
             )
         body.append("".join(rivets))
         body.append(
             f'<g class="skill-glyph" fill="{GOLD if node.satisfied else GREY}" '
-            f'stroke="{GOLD if node.satisfied else GREY}" stroke-width="1.8">'
+            f'stroke="{GOLD if node.satisfied else GREY}" stroke-width="1.6">'
             f"{_gate_glyph(node.gate_key, colours.get(node.gate_key, GOLD))}</g>"
         )
         body.append(
             f'<text class="skill-label skill-label-small" x="0" '
-            f'y="{GATE_RADIUS + 17:.1f}" text-anchor="middle">{node.label}</text>'
+            f'y="{GATE_RADIUS + 16:.1f}" text-anchor="middle">{node.label}</text>'
         )
         body.append(
-            f'<text class="skill-count" x="0" y="{GATE_RADIUS + 33:.1f}" '
+            f'<text class="skill-count" x="0" y="{GATE_RADIUS + 30:.1f}" '
             f'text-anchor="middle">{node.current}/{node.required}</text>'
         )
         body.append("</g>")
@@ -284,31 +276,24 @@ def render_skill_tree(
             f'data-node="{node.id}" data-state="{node.state}" data-x="{node.x:.1f}" '
             f'data-y="{node.y:.1f}" tabindex="0" role="button" '
             f'hx-get="{detail_url.format(id=quote(node.id, safe=""))}" '
-            f'hx-target="#tree-detail" hx-swap="innerHTML">'
+            f'hx-target="#tree-detail" hx-swap="innerHTML show:#tree-detail">'
         )
         body.append(f"<title>{node.label}</title>")
         if node.state == CURRENT:
-            body.append('<circle class="skill-halo" r="66" />')
+            body.append(f'<circle class="skill-halo" r="{RANK_RADIUS + 8:.1f}" />')
         body.append(f'<circle class="skill-disc" r="{RANK_RADIUS - 2:.1f}" />')
         body.append(_frame(RANK_RADIUS))
         badge_state = "locked" if node.state == LOCKED else "lit"
         drawn = badge_for(node.title_key, badge_state)
         body.append(
-            f'<g class="skill-badge" transform="translate(-42 -50) scale(0.88)">{drawn}</g>'
+            f'<g class="skill-badge" transform="translate(-{BADGE_HALF_W} '
+            f'-{BADGE_HALF_H}) scale({BADGE_SCALE})">{drawn}</g>'
         )
-        # The name of the rank rides on a ribbon, the way a name rides on
-        # a banner.
-        banner_y = RANK_RADIUS + 12
-        body.append(
-            f'<g class="skill-banner" transform="translate(0 {banner_y:.1f})">'
-            '<path class="skill-banner-band" d="M -46 0 H 46 V 22 H -46 Z" />'
-            '<path class="skill-banner-tail" d="M -46 0 L -58 11 L -46 22 Z" />'
-            '<path class="skill-banner-tail" d="M 46 0 L 58 11 L 46 22 Z" />'
-            "</g>"
-        )
+        # The name of the rank rides above it, the way a name rides on
+        # the banner of a lord.
         body.append(
             f'<text class="skill-label skill-label-banner" x="0" '
-            f'y="{banner_y + 16:.1f}" text-anchor="middle">{node.label}</text>'
+            f'y="{-RANK_RADIUS - 14:.1f}" text-anchor="middle">{node.label}</text>'
         )
         if node.state == CURRENT:
             body.append(
