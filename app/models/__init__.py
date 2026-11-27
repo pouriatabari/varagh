@@ -16,6 +16,15 @@ from app.models.base import (
 )
 from app.models.learning import LearningItem, LearningLog, LearningUnit
 from app.models.review import Achievement, AchievementTask, Review
+from app.models.rewards import (
+    Medal,
+    MedalEvidence,
+    Order,
+    Quest,
+    RealmClaim,
+    SagaChapter,
+    TitleHistory,
+)
 from app.models.system import AIRun, NotificationLog, Setting
 from app.models.task import BoardItem, Domain, Task, TaskDomain, TaskNote
 from app.models.timing import DailyJournal, TimeEntry
@@ -41,12 +50,19 @@ __all__ = [
     "LearningItem",
     "LearningLog",
     "LearningUnit",
+    "Medal",
+    "MedalEvidence",
     "NotificationLog",
+    "Order",
+    "Quest",
+    "RealmClaim",
     "Review",
+    "SagaChapter",
     "Setting",
     "Task",
     "TaskDomain",
     "TaskNote",
     "TimeEntry",
+    "TitleHistory",
     "utcnow",
 ]

@@ -112,12 +112,23 @@ class DailyPlanDraft(StrictModel):
 
 
 class AchievementDraft(StrictModel):
-    """One achievement proposed by the AI, grounded in tasks."""
+    """One achievement proposed by the AI, grounded in tasks.
+
+    The proposal also carries what the reward engine needs: the virtue it
+    belongs to, the domain of the craft, the tier it asks for and whether
+    the impact is concrete. The server checks all of it again and lowers
+    the tier when the evidence does not prove it.
+    """
 
     title: str = Field(min_length=1, max_length=500)
     description_fa: str = ""
     task_ids: list[int] = Field(default_factory=list)
     impact_fa: str = ""
+    virtue: str = "prowess"
+    domain: str = ""
+    suggested_tier: str = "bronze"
+    concrete: bool = False
+    confidence: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
 class ReviewDraft(StrictModel):

@@ -8,13 +8,12 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from app.api.deps import SessionDep, base_context
-from app.api.forms import form_int, form_str
+from app.api.forms import form_bool, form_int, form_str
 from app.i18n import t
 from app.security import validate_csrf
 from app.services import achievements as achievement_service
 from app.services import charts as chart_service
-from app.services import dashboard as dashboard_service
-from app.services import medals as medal_service
+from app.services import honours, rewards, rewards_config
 from app.services import reviews as review_service
 from app.services import settings as settings_service
 from app.templating import templates
@@ -233,6 +232,52 @@ async def review_update(request: Request, review_id: int, session: SessionDep) -
     return _redirect(f"/reviews/{review.id}", flash="flash.review_updated")
 
 
+@router.post("/reviews/{review_id}/confirm", response_class=HTMLResponse)
+async def review_confirm(
+    request: Request, review_id: int, session: SessionDep
+) -> HTMLResponse:
+    """Confirm a muster and give the medals it earned.
+
+    Nothing is given before this moment: the proposals of the AI wait as
+    a draft, the user may lower a tier, and the server checks the tier
+    against the evidence before the medal is written.
+    """
+    review = review_service.get_review(session, review_id)
+    if review is None:
+        return _redirect("/reviews", error="error.not_found")
+    if review.status == "finished":
+        return _redirect(f"/reviews/{review.id}")
+    form = await request.form()
+    config = rewards_config.load_config()
+    proposals = []
+    raw = (review.ai_draft or {}).get("medal_proposals") or []
+    for index, item in enumerate(raw):
+        tier = form_str(form, f"tier_{index}") or item.get("tier") or "bronze"
+        concrete = form_bool(form, f"concrete_{index}") or bool(item.get("concrete"))
+        proposals.append(
+            honours.MedalProposal(
+                title=str(item.get("title") or ""),
+                virtue=str(item.get("virtue") or "prowess"),
+                tier=tier if tier in rewards.TIERS else "bronze",
+                domain_name=str(item.get("domain") or "") or None,
+                evidence_task_ids=tuple(item.get("evidence_task_ids") or ()),
+                impact_note=str(item.get("impact_note") or "") or None,
+                concrete=concrete,
+                confidence=float(item.get("confidence") or 0.0),
+                description_md=str(item.get("description") or ""),
+            )
+        )
+    result = honours.award_medals(session, review=review, proposals=proposals, config=config)
+    for medal, proposal in zip(result.created, proposals, strict=False):
+        achievement_id = (raw[proposals.index(proposal)] or {}).get("achievement_id")
+        if achievement_id:
+            medal.achievement_id = int(achievement_id)
+    session.flush()
+    review.status = "finished"
+    session.flush()
+    return _redirect("/achievements", flash="flash.review_updated")
+
+
 @router.get("/reviews/{review_id}/export.md", response_class=PlainTextResponse)
 async def review_export(request: Request, review_id: int, session: SessionDep) -> PlainTextResponse:
     """Export a review as Markdown."""
@@ -249,13 +294,16 @@ async def review_export(request: Request, review_id: int, session: SessionDep) -
 
 @router.get("/achievements", response_class=HTMLResponse)
 async def achievement_list(request: Request, session: SessionDep) -> HTMLResponse:
-    """List the achievements."""
+    """The hall of the honours.
+
+    The honours are given by the musters; nothing is registered by hand.
+    The page shows the medals, the degrees, the title of the user and the
+    gates of the next one.
+    """
     rows = achievement_service.list_achievements(session)
-    timezone = settings_service.timezone_name(session)
-    stats = dashboard_service.collect_stats(session, now=utcnow(), timezone=timezone)
-    medals = medal_service.compute_medals(
-        session, now=utcnow(), streak_days=stats.streak_days
-    )
+    config = rewards_config.load_config()
+    state = honours.title_state(session, config)
+    medals = honours.list_medals(session)
     context = base_context(
         request,
         session,
@@ -263,32 +311,12 @@ async def achievement_list(request: Request, session: SessionDep) -> HTMLRespons
         achievements=rows,
         achievement_ids=[row.id for row in rows],
         linked_tasks={row.id: achievement_service.linked_task_ids(session, row) for row in rows},
-        medals=medal_service.medal_context(medals),
-        earned_medals=sum(1 for medal in medals if medal.earned),
+        earned_medals=sum(1 for medal in medals if medal.value_counted > 0),
+        honours=state,
+        honours_medals=medals,
+        honours_config=config,
     )
     return templates.TemplateResponse(request, "achievements.html", context)
-
-
-@router.post("/achievements")
-async def achievement_create(request: Request, session: SessionDep) -> RedirectResponse:
-    """Create an achievement, grounded in the tasks the user cites."""
-    form = await request.form()
-    title = form_str(form, "title")
-    if not title:
-        return _redirect("/achievements", error="error.validation")
-    today = utcnow().date()
-    task_ids = [int(value) for value in form.getlist("task_ids") if str(value).isdigit()]
-    achievement_service.create_achievement(
-        session,
-        title=title,
-        description_md=form_str(form, "description_md"),
-        kind=form_str(form, "kind") or "technical",
-        period_start=_parse_date(form_str(form, "period_start")) or today,
-        period_end=_parse_date(form_str(form, "period_end")) or today,
-        impact_note=form_str(form, "impact_note") or None,
-        task_ids=task_ids,
-    )
-    return _redirect("/achievements", flash="flash.achievement_created")
 
 
 @router.post("/achievements/{achievement_id}/confirm")

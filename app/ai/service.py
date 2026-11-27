@@ -77,7 +77,11 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "You write the draft of a periodic review out of the statistics given "
         "in the payload. Return JSON with: achievements_technical and "
         "achievements_work (lists of {title, description_fa, task_ids (list of "
-        "int), impact_fa}), comparison (string), bottlenecks (list of strings), "
+        "int), impact_fa, virtue (one of prowess, valor, wisdom, loyalty, "
+        "largesse, temperance), domain (the name of the craft), "
+        "suggested_tier (bronze, silver or gold), concrete (bool), "
+        "confidence (number between 0 and 1)}), comparison (string), "
+        "bottlenecks (list of strings), "
         "suggestions (list of strings), narrative_fa (string). Only use task "
         "ids that appear in the payload; never invent a number. "
         + CHARTS

@@ -180,19 +180,43 @@ async def ai_review_draft(
         draft = ai_service.review_draft(session, provider, stats)
     except AIError:
         return _redirect(f"/reviews/{review.id}", error="error.ai_failed")
-    review_service.update_review(session, review, ai_draft=ai_service.draft_to_dict(draft, payload))
+    draft_data = ai_service.draft_to_dict(draft, payload)
+    proposals = []
     for kind, items in (
         ("technical", draft.achievements_technical),
         ("work", draft.achievements_work),
     ):
         for item in items:
-            _create_achievement(session, review, item, kind)
+            achievement = _create_achievement(session, review, item, kind)
+            proposals.append(
+                {
+                    "title": item.title,
+                    "description": item.description_fa,
+                    "virtue": item.virtue,
+                    "domain": item.domain,
+                    "tier": item.suggested_tier,
+                    "evidence_task_ids": list(item.task_ids),
+                    "impact_note": item.impact_fa,
+                    "concrete": item.concrete,
+                    "confidence": item.confidence,
+                    "achievement_id": achievement.id,
+                }
+            )
+    # The proposals of the medals travel with the draft: the user may
+    # lower a tier before the muster is confirmed, and the server checks
+    # the tier against the evidence when it gives the medal.
+    draft_data["medal_proposals"] = proposals
+    review_service.update_review(session, review, ai_draft=draft_data)
     return _redirect(f"/reviews/{review.id}", flash="flash.review_updated")
 
 
-def _create_achievement(session: Session, review: Any, item: Any, kind: str) -> None:
-    """Store one achievement proposed by the AI."""
-    achievement_service.create_achievement(
+def _create_achievement(session: Session, review: Any, item: Any, kind: str) -> Any:
+    """Store one achievement proposed by the AI.
+
+    The achievement is the record of what the muster saw; the medal that
+    goes with it is given when the muster is confirmed.
+    """
+    return achievement_service.create_achievement(
         session,
         title=item.title,
         description_md=item.description_fa,

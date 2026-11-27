@@ -5,68 +5,73 @@
 {% block content %}
 <h1>{{ term('achievements.title') }}</h1>
 
-<div class="card">
-  <div class="card-title"><h2>{{ t('achievements.new') }}</h2></div>
-  <form method="post" action="/achievements">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <div class="grid-2">
-      <label>
-        {{ t('common.title') }}
-        <input type="text" name="title" dir="auto" required />
-      </label>
-      <label>
-        {{ t('achievements.kind') }}
-        <select name="kind">
-          {% for kind in ['technical', 'work', 'personal', 'learning'] %}
-          <option value="{{ kind }}">{{ t('achievements.kind.' + kind) }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <label>
-        {{ t('common.date') }}
-        <input type="date" name="period_start" dir="ltr" />
-      </label>
-      <label>
-        {{ t('common.date') }}
-        <input type="date" name="period_end" dir="ltr" />
-      </label>
-    </div>
-    <div class="field">
-      <label for="description_md">{{ t('tasks.description') }}</label>
-      <textarea id="description_md" name="description_md" dir="auto"></textarea>
-    </div>
-    <div class="field">
-      <label for="impact_note">{{ t('achievements.impact') }}</label>
-      <input type="text" id="impact_note" name="impact_note" dir="auto" />
-    </div>
-    <button class="btn btn-primary" type="submit">{{ t('common.create') }}</button>
-  </form>
+{# The header of the hall: the title of the user, the degrees and the
+   gates of the next one. #}
+<div class="card honours-header">
+  <div class="card-title">
+    <h2>{{ t('honours.current_title') }}: {{ t('honours.title.' ~ honours.current) }}</h2>
+    <span class="chip">
+      {{ t('honours.degree', count=honours.degrees) }} · {{ t('honours.value', count=honours.total_value) }}
+    </span>
+  </div>
+  <div class="progress" title="{{ t('honours.progress_to_next_degree') }}">
+    <span style="width: {{ (honours.progress_to_next_degree * 100) | round(1) }}%"></span>
+  </div>
+  {% if honours.next_title %}
+  <h3>{{ t('honours.next_title') }}: {{ t('honours.title.' ~ honours.next_title) }}</h3>
+  <ul class="gate-list">
+    {% for gate in honours.next_gates %}
+    <li class="gate {{ 'satisfied' if gate.satisfied else 'open' }}">
+      <span class="gate-mark" aria-hidden="true">{{ '✓' if gate.satisfied else '○' }}</span>
+      <span class="gate-label">{{ t('honours.gate.' ~ gate.key) }}</span>
+      <span class="gate-count">
+        {{ gate.current | digits }} / {{ gate.required | digits }}
+      </span>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="small muted">
+    {% if honours.eligible %}
+    {{ t('honours.eligible') }}
+    {% else %}
+    {{ t('honours.not_eligible') }}
+    {% endif %}
+  </p>
+  {% endif %}
 </div>
 
-{% if medals %}
+{% if honours_medals %}
 <div class="card" style="margin-bottom: 1rem;">
   <div class="card-title">
-    <h2>{{ t('medals.title') }}</h2>
+    <h2>{{ t('honours.medals') }}</h2>
     <span class="chip">{{ t('medals.earned_count', count=earned_medals) }}</span>
   </div>
-  <p class="small muted">{{ t('medals.hint') }}</p>
-  <div class="medal-grid">
-    {% for medal in medals %}
-    <div class="medal {{ 'earned' if medal.earned else 'locked' }} tier-{{ medal.tier or 'none' }}">
-      <div class="medal-icon">{{ iso_icon(medal.icon, 44) }}</div>
-      <div class="medal-title">{{ medal.title }}</div>
-      <div class="medal-value">
-        {{ medal.value_text | digits }} {{ t('medals.unit.' + medal.unit) }}
-        {% if not medal.earned %}
-        <span class="small muted">/ {{ medal.next | digits }}</span>
-        {% endif %}
-      </div>
-      <div class="progress"><span style="width: {{ medal.percent }}%"></span></div>
-      <div class="small muted">{{ t('medals.tier.' + (medal.tier or 'none')) }}</div>
-    </div>
-    {% endfor %}
+  <p class="small muted">{{ t('honours.medals_hint') }}</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ t('honours.tier') }}</th>
+          <th>{{ t('honours.virtue') }}</th>
+          <th>{{ t('honours.value') }}</th>
+          <th>{{ t('honours.month') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for medal in honours_medals %}
+        <tr class="{{ 'counted' if medal.value_counted > 0 else 'uncounted' }}">
+          <td>{{ t('medals.tier.' + medal.tier) }}</td>
+          <td>{{ t('honours.virtue.' + medal.virtue) }}</td>
+          <td>{{ medal.value_counted | digits }}</td>
+          <td><bdi>{{ medal.month_key }}</bdi></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
+{% else %}
+<p class="muted">{{ t('honours.no_medals') }}</p>
 {% endif %}
 
 {% if achievements %}
@@ -91,51 +96,46 @@
     </button>
   </div>
 
-{% for achievement in achievements %}
-<div class="card">
-  <div class="card-title">
-    <h2><bdi>{{ achievement.title }}</bdi></h2>
-    <label class="inline">
-      <input type="checkbox" name="achievement_ids" value="{{ achievement.id }}" x-model="selected" />
-      {{ t('common.select') }}
-    </label>
-    <span class="chip">{{ t('achievements.kind.' + achievement.kind) }}</span>
-    {% if achievement.confirmed %}
-    <span class="chip">{{ t('achievements.confirmed') }}</span>
+  <p class="small muted">{{ t('honours.records_hint') }}</p>
+  {% for achievement in achievements %}
+  <div class="card">
+    <div class="card-title">
+      <h2><bdi>{{ achievement.title }}</bdi></h2>
+      <label class="inline">
+        <input type="checkbox" name="achievement_ids" value="{{ achievement.id }}" x-model="selected" />
+        {{ t('common.select') }}
+      </label>
+      <span class="chip">{{ t('achievements.kind.' + achievement.kind) }}</span>
+      {% if achievement.confirmed %}
+      <span class="chip">{{ t('achievements.confirmed') }}</span>
+      {% endif %}
+    </div>
+    {% if achievement.description_md %}
+    <div class="markdown-body" dir="auto">{{ achievement.description_md | markdown }}</div>
     {% endif %}
-  </div>
-  {% if achievement.description_md %}
-  <div class="markdown-body" dir="auto">{{ achievement.description_md | markdown }}</div>
-  {% endif %}
-  {% if achievement.impact_note %}
-  <p class="small muted"><bdi>{{ achievement.impact_note }}</bdi></p>
-  {% endif %}
-  {% if linked_tasks[achievement.id] %}
-  <p class="small muted">
-    {{ t('achievements.linked_tasks') }}:
-    {% for task_id in linked_tasks[achievement.id] %}<span class="chip">#{{ task_id }}</span>{% endfor %}
-  </p>
-  {% endif %}
-  <div class="row">
-    {% if not achievement.confirmed %}
-    <form method="post" action="/achievements/{{ achievement.id }}/confirm">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <button class="btn btn-sm" type="submit">{{ t('common.confirm') }}</button>
-    </form>
+    {% if achievement.impact_note %}
+    <p class="small muted"><bdi>{{ achievement.impact_note }}</bdi></p>
     {% endif %}
-    <a class="btn btn-sm" href="/achievements/{{ achievement.id }}/export.md">
-      {{ t('achievements.export') }}
-    </a>
-    <button
-      class="btn btn-sm btn-danger"
-      type="button"
-      @click="deleteOne('/achievements/{{ achievement.id }}/delete')"
-    >
-      {{ t('tasks.delete_one') }}
-    </button>
+    {% if linked_tasks[achievement.id] %}
+    <p class="small muted">
+      {{ t('achievements.linked_tasks') }}:
+      {% for task_id in linked_tasks[achievement.id] %}<span class="chip">#{{ task_id }}</span>{% endfor %}
+    </p>
+    {% endif %}
+    <div class="row">
+      <a class="btn btn-sm" href="/achievements/{{ achievement.id }}/export.md">
+        {{ t('achievements.export') }}
+      </a>
+      <button
+        class="btn btn-sm btn-danger"
+        type="button"
+        @click="deleteOne('/achievements/{{ achievement.id }}/delete')"
+      >
+        {{ t('tasks.delete_one') }}
+      </button>
+    </div>
   </div>
-</div>
-{% endfor %}
+  {% endfor %}
 </div>
 {% else %}
 <p class="muted">{{ t('achievements.empty') }}</p>

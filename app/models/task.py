@@ -52,6 +52,11 @@ class Task(Base, TimestampMixin):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_activity_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # A private task keeps its text away from the AI and from the medals.
+    is_private: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # A task that does not count for the medals may still be part of the
+    # work: it is only kept out of the honours.
+    counts_for_medals: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
 
 class Domain(Base, TimestampMixin):

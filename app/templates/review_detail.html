@@ -103,6 +103,48 @@
   <div class="markdown-body" dir="auto">{{ review.ai_draft.narrative_fa | markdown }}</div>
   {% endif %}
   {% endif %}
+
+  {# The proposals of the medals: the muster gives them when the user
+     confirms it, and the tier may be lowered but never raised. #}
+  {% if review.ai_draft and review.ai_draft.medal_proposals %}
+  <div class="divider"></div>
+  <h3>{{ t('honours.proposals') }}</h3>
+  {% if review.status == 'finished' %}
+  <p class="small muted">{{ t('honours.confirmed_muster') }}</p>
+  {% else %}
+  <form method="post" action="/reviews/{{ review.id }}/confirm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    {% for proposal in review.ai_draft.medal_proposals %}
+    <div class="proposal">
+      <div class="proposal-title">{{ proposal.title }}</div>
+      <p class="small muted">
+        {{ t('honours.virtue') }}: {{ t('honours.virtue.' + proposal.virtue) }}
+        {% if proposal.domain %}· {{ t('honours.domain') }}: <bdi>{{ proposal.domain }}</bdi>{% endif %}
+      </p>
+      <label class="inline">
+        {{ t('honours.tier') }}
+        <select name="tier_{{ loop.index0 }}">
+          {% for tier in ['bronze', 'silver', 'gold'] %}
+          <option value="{{ tier }}" {{ 'selected' if proposal.tier == tier }}>
+            {{ t('medals.tier.' + tier) }}
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="inline">
+        <input type="checkbox" name="concrete_{{ loop.index0 }}" value="1" {{ 'checked' if proposal.concrete }} />
+        {{ t('honours.concrete') }}
+      </label>
+      <p class="small muted">
+        {{ t('honours.evidence') }}:
+        {% for task_id in proposal.evidence_task_ids %}<span class="chip">#{{ task_id }}</span>{% endfor %}
+      </p>
+    </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">{{ t('honours.confirm_muster') }}</button>
+  </form>
+  {% endif %}
+  {% endif %}
   <div class="divider"></div>
   {% if readonly %}
   <p class="small muted">{{ t('reviews.readonly_hint') }}</p>

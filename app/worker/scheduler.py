@@ -46,6 +46,9 @@ def run_scheduled_jobs() -> None:
     try:
         configured = settings_service.get_all_settings(session)
         now = utcnow()
+        from app.worker.muster import ensure_monthly_muster
+
+        muster = ensure_monthly_muster(session, now)
         sent = rule_module.dispatch(
             session,
             now=now,
@@ -54,7 +57,11 @@ def run_scheduled_jobs() -> None:
             calendar_system=str(configured.get("calendar_system", "jalali")),
         )
         session.commit()
-        logger.info("scheduled jobs tick: %s notification(s) sent", sent)
+        logger.info(
+            "scheduled jobs tick: %s notification(s) sent, muster %s",
+            sent,
+            "ready" if muster is not None else "not due",
+        )
     except Exception:
         session.rollback()
         logger.exception("scheduled jobs tick failed")

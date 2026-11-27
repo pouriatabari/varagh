@@ -32,6 +32,7 @@ class Review(Base, TimestampMixin):
             name="period_type_valid",
         ),
         CheckConstraint("rating IS NULL OR (rating >= 1 AND rating <= 5)", name="rating_range"),
+        CheckConstraint("status IN ('draft', 'finished')", name="review_status_valid"),
         Index("ix_reviews_period_type", "period_type"),
         Index("ix_reviews_period_start", "period_start"),
         Index("ix_reviews_period_end", "period_end"),
@@ -39,6 +40,9 @@ class Review(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     period_type: Mapped[str] = mapped_column(String(20), default="month", nullable=False)
+    # A muster is a draft until the user confirms it; nothing is given
+    # before that moment.
+    status: Mapped[str] = mapped_column(String(20), default="draft", nullable=False)
     period_start: Mapped[date] = mapped_column(Date, nullable=False)
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
     stats: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)

@@ -257,3 +257,19 @@ together with its rationale.
   honour must come from the muster — the review that looked at the work —
   and from the work itself, so that it cannot be claimed and cannot be
   lost either.
+
+## D29 — The muster is a draft, and the confirmation gives the medals
+
+- **Decision:** A muster has a status: it is a draft until the user
+  confirms it. The draft holds the immutable snapshot of the statistics
+  and the proposals of the AI (virtue, domain, the tier asked for, the
+  tasks that back it). The confirmation writes the medals; the user may
+  lower a tier, but a tier is never raised above what the evidence
+  proves. A confirmed muster is never confirmed twice, and a title that
+  was reached is never taken back.
+- **Why:** The honour must be the work's own, and the work must be the
+  muster's own reading of it. If the medal could be written before the
+  user had seen the muster, the muster would be a formality; if the tier
+  could be raised freely, the evidence would be a decoration. The draft
+  keeps the reading and the giving apart, so the user always stands
+  between the work and its honour.

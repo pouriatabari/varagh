@@ -40,7 +40,7 @@ Then open <http://localhost:8000>.
 | **تقویم** (calendar) | Jalali month grid with the daily totals, click to add a task, running-timer chip, a dedicated form for the overtime |
 | **یادداشت روزانه** (journal) | Free-form entries; the AI proposes a structure that is written only after you confirm it |
 | **یادگیری** (learning) | Syllabus parsing, units, "read up to here", progress bars, stale-item report, deletion (single and in bulk), a chart per item and for the minutes |
-| **دستاوردها** (achievements) | Grounded in cited task ids, confirmed manually, Markdown export, deletion (single and in bulk), medals that are computed from the work and taken away when the work disappears |
+| **تالار افتخارات** (hall of honours) | The medals the musters give, the degrees, the title of the user and the gates of the next one. Nothing is registered by hand: the honours come from the reviews |
 | **ارزیابی‌ها** (reviews) | Jalali month/quarter/half-year/year periods, an immutable stats snapshot, comparison with the previous period, a wizard with an AI draft and its charts, Markdown export, a read-only view of a finished review, a rating that shows its scale (۴ از ۵), deletion (single and in bulk), a chart of the hours per kind and of the rating of every review |
 | **تنظیمات** (settings) | Timezone, weekend days, weekly target, notification channels with test buttons, holidays, the AI provider, key and model, JSON export |
 | **اضافه‌کاری** (overtime) | A tab of its own: a dedicated form, the total, the split between the off days and the working days, a chart of the last sixty days and the list of the entries |
@@ -257,6 +257,27 @@ the parchment is the warm paper of a ledger. The setting lives in the
 settings page; the system preference (`prefers-color-scheme`) only decides
 the theme the very first time, before the user has chosen one.
 
+## The hall of honours
+
+The hall of honours is not a list the user fills in by hand. The honours
+come from the musters (the reviews): at the end of every Jalali month the
+worker writes the draft of the muster of that month, the AI proposes the
+medals with the tasks that back them, and the user confirms the muster. Only
+then are the medals written — and the server checks every proposal again
+before it gives anything:
+
+- a medal may only be backed by a task that is finished, that is allowed to
+  count and that does not back another medal;
+- the tier the proposal asks for is lowered to what the evidence proves
+  (bronze 1, silver 2, gold 4 points of value);
+- a month counts at most 10 points of value, and the second medal of the
+  same domain in the same month counts for half;
+- six points of value make one degree, and the titles go from the page to
+  the king — the king needs 65 degrees, which is 39 months at the cap.
+
+Every number of the engine lives in `config/rewards.yaml` and is validated
+when it is read, so a wrong number is reported instead of breaking a muster.
+
 ## Project structure
 
 ```
@@ -299,13 +320,13 @@ app/
 - [x] M8 — AI features behind the `AIProvider` interface
 - [x] M9 — export, backup/restore, seed data, final polish
 - [x] M10 — the two lexicons, the two themes, the icon manifest and the credits
+- [x] M11 — the reward engine: the musters, the medals, the degrees and the titles
 
 Still open:
 
-- The AI draft of a review is written into the review, but the achievements it
-  proposes are created without a link to the review itself.
-- The honours hall is not a manual list: the honours are given by the
-  reviews, and the reward engine that computes them is not written yet.
+- The court chart, the round table and the heraldry of the hall of the honours
+  are not drawn yet.
+- The realm map and the saga of the musters are not written yet.
 - The learning report is generated per item; a yearly summary page is missing.
 - The dashboard heatmap is a flat 90-day grid; a calendar-shaped heatmap would
   read better.
