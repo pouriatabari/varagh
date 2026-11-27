@@ -1,0 +1,145 @@
+# The numbers of the reward engine.
+#
+# Every threshold of the app lives here, never in the code. The file is
+# validated by Pydantic when it is read, and the settings page may change
+# it; the defaults below can always be restored.
+
+# The value of a medal, before the cap and the diminishing returns.
+medal_tiers:
+  bronze: 1
+  silver: 2
+  gold: 4
+
+# What a medal needs to be earned: the number of the finished tasks that
+# back it, an impact note, and an impact note the user marked as concrete.
+evidence:
+  bronze:
+    tasks: 1
+    impact_note: false
+    concrete: false
+  silver:
+    tasks: 2
+    impact_note: true
+    concrete: false
+  gold:
+    tasks: 3
+    impact_note: true
+    concrete: true
+
+# The six virtues. Every medal has exactly one.
+virtues:
+  - prowess
+  - valor
+  - wisdom
+  - loyalty
+  - largesse
+  - temperance
+
+# The value that makes one degree.
+degree_size: 6
+
+counting:
+  # The counted value of one Jalali month.
+  monthly_cap: 10
+  # The share of the value of the second medal of a domain in the same month.
+  diminishing_factor: 0.5
+
+# The medal of temperance is given by the app, once a month.
+temperance:
+  # The minutes of overtime that still count as a balanced month.
+  overtime_minutes_threshold: 600
+  # The weeks of the month in which the weekly target was met.
+  weeks_with_target_met: 3
+
+# The medal of victory is given by the app, once a month.
+victory:
+  # The points of the completion rate the muster must win.
+  completion_rate_gain: 10
+  # The share the median lead time of the same domain must shrink by.
+  lead_time_drop: 20
+  # The number of the tasks that can be compared.
+  min_comparable_tasks: 3
+
+# The titles, from the lowest to the highest. A gate that is not written
+# down is not needed.
+titles:
+  - key: page
+    degrees: 0
+  - key: squire
+    degrees: 2
+    musters: 2
+  - key: knight
+    degrees: 5
+    silver: 1
+    virtues: 2
+    vigil: true
+  - key: banneret
+    degrees: 9
+    silver: 2
+    virtues: 3
+    vigil: true
+  - key: baron
+    degrees: 14
+    gold: 1
+    virtues: 3
+    fiefs: 1
+    vigil: true
+  - key: viscount
+    degrees: 20
+    gold: 2
+    virtues: 4
+    vigil: true
+  - key: earl
+    degrees: 27
+    gold: 3
+    virtues: 4
+    fiefs: 2
+    vigil: true
+  - key: marquess
+    degrees: 35
+    gold: 5
+    virtues: 5
+    vigil: true
+  - key: duke
+    degrees: 44
+    gold: 7
+    virtues: 5
+    fiefs: 3
+    vigil: true
+  - key: prince
+    degrees: 54
+    gold: 10
+    virtues: 5
+    virtues_must_include:
+      - largesse
+    vigil: true
+  - key: king
+    degrees: 65
+    gold: 14
+    virtues: 6
+    fiefs: 4
+    vigil: true
+
+# A domain with this many counted medals is a fief.
+fiefs:
+  medals_per_fief: 3
+
+# The last title: it comes after the king and every realm of the map.
+endgame:
+  realms: 14
+  title: bretwalda
+
+# The orders: badges without value.
+orders:
+  quill:
+    journal_days: 25
+  scholar:
+    learning_items: 3
+  round_table:
+    quarterly_musters: 4
+
+# The quests: an optional task the app proposes every month.
+quests:
+  per_month_min: 1
+  per_month_max: 3
+  medal_tier: bronze

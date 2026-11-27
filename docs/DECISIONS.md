@@ -440,3 +440,44 @@ together with its rationale.
   it, not a ladder of a chart. Nothing of the tree is written by hand: a
   title that the configuration does not know is never drawn, so the picture
   cannot drift away from the rules of the reward engine.
+
+## D38 — The desktop and the phone are a second app, written in Dart
+
+- **Decision:** The web app stays as it is: FastAPI, Jinja2, HTMX, Postgres —
+  it is the app of the browser. The desktop (macOS, Windows, Linux) and the
+  phone (Android) get a second app of their own, written in Flutter and Dart,
+  in `flutter_app/`. It is standalone: it keeps its own journal in a SQLite
+  file of the machine, it never calls the server, and it reads the same
+  `config/rewards.yaml` as the web app, copied into `assets/rewards.yaml`, so
+  the rules of the medals and of the ladder are the same on every screen. The
+  reward engine is ported to Dart in `lib/domain/rewards.dart`, and the tree
+  of the ranks is painted by a `CustomPainter` in `lib/widgets/skill_tree.dart`.
+- **Why:** A desktop app installed as a `.dmg` and a phone app installed as an
+  `.apk` cannot be a server-rendered web page: they must run without a
+  server, without Docker and without a network. The rules of the reward
+  engine are pure arithmetic, so they can be written twice — once in Python
+  and once in Dart — and checked against each other by the same numbers. The
+  configuration file is the single source of truth for the thresholds, so the
+  two engines cannot drift apart on the rules themselves.
+- **The platform folders are not in the repository.** `android/`, `macos/`,
+  `windows/` and `linux/` are written by `flutter create`; the Gradle wrapper
+  jar is a binary, and a binary does not belong in the history of the code.
+  `flutter_app/tool/bootstrap.sh` writes the folders and puts back the files
+  of the app, and the CI calls it before it builds.
+
+## D39 — The releases are made by the CI, one tag at a time
+
+- **Decision:** `.github/workflows/release.yml` builds the desktop packages
+  (a `.dmg` for the mac, a `.zip` for the windows, a `.tar.gz` for the linux)
+  and the mobile package (an `.apk`) and puts all of them into a GitHub
+  release of the tag that was pushed. The CI (`.github/workflows/ci.yml`) runs
+  the tests of the python app and the checks of the Flutter app on every push
+  and every pull request.
+- **Why:** The user asked for a release at every run, and a tag is the
+  clearest word for "this is a version": the tag names the files, the notes
+  of the release are written by the workflow, and the packages are the ones
+  the same tag will always produce. The signature of the Android package is
+  optional: when the secret `KEYSTORE_BASE64` is set the package is signed
+  with it, and when it is not the package is still built, unsigned, so the
+  pipeline never depends on a secret being present.
+

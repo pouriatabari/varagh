@@ -1,0 +1,190 @@
+name: Release
+
+# Every tag of the form `v1.2.3` builds the desktop and the mobile
+# packages of the app and puts them into a release of the repository.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The tag of the release
+        required: true
+        default: v0.1.0
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  macos:
+    name: The disk image of the mac
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: stable
+          cache: true
+      - name: Write the platform folders
+        working-directory: flutter_app
+        run: VARAGH_PLATFORMS=macos bash tool/bootstrap.sh
+      - name: Build the app
+        working-directory: flutter_app
+        run: flutter build macos --release
+      - name: Put the app into a disk image
+        run: |
+          set -euo pipefail
+          staging="$(mktemp -d)"
+          cp -R flutter_app/build/macos/Build/Products/Release/varagh.app "$staging/"
+          ln -s /Applications "$staging/Applications"
+          hdiutil create \
+            -volname "Varagh" \
+            -srcfolder "$staging" \
+            -ov -format UDZO \
+            "varagh-${{ github.ref_name }}-macos.dmg"
+          rm -rf "$staging"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: "*.dmg"
+          if-no-files-found: error
+
+  windows:
+    name: The package of the windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: stable
+          cache: true
+      - name: Write the platform folders
+        working-directory: flutter_app
+        run: VARAGH_PLATFORMS=windows bash tool/bootstrap.sh
+      - name: Build the app
+        working-directory: flutter_app
+        run: flutter build windows --release
+      - name: Gather the files
+        shell: pwsh
+        run: |
+          Compress-Archive -Path flutter_app/build/windows/x64/runner/Release/* `
+            -DestinationPath "varagh-${{ github.ref_name }}-windows.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: "*.zip"
+          if-no-files-found: error
+
+  linux:
+    name: The package of the linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: stable
+          cache: true
+      - name: Write the platform folders
+        working-directory: flutter_app
+        run: VARAGH_PLATFORMS=linux bash tool/bootstrap.sh
+      - name: Install the libraries of the desktop
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev
+      - name: Build the app
+        working-directory: flutter_app
+        run: flutter build linux --release
+      - name: Gather the files
+        run: |
+          tar -czf "varagh-${{ github.ref_name }}-linux.tar.gz" \
+            -C flutter_app/build/linux/x64/release/bundle varagh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: "*.tar.gz"
+          if-no-files-found: error
+
+  android:
+    name: The package of the android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: stable
+          cache: true
+      - name: Cache the gradle build
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('flutter_app/android/**/*.gradle*') }}
+          restore-keys: gradle-${{ runner.os }}-
+      - name: Write the platform folders
+        working-directory: flutter_app
+        run: VARAGH_PLATFORMS=android bash tool/bootstrap.sh
+      - name: Write the key of the signature
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p flutter_app/android
+          echo "$KEYSTORE_BASE64" | base64 --decode > flutter_app/android/varagh.keystore
+      - name: Build the package
+        working-directory: flutter_app
+        run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: "flutter_app/build/app/outputs/flutter-apk/*.apk"
+          if-no-files-found: error
+
+  release:
+    name: The release
+    needs: [macos, windows, linux, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Write the notes of the release
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          {
+            echo "## Varagh ${tag}"
+            echo
+            echo "The journal of the user, on the desktop and on the phone."
+            echo
+            echo "| Package | File |"
+            echo "| --- | --- |"
+            echo "| macOS | \`varagh-${tag}-macos.dmg\` |"
+            echo "| Windows | \`varagh-${tag}-windows.zip\` |"
+            echo "| Linux | \`varagh-${tag}-linux.tar.gz\` |"
+            echo "| Android | \`varagh-release.apk\` |"
+          } > release-notes.md
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            artifacts/* \
+            --title "Varagh ${GITHUB_REF_NAME}" \
+            --notes-file release-notes.md

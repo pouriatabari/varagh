@@ -1,0 +1,29 @@
+name: varagh
+description: "Varagh (ورق) — the journal of the user, on the desktop and on the phone."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # The journal lives in a SQLite file of its own, on the machine of the
+  # user: nothing leaves the device.
+  sqflite: ^2.3.3
+  sqflite_common_ffi: ^2.3.3
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  # The rules of the reward engine are the same file the python app reads.
+  yaml: ^3.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/rewards.yaml

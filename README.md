@@ -373,6 +373,52 @@ Nothing is fetched while the page is drawn.
 - when a muster is confirmed, the ceremony plays: the fog lifts, the
   castles light one by one and the road of the campaign draws itself.
 
+## The desktop and the phone (Flutter)
+
+The web app above is the app of the browser. The desktop and the phone get a
+second app of their own, written in Flutter (Dart), in `flutter_app/`. It is
+**standalone**: it keeps its own journal in a SQLite file of the machine, it
+never calls a server, and it reads the same reward rules as the web app from
+`assets/rewards.yaml` (a copy of `config/rewards.yaml`).
+
+```bash
+cd flutter_app
+bash tool/bootstrap.sh      # writes android/ macos/ windows/ linux/
+flutter run -d macos        # or -d android, -d windows, -d linux
+flutter test                # the tests of the reward engine
+```
+
+The platform folders are **not** in the repository: the Gradle wrapper jar is a
+binary, and a binary does not belong in the history of the code. The
+bootstrap script writes them and puts back the files of the app.
+
+What is in the Flutter app today: the reward engine (`lib/domain/rewards.dart`),
+the configuration (`lib/domain/rewards_config.dart`), the tree of the ranks
+(`lib/domain/skill_tree.dart` and `lib/widgets/skill_tree.dart`), the journal
+(`lib/data/database.dart`), the two themes (`lib/theme.dart`), the Persian
+words (`lib/i18n.dart`) and the screens of the dashboard, the tasks, the
+learning, the reviews and the hall of honours.
+
+### The releases
+
+`.github/workflows/release.yml` builds the packages and publishes them as a
+GitHub release of the tag that was pushed:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+| Platform | File |
+| --- | --- |
+| macOS | `varagh-v0.1.0-macos.dmg` |
+| Windows | `varagh-v0.1.0-windows.zip` |
+| Linux | `varagh-v0.1.0-linux.tar.gz` |
+| Android | `varagh-release.apk` |
+
+The Android package is signed when the repository secret `KEYSTORE_BASE64` is
+set (with `KEYSTORE_PASSWORD` beside it); without it the package is built
+unsigned, so the pipeline never depends on a secret.
+
 ## Project structure
 
 ```
@@ -387,6 +433,17 @@ app/
 ├── notify/     # notification channels and rules
 ├── worker/     # APScheduler worker
 └── i18n/       # the two Persian packs: the plain one and the medieval one
+
+flutter_app/     # the second app: the desktop and the phone, in Flutter
+├── lib/
+│   ├── domain/  # the reward engine, the configuration, the tree of the ranks
+│   ├── data/    # the SQLite journal of the user
+│   ├── widgets/ # the tree of the ranks, painted by the code
+│   ├── screens/ # the dashboard, the tasks, the learning, the reviews, the hall
+│   ├── theme.dart, i18n.dart, app.dart, main.dart
+├── assets/      # rewards.yaml, the same numbers as the web app
+├── test/        # the tests of the reward engine
+└── tool/        # bootstrap.sh, the script that writes the platform folders
 ```
 
 ## Troubleshooting

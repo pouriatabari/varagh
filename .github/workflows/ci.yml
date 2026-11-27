@@ -1,0 +1,45 @@
+name: CI
+
+# The gate of the repository: the tests of the python app and the checks of
+# the flutter app run on every push and on every pull request.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: The tests of the app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image of the tests
+        run: docker compose build tests
+      - name: Run the tests
+        run: docker compose run --rm tests
+
+  flutter:
+    name: The checks of the desktop app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: stable
+          cache: true
+      - name: Write the platform folders
+        run: VARAGH_PLATFORMS=linux,android bash tool/bootstrap.sh
+      - name: Look for mistakes
+        run: flutter analyze
+      - name: Run the tests
+        run: flutter test
