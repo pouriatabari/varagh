@@ -161,6 +161,22 @@ Future<void> _createShape(Database db) async {
   await db.execute(
     'CREATE INDEX IF NOT EXISTS ix_journal_date ON journal_entries (date_key)',
   );
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS time_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT NOT NULL DEFAULT 'work',
+      task_id INTEGER,
+      learning_item_id INTEGER,
+      started_at TEXT NOT NULL,
+      ended_at TEXT,
+      duration_minutes INTEGER NOT NULL DEFAULT 0,
+      reason TEXT NOT NULL DEFAULT '',
+      note TEXT NOT NULL DEFAULT ''
+    )
+  ''');
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS ix_time_started_at ON time_entries (started_at)',
+  );
   await db.execute(
     'CREATE INDEX IF NOT EXISTS ix_medals_month_key ON medals (month_key)',
   );

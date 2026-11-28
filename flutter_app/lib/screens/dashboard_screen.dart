@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../data/database.dart';
+import '../data/time_entries.dart';
 import '../domain/rewards_config.dart';
 import '../domain/skill_tree.dart';
 import '../i18n.dart';
 import '../theme.dart';
 import '../widgets/skill_tree.dart';
+import '../widgets/timer_card.dart';
 
 /// The first page: what the day holds and where the user stands.
 class DashboardScreen extends StatefulWidget {
@@ -25,6 +27,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   SkillTree? _tree;
   int _open = 0;
+  int _minutes = 0;
 
   @override
   void initState() {
@@ -43,6 +46,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final String status = row['status'] as String? ?? 'todo';
       if (status == 'todo' || status == 'doing') open++;
     }
+    final int minutes =
+        await TimeRepository(widget.database).minutesToday();
     final SkillTree tree = buildSkillTree(
       medals: snapshot.medals,
       musters: snapshot.musters,
@@ -55,6 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _tree = tree;
       _open = open;
+      _minutes = minutes;
     });
   }
 
@@ -64,12 +70,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: <Widget>[
+        TimerCard(database: widget.database),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 12,
           runSpacing: 12,
           children: <Widget>[
-            _Tile(label: Fa.t('nav.tasks'), value: '$_open'),
-            _Tile(label: Fa.t('nav.reviews'), value: '${tree == null ? 0 : tree.nodes.length}'),
+            _Tile(label: 'کارهای باز', value: '$_open'),
+            _Tile(label: 'دقایق امروز', value: '$_minutes'),
+            if (tree != null)
+              _Tile(label: 'رتبهٔ کنونی', value: tree.current),
           ],
         ),
         const SizedBox(height: 16),
