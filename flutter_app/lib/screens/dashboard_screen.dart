@@ -79,7 +79,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _Tile(label: 'کارهای باز', value: '$_open'),
             _Tile(label: 'دقایق امروز', value: '$_minutes'),
             if (tree != null)
-              _Tile(label: 'رتبهٔ کنونی', value: tree.current),
+              _Tile(label: 'رتبهٔ کنونی', value: Fa.title(tree.current)),
           ],
         ),
         const SizedBox(height: 16),
