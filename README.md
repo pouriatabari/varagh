@@ -394,10 +394,13 @@ bootstrap script writes them and puts back the files of the app.
 
 What is in the Flutter app today: the reward engine (`lib/domain/rewards.dart`),
 the configuration (`lib/domain/rewards_config.dart`), the tree of the ranks
-(`lib/domain/skill_tree.dart` and `lib/widgets/skill_tree.dart`), the journal
+(`lib/domain/skill_tree.dart` and `lib/widgets/skill_tree.dart`), the map of
+the realms (`lib/widgets/realm_map.dart`, painted from the same vendored
+ground as the web app), the Persian calendar (`lib/utils/jalali.dart`), the
+journal (`lib/data/journal.dart`), the journal of the user on the disk
 (`lib/data/database.dart`), the two themes (`lib/theme.dart`), the Persian
 words (`lib/i18n.dart`) and the screens of the dashboard, the tasks, the
-learning, the reviews and the hall of honours.
+learning, the reviews, the hall, the realms, the journal and the settings.
 
 ### The releases
 
