@@ -21,7 +21,7 @@ class RealmsScreen extends StatefulWidget {
 }
 
 class _RealmsScreenState extends State<RealmsScreen> {
-  late final RealmRepository _realms;
+  RealmRepository get _realms => RealmRepository(widget.database);
   MapGeometry? _geometry;
   List<RealmState> _states = <RealmState>[];
   RealmState? _selected;
@@ -29,7 +29,6 @@ class _RealmsScreenState extends State<RealmsScreen> {
   @override
   void initState() {
     super.initState();
-    _realms = RealmRepository(widget.database);
     _load();
   }
 

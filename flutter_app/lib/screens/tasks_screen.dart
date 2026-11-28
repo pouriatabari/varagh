@@ -19,7 +19,7 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
-  late final TaskRepository _tasks;
+  TaskRepository get _tasks => TaskRepository(widget.database);
   List<Task> _items = <Task>[];
   bool _onlyOpen = true;
   String _search = '';
@@ -27,7 +27,6 @@ class _TasksScreenState extends State<TasksScreen> {
   @override
   void initState() {
     super.initState();
-    _tasks = TaskRepository(widget.database);
     _load();
   }
 

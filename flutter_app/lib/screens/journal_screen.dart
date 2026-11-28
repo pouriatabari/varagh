@@ -20,13 +20,12 @@ class JournalScreen extends StatefulWidget {
 }
 
 class _JournalScreenState extends State<JournalScreen> {
-  late final JournalRepository _journal;
+  JournalRepository get _journal => JournalRepository(widget.database);
   List<JournalEntry> _entries = <JournalEntry>[];
 
   @override
   void initState() {
     super.initState();
-    _journal = JournalRepository(widget.database);
     _load();
   }
 

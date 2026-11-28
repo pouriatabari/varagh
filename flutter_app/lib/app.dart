@@ -34,7 +34,13 @@ class VaraghApp extends StatefulWidget {
 }
 
 class _VaraghAppState extends State<VaraghApp> {
-  late String _themeName = widget.themeName;
+  String _themeName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _themeName = widget.themeName;
+  }
 
   void _changeTheme(String name) {
     setState(() => _themeName = name);

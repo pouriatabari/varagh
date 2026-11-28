@@ -19,14 +19,13 @@ class LearningScreen extends StatefulWidget {
 }
 
 class _LearningScreenState extends State<LearningScreen> {
-  late final LearningRepository _items;
+  LearningRepository get _items => LearningRepository(widget.database);
   List<LearningItem> _list = <LearningItem>[];
   bool _onlyActive = true;
 
   @override
   void initState() {
     super.initState();
-    _items = LearningRepository(widget.database);
     _load();
   }
 

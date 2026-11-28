@@ -21,7 +21,7 @@ class TimerCard extends StatefulWidget {
 }
 
 class _TimerCardState extends State<TimerCard> {
-  late final TimeRepository _time;
+  TimeRepository get _time => TimeRepository(widget.database);
   TimeEntry? _running;
   List<TimeEntry> _today = <TimeEntry>[];
   String _kind = 'work';
@@ -30,7 +30,6 @@ class _TimerCardState extends State<TimerCard> {
   @override
   void initState() {
     super.initState();
-    _time = TimeRepository(widget.database);
     _load();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_running != null) setState(() {});
