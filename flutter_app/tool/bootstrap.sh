@@ -39,5 +39,26 @@ done
 # The test of the template of Flutter is not the test of the app.
 rm -f test/widget_test.dart
 
+# The icon of the app: the shield of the ranks.
+icons="assets/icons"
+if [ -d "$icons" ]; then
+  macicons="macos/Runner/Assets.xcassets/AppIcon.appiconset"
+  if [ -d "$macicons" ]; then
+    for size in 16 32 64 128 256 512 1024; do
+      if [ -f "$icons/icon-$size.png" ]; then
+        cp "$icons/icon-$size.png" "$macicons/AppIcon-$size.png"
+      fi
+    done
+  fi
+  androidicons="android/app/src/main/res"
+  if [ -d "$androidicons" ]; then
+    cp "$icons/icon-48.png" "$androidicons/mipmap-mdpi/ic_launcher.png"
+    cp "$icons/icon-72.png" "$androidicons/mipmap-hdpi/ic_launcher.png"
+    cp "$icons/icon-96.png" "$androidicons/mipmap-xhdpi/ic_launcher.png"
+    cp "$icons/icon-144.png" "$androidicons/mipmap-xxhdpi/ic_launcher.png"
+    cp "$icons/icon-192.png" "$androidicons/mipmap-xxxhdpi/ic_launcher.png"
+  fi
+fi
+
 flutter pub get
 echo "the platform folders are ready: $platforms"
