@@ -108,78 +108,51 @@ JalaliDate jalaliOf(DateTime value) {
 }
 
 /// Convert a Jalali date into a Gregorian date.
+///
+/// The first day of the Persian year is found with the conversion above,
+/// and the day of the year is added to it, so the two directions can never
+/// disagree about the length of a year.
 DateTime gregorianOf(int jy, int jm, int jd) {
-  int gy;
-  int adjusted = jy;
-  if (jy > 979) {
-    gy = 1600;
-    adjusted = jy - 979;
-  } else {
-    gy = kJalaliEpoch;
-  }
-
-  int days = 365 * adjusted +
-      (adjusted ~/ 33) * 8 +
-      (((adjusted % 33) + 3) ~/ 4) +
-      78 +
-      jd +
-      (jm < 7 ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
-
-  gy += 400 * (days ~/ 146097);
-  days %= 146097;
-  if (days > 36524) {
-    gy += 100 * (days ~/ 36524);
-    days %= 36524;
-    if (days >= 365) days += 1;
-  }
-  gy += 4 * (days ~/ 1461);
-  days %= 1461;
-  if (days > 365) {
-    gy += (days - 1) ~/ 365;
-    days = (days - 1) % 365;
-  }
-  int gd = days + 1;
-
-  final List<int> lengthOfMonth = <int>[
-    0,
-    31,
-    _isGregorianLeap(gy) ? 29 : 28,
-    31,
-    30,
-    31,
-    30,
-    31,
-    31,
-    30,
-    31,
-    30,
-    31,
-  ];
-  int gm = 0;
-  while (gm < 13 && gd > lengthOfMonth[gm]) {
-    gd -= lengthOfMonth[gm];
-    gm += 1;
-  }
-  return DateTime(gy, gm, gd);
+  final DateTime start = _startOfJalaliYear(jy);
+  return start.add(Duration(days: _dayOfJalaliYear(jy, jm, jd) - 1));
 }
 
-/// The Gregorian year has a leap day.
-bool _isGregorianLeap(int year) =>
-    (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+/// The first day of a Persian year, as a Gregorian date.
+DateTime _startOfJalaliYear(int jy) {
+  final DateTime guess = DateTime(jy + 621, 3, 21);
+  for (int shift = -3; shift <= 3; shift++) {
+    final DateTime day = guess.add(Duration(days: shift));
+    final JalaliDate jalali = jalaliOf(day);
+    if (jalali.year == jy && jalali.month == 1 && jalali.day == 1) return day;
+  }
+  return guess;
+}
 
-/// The Persian year has a leap day.
-bool isLeapJalali(int year) {
-  final int remainder = year % 33;
-  return remainder == 1 || remainder == 5 || remainder == 9 || remainder == 13 ||
-      remainder == 17 || remainder == 22 || remainder == 26 || remainder == 30;
+/// The day of the Persian year, the first of Farvardin being the first.
+int _dayOfJalaliYear(int jy, int jm, int jd) {
+  int day = jd;
+  for (int month = 1; month < jm; month++) {
+    day += _lengthOfJalaliMonth(jy, month);
+  }
+  return day;
 }
 
 /// The number of the days of a month of the Persian calendar.
-int daysInJalaliMonth(int year, int month) {
-  if (month <= 6) return 31;
-  if (month <= 11) return 30;
-  return isLeapJalali(year) ? 30 : 29;
+int _lengthOfJalaliMonth(int jy, int jm) {
+  if (jm <= 6) return 31;
+  if (jm <= 11) return 30;
+  return _lengthOfJalaliYear(jy) - 336;
 }
+
+/// The number of the days of a Persian year.
+int _lengthOfJalaliYear(int jy) =>
+    _startOfJalaliYear(jy + 1).difference(_startOfJalaliYear(jy)).inDays;
+
+/// The Persian year has a leap day.
+bool isLeapJalali(int year) => _lengthOfJalaliYear(year) == 366;
+
+/// The number of the days of a month of the Persian calendar.
+int daysInJalaliMonth(int year, int month) => _lengthOfJalaliMonth(year, month);
 
 /// The month of a date, the way the medals are counted: 1404/01.
 String monthKeyOf(DateTime value) => jalaliOf(value).monthKey;
