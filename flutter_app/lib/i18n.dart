@@ -22,12 +22,9 @@ class Fa {
 
     // The hall of honours.
     'honours.title': 'تالار افتخارات',
-    'honours.tree_title': 'درختِ رتبه‌ها',
-    'honours.tree_hint': 'روی هر نشان بزن تا جزئیاتش را ببینی.',
+    'honours.court': 'هیئتِ رتبه‌ها',
+    'honours.table': 'میزِ گرد',
     'honours.requirements': 'شرط‌ها',
-    'honours.rewards': 'دستاوردها',
-    'honours.reward_insignia': 'نشانِ این رتبه، با میخ‌های درجه‌هایش',
-    'honours.reward_degrees': 'درجه‌های شمرده: {count}',
     'honours.reached': 'باز شده',
     'honours.current': 'رتبهٔ کنونیِ تو',
     'honours.next': 'رتبهٔ بعدی',
@@ -35,12 +32,8 @@ class Fa {
     'honours.met': 'انجام شده',
     'honours.unmet': 'هنوز نیست',
     'honours.requirement_body': 'از {current} تا {required} شمرده شده.',
-    'honours.pick_a_node': 'روی یکی از نشان‌ها بزن تا جزئیاتش را ببینی.',
-    'honours.legend': 'راهنمای نشان‌ها',
-    'honours.legend_open': 'راهِ گشوده',
-    'honours.legend_ready': 'راهِ آماده',
-    'honours.legend_locked': 'راهِ بسته',
-    'honours.legend_current': 'رتبهٔ کنونی',
+    'honours.tap_to_choose': 'روی هر رتبه بزن تا جزئیاتش را ببینی.',
+    'honours.next_title': 'رتبهٔ بعدی',
 
     // The gates of a title.
     'gate.degrees': 'درجه‌ها',

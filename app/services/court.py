@@ -1,20 +1,103 @@
-"""The round table of the virtues.
+"""The court chart and the round table.
 
-The table is the circle of the six virtues. Each seat lights as far as
-the medals of that virtue have carried the user.
+The chart is the pyramid of the titles: the page at the bottom, the king
+at the top. The tiers that were reached are lit, the others are locked,
+and the tier of the user is the one that shines.
 
-The ladder of the titles is drawn by the tree of the ranks
-(:mod:`app.insignia.skill_tree`), not from here.
+The round table is the circle of the six virtues. Each seat lights as
+far as the medals of that virtue have carried the user.
 """
 
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 # The order of the virtues around the table.
 VIRTUE_ORDER = ("prowess", "valor", "wisdom", "loyalty", "largesse", "temperance")
+
+
+@dataclass(frozen=True)
+class CourtTier:
+    """One tier of the pyramid."""
+
+    key: str
+    reached: bool
+    current: bool
+    next: bool
+    progress: float = 0.0
+
+
+def court_chart_svg(
+    tiers: Sequence[CourtTier],
+    *,
+    labels: dict[str, str] | None = None,
+    width: int = 380,
+    row_height: int = 34,
+    badge_for: Callable[[str, str], str] | None = None,
+) -> str:
+    """The pyramid of the titles, from the page at the bottom to the king.
+
+    The tiers are drawn from the top (the highest title) down, so the
+    page is at the bottom of the picture. The labels are the words of the
+    interface; they are given from the outside, so the picture stays a
+    picture and not a page.
+
+    The badge of every tier stands in a column beside the pyramid when
+    ``badge_for`` is given: it draws the badge of a title in a state.
+    """
+    count = len(tiers)
+    height = count * row_height + 16
+    names = labels or {}
+    top_half = width * 0.15
+    bottom_half = width * 0.42
+    span = (bottom_half - top_half) / max(count, 1)
+    body = [
+        f'<svg class="court-chart" viewBox="0 0 {width} {height}" '
+        f'width="{width}" height="{height}" role="img" aria-label="court chart" '
+        'xmlns="http://www.w3.org/2000/svg">',
+    ]
+    for index, tier in enumerate(reversed(tiers)):
+        # The first drawn row is the highest title.
+        level = index
+        half_top = top_half + span * level
+        half_bottom = half_top + span
+        middle = width / 2
+        y = 8 + index * row_height
+        classes = "court-tier"
+        if tier.reached:
+            classes += " lit"
+        else:
+            classes += " locked"
+        if tier.current:
+            classes += " current"
+        if tier.next:
+            classes += " next"
+        badge = ""
+        if badge_for is not None:
+            state = "locked"
+            if tier.reached or tier.current:
+                state = "lit"
+            elif tier.next:
+                state = "next"
+            drawn = badge_for(tier.key, state)
+            badge = (
+                f'<g class="court-badge" transform="translate({width - 30} '
+                f'{y + 3}) scale(0.6)">{drawn}</g>'
+            )
+        body.append(
+            f'<g class="{classes}"><title>{names.get(tier.key, tier.key)}</title>'
+            f'<path d="M {middle - half_top:.1f} {y} '
+            f'H {middle + half_top:.1f} '
+            f'L {middle + half_bottom:.1f} {y + row_height - 3} '
+            f'H {middle - half_bottom:.1f} Z" />'
+            f'<text x="{middle:.1f}" y="{y + row_height / 2 + 4:.1f}" '
+            f'text-anchor="middle">{names.get(tier.key, tier.key)}</text>'
+            f"{badge}</g>"
+        )
+    body.append("</svg>")
+    return "".join(body)
 
 
 @dataclass(frozen=True)
@@ -89,12 +172,14 @@ def round_table_svg(
         body.append(f'<g class="{classes}" style="--seat-color: var(--viz-{colour})">')
         body.append(f"<title>{name}</title>")
         body.append(
-            f'<path class="seat-track" d="{_wedge(middle, radius, inner, start, end)}" />'
+            f'<path class="seat-track" '
+            f'd="{_wedge(middle, radius, inner, start, end)}" />'
         )
         if seat.count > 0 and seat.share > 0:
             lit_end = start + (end - start) * min(seat.share, 1.0)
             body.append(
-                f'<path class="seat-bar" d="{_wedge(middle, radius, inner, start, lit_end)}" />'
+                f'<path class="seat-bar" '
+                f'd="{_wedge(middle, radius, inner, start, lit_end)}" />'
             )
         label_x = middle + (radius + inner) / 2 * math.cos(math.radians(angle))
         label_y = middle + (radius + inner) / 2 * math.sin(math.radians(angle))
@@ -105,8 +190,8 @@ def round_table_svg(
         body.append("</g>")
     if centre:
         body.append(
-            f'<text class="table-centre" x="{middle}" y="{middle}" text-anchor="middle" '
-            f'dominant-baseline="middle">{centre}</text>'
+            f'<text class="table-centre" x="{middle}" y="{middle}" '
+            f'text-anchor="middle" dominant-baseline="middle">{centre}</text>'
         )
     body.append("</svg>")
     return "".join(body)

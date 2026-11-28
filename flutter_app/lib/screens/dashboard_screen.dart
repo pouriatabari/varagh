@@ -1,4 +1,5 @@
-/// The dashboard: the counters of the journal and the tree of the ranks.
+/// The dashboard: the counters of the journal and the pyramid of the
+/// titles.
 library;
 
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import '../domain/rewards_config.dart';
 import '../domain/skill_tree.dart';
 import '../i18n.dart';
 import '../theme.dart';
-import '../widgets/skill_tree.dart';
+import '../widgets/court_chart.dart';
 import '../widgets/timer_card.dart';
 
 /// The first page: what the day holds and where the user stands.
@@ -84,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(height: 16),
         if (tree != null) ...<Widget>[
           Text(
-            Fa.t('honours.tree_title'),
+            Fa.t('honours.court'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -101,13 +102,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             clipBehavior: Clip.antiAlias,
             child: SizedBox(
-              height: 320,
-              child: SkillTreeView(
+              height: 400,
+              child: CourtChartView(
                 tree: tree,
+                config: widget.config,
                 palette: Theme.of(context).brightness == Brightness.dark
                     ? AppPalette.night
                     : AppPalette.parchment,
-                onNodeTap: (TreeNode node) {},
+                onTap: (TreeNode node) {},
               ),
             ),
           ),

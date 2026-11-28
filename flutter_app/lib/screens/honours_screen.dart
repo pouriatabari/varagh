@@ -1,4 +1,5 @@
-/// The hall of honours: the tree of the ranks and the panel of a node.
+/// The hall of honours: the court chart and the panel of the tier that is
+/// picked.
 library;
 
 import 'package:flutter/material.dart';
@@ -7,10 +8,9 @@ import '../domain/rewards_config.dart';
 import '../domain/skill_tree.dart';
 import '../i18n.dart';
 import '../theme.dart';
-import '../widgets/skill_tree.dart';
+import '../widgets/court_chart.dart';
 
-/// The hall: the tree of the ranks, and the detail of the node that is
-/// picked.
+/// The hall: the court chart and the panel of the tier that is picked.
 class HonoursScreen extends StatefulWidget {
   const HonoursScreen({super.key, required this.database, required this.config});
 
@@ -65,11 +65,11 @@ class _HonoursScreenState extends State<HonoursScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              Fa.t('honours.tree_title'),
+              Fa.t('honours.court'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             Text(
-              Fa.t('honours.tree_hint'),
+              Fa.t('honours.tap_to_choose'),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
@@ -80,12 +80,13 @@ class _HonoursScreenState extends State<HonoursScreen> {
               ),
               clipBehavior: Clip.antiAlias,
               child: SizedBox(
-                height: 340,
-                child: SkillTreeView(
+                height: 420,
+                child: CourtChartView(
                   tree: tree,
+                  config: widget.config,
                   palette: palette,
-                  selectedId: _selected?.id,
-                  onNodeTap: (TreeNode node) => setState(() => _selected = node),
+                  selectedKey: _selected?.id,
+                  onTap: (TreeNode node) => setState(() => _selected = node),
                 ),
               ),
             ),
@@ -116,7 +117,7 @@ class _HonoursScreenState extends State<HonoursScreen> {
   }
 }
 
-/// The detail of the node that is picked.
+/// The detail of the tier that is picked.
 class _NodePanel extends StatelessWidget {
   const _NodePanel({required this.node, required this.config});
 
@@ -130,35 +131,7 @@ class _NodePanel extends StatelessWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(Fa.t('honours.pick_a_node')),
-        ),
-      );
-    }
-    if (picked.kind == 'gate') {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(picked.label, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(
-                Fa.t('honours.requirement_body', <String, Object?>{
-                  'current': picked.current,
-                  'required': picked.required,
-                }),
-              ),
-              const SizedBox(height: 8),
-              Chip(
-                label: Text(
-                  picked.satisfied
-                      ? Fa.t('honours.met')
-                      : Fa.t('honours.unmet'),
-                ),
-              ),
-            ],
-          ),
+          child: Text(Fa.t('honours.tap_to_choose')),
         ),
       );
     }

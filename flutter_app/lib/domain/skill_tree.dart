@@ -1,7 +1,7 @@
-/// The tree of the ranks: the data of the app becomes the picture.
+/// The ranks of the ladder: the data of the app becomes the picture.
 ///
-/// The ranks are the nodes of the tree and the gates of a rank are the
-/// paths that lead into it. Everything comes from the configuration of
+/// The ranks are the tiers of the pyramid and the gates of a rank are
+/// the conditions that stand between the user and the next one. Everything comes from the configuration of
 /// the reward engine and from the state of the user: no node and no path
 /// is written by hand.
 library;

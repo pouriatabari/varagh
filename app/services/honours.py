@@ -463,3 +463,20 @@ def seats(session: Session) -> list[court.Seat]:
         share = (count / highest) if highest else 0.0
         seats.append(court.Seat(virtue=virtue, count=count, share=share))
     return seats
+
+
+def court_tiers(session: Session, config: RewardsConfig) -> list[court.CourtTier]:
+    """The tiers of the pyramid, from the page at the bottom to the king."""
+    state = title_state(session, config)
+    reached = set(state.reached)
+    tiers = []
+    for rule in config.titles:
+        tiers.append(
+            court.CourtTier(
+                key=rule.key,
+                reached=rule.key in reached,
+                current=rule.key == state.current,
+                next=rule.key == state.next_title,
+            )
+        )
+    return tiers

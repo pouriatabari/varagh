@@ -276,7 +276,7 @@ together with its rationale.
 
 ## D30 — The pictures of the hall are read from the database, never drawn by the AI
 
-- **Decision:** The arms, the tree of the ranks and the round table are generated
+- **Decision:** The arms, the court chart and the round table are generated
   by the server from the state of the honours: the title gives the crown,
   the domains the user works in give the colours of the field, the virtues
   the medals stand for give the charges, and the counted medals give the
@@ -354,7 +354,7 @@ together with its rationale.
 - **The placements:** three places carry the badges today: the case of the
   insignia (`/insignia`), the header of the hall of honours (the badge of
   the title of the user, the studs of the degrees and the rack of the six
-  ribbons) and the tree of the ranks (a badge beside every title, lit up
+  ribbons) and the court chart (a badge beside every title, lit up
   to the title of the user and locked above it). Three more placements were
   asked for and are not built yet, because the flows behind them do not
   exist: the pinning ceremony (no route may promote a title by hand, so
@@ -421,25 +421,29 @@ together with its rationale.
   given, and the tests check that a title is given only when its gates are
   met and never taken back.
 
-## D37 — The tree of the ranks is drawn from the data, and it is not a canvas to fight with
+## D37 — The court chart is the pyramid of the titles
 
-- **Decision:** The ladder of the titles is drawn as a tree of the ranks, in
-  the manner of a skill tree of a game: the ranks are a chain of shields
-  that runs from left to right, and the gates of the ranks hang under them
-  like the pendants of a chain, each on its own stem. Every node and every
-  path is computed from `config/rewards.yaml` and from the state of the
-  user. The picture is a plain scrolling strip of SVG — no zoom, no drag, no
-  panning. Clicking a node loads its panel with HTMX.
-- **Why:** The tree was first drawn as a canvas that could be zoomed and
-  dragged. It was fiddly to drive, easy to lose the thread of, and it hid
-  the very thing the tree is for: the gates of the rank that waits. A long
-  picture that scrolls the way a page scrolls is easier to read and easier
-  to keep honest, and the panel of a node gives the detail that the picture
-  has no room for. The shape of the picture follows the picture the design
-  was taken from: a chain of nodes with the small medallions hanging under
-  it, not a ladder of a chart. Nothing of the tree is written by hand: a
-  title that the configuration does not know is never drawn, so the picture
-  cannot drift away from the rules of the reward engine.
+- **Decision:** The ladder of the titles is drawn as a pyramid in the hall
+  of honours: the king is at the top, the page is at the bottom, and the
+  tier of the user is the one that shines. The tiers that were reached are
+  lit with the gold of the theme, the tiers that are locked are dimmed,
+  and the tier that waits is dashed. The badge of every tier stands in a
+  column beside the pyramid — the badge of the title, in a state — so the
+  ladder is read at a glance: the eye finds the lit tier and the next
+  one below.
+- **Why:** The pyramid is the picture the user kept when the hall of
+  honours was first drawn. A chain of shields with hanging medallions was
+  tried as a richer picture of the gates of every rank, but it was harder
+  to read and it hid the very thing the hall is for: where the user is
+  on the ladder. A pyramid is honest about the ranks: every title sits
+  above the one that comes before it, every tier is either lit or locked,
+  and the one that is lit is the one that has been earned.
+- **How to apply:** the pyramid is drawn by `app/services/court.py`'s
+  `court_chart_svg`, fed by `honours.court_tiers`. The badge of every
+  tier is `app.insignia.badge.render_badge`. Nothing of the picture is
+  written by hand: a title that the configuration does not know is never
+  drawn, and the rules of the reward engine remain the only source of
+  truth. See [[english-commits-and-docs]] for the prose rules.
 
 ## D38 — The desktop and the phone are a second app, written in Dart
 
