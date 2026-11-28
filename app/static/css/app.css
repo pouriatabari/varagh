@@ -122,9 +122,9 @@ html[data-theme="night"] {
   --insignia-sable: #171b24;
   --insignia-or: #6d5417;
   --insignia-field-line: rgba(0, 0, 0, 0.5);
-  --skill-floor-1: #14161d;
-  --skill-floor-2: #0a0b10;
-  --skill-floor-3: #050507;
+  --skill-floor-1: #1b2534;
+  --skill-floor-2: #101722;
+  --skill-floor-3: #080c13;
   --insignia-shadow: rgba(0, 0, 0, 0.45);
   --insignia-ink: #e8ecf4;
   --heat-1: #1c332c;
@@ -159,9 +159,9 @@ html[data-theme="parchment"] {
   --insignia-sable: #4b4436;
   --insignia-or: #b08b28;
   --insignia-field-line: rgba(90, 68, 30, 0.35);
-  --skill-floor-1: #2a2117;
-  --skill-floor-2: #171208;
-  --skill-floor-3: #0b0806;
+  --skill-floor-1: #f3e9d2;
+  --skill-floor-2: #e3d3ae;
+  --skill-floor-3: #cdb98d;
   --insignia-shadow: rgba(90, 68, 30, 0.22);
   --insignia-ink: #2c2114;
   --heat-1: #dcefe8;
@@ -2417,21 +2417,20 @@ table tbody tr:hover {
   cursor: pointer;
 }
 
-/* The rim of a medallion: a gold ring with a thin ring inside it. */
 .skill-frame {
   fill: none;
-  stroke: var(--insignia-gilt);
-  stroke-width: 3.5;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--insignia-gilt) 55%, transparent));
+  stroke: var(--insignia-iron);
+  stroke-width: 3;
 }
 
-.skill-frame-inner {
-  fill: none;
-  stroke: color-mix(in srgb, var(--insignia-gilt) 45%, transparent);
-  stroke-width: 1;
+.skill-tick {
+  stroke: var(--insignia-iron);
+  stroke-width: 3;
+  stroke-linecap: round;
 }
 
-.skill-rank.reached .skill-frame {
+.skill-rank.reached .skill-frame,
+.skill-rank.reached .skill-tick {
   stroke: var(--insignia-gilt);
 }
 
@@ -2441,7 +2440,11 @@ table tbody tr:hover {
 
 .skill-rank.current .skill-frame {
   stroke: var(--insignia-gold);
-  stroke-width: 4.5;
+  stroke-width: 4;
+}
+
+.skill-rank.current .skill-tick {
+  stroke: var(--insignia-gold);
 }
 
 .skill-rank.next .skill-frame {
@@ -2450,10 +2453,9 @@ table tbody tr:hover {
 }
 
 .skill-rank.locked .skill-frame,
-.skill-rank.locked .skill-frame-inner {
+.skill-rank.locked .skill-tick {
   stroke: var(--insignia-iron);
-  opacity: 0.5;
-  filter: none;
+  opacity: 0.55;
 }
 
 .skill-rank.locked .skill-badge {
@@ -2500,7 +2502,6 @@ table tbody tr:hover {
 .skill-gate.met .skill-medallion {
   fill: color-mix(in srgb, var(--insignia-gilt) 14%, #0a0f16);
   stroke: var(--insignia-gilt);
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--insignia-gilt) 60%, transparent));
 }
 
 .skill-gate.met .skill-glyph {
