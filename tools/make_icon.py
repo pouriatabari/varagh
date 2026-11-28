@@ -47,7 +47,12 @@ def png(width: int, height: int, pixels: bytearray) -> bytes:
     )
 
 
-def blend(target: bytearray, index: int, colour, alpha: float) -> None:
+def blend(
+    target: bytearray,
+    index: int,
+    colour: tuple[int, int, int],
+    alpha: float,
+) -> None:
     """Put a colour over a pixel, with the given opacity."""
     if alpha <= 0:
         return

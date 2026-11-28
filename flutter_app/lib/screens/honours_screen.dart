@@ -2,8 +2,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-
 import '../data/database.dart';
 import '../domain/rewards_config.dart';
 import '../domain/skill_tree.dart';

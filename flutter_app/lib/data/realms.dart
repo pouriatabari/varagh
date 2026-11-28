@@ -161,7 +161,7 @@ class RealmRepository {
 
   /// Give a realm to a domain: the user has begun the campaign.
   Future<void> assign(String realmKey, String domainName) async {
-    final int? domainId = await DomainRepository(db).create(domainName);
+    final int domainId = await DomainRepository(db).create(domainName);
     await db.insert('realm_claims', <String, Object?>{
       'realm_key': realmKey,
       'domain_id': domainId,

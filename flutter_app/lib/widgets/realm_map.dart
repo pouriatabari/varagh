@@ -197,7 +197,7 @@ class RealmMapPainter extends CustomPainter {
           canvas.save();
           canvas.clipPath(shape);
           canvas.drawRect(
-            shape.bounds,
+            shape.getBounds(),
             Paint()
               ..color = _fog.withValues(alpha: 0.55)
               ..style = PaintingStyle.fill,
