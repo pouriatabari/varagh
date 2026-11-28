@@ -115,7 +115,7 @@ class SkillTreePainter extends CustomPainter {
       final bool isOpen =
           edge.state == NodeState.open || edge.state == NodeState.ready;
       final Color colour = isOpen ? palette.gilt : palette.iron;
-      final double width = isOpen ? 5 : 3;
+      final double width = isOpen ? 7 : 4;
 
       final Path road = Path();
       if (source.kind == 'rank' && target.kind == 'rank') {
@@ -328,18 +328,27 @@ class SkillTreePainter extends CustomPainter {
         centre,
         kRankRadius,
         Paint()
-          ..color = locked ? palette.iron.withValues(alpha: 0.5) : palette.gilt
+          ..color = locked ? palette.iron : palette.gilt
           ..style = PaintingStyle.stroke
-          ..strokeWidth = isCurrent ? 4.5 : 3.5,
+          ..strokeWidth = isCurrent ? 4 : 3,
       );
-      canvas.drawCircle(
-        centre,
-        kRankRadius - 7,
-        Paint()
-          ..color = (locked ? palette.iron : palette.gilt).withValues(alpha: 0.45)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1,
-      );
+
+      // The twelve notches of the frame, the same look the web app draws.
+      final Paint notchPaint = Paint()
+        ..color = locked ? palette.iron : palette.gilt
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round;
+      const double inner = kRankRadius - 9;
+      const double outer = kRankRadius;
+      for (int index = 0; index < 12; index++) {
+        final double angle = (math.pi * 2 * index) / 12;
+        canvas.drawLine(
+          Offset(centre.dx + inner * math.cos(angle), centre.dy + inner * math.sin(angle)),
+          Offset(centre.dx + outer * math.cos(angle), centre.dy + outer * math.sin(angle)),
+          notchPaint,
+        );
+      }
 
       _paintShield(canvas, node, centre, locked);
       _paintText(

@@ -91,9 +91,9 @@ class AppPalette {
     gilt: Color(0xFFD4A72C),
     iron: Color(0xFF6C7789),
     ink: Color(0xFFE8ECF4),
-    floorOne: Color(0xFF14161D),
-    floorTwo: Color(0xFF0A0B10),
-    floorThree: Color(0xFF050507),
+    floorOne: Color(0xFF1B2534),
+    floorTwo: Color(0xFF101722),
+    floorThree: Color(0xFF080C13),
     brightness: Brightness.dark,
   );
 
@@ -119,9 +119,9 @@ class AppPalette {
     gilt: Color(0xFF9A6F1C),
     iron: Color(0xFF6C7789),
     ink: Color(0xFFF2E7CE),
-    floorOne: Color(0xFF2A2117),
-    floorTwo: Color(0xFF171208),
-    floorThree: Color(0xFF0B0806),
+    floorOne: Color(0xFFF3E9D2),
+    floorTwo: Color(0xFFE3D3AE),
+    floorThree: Color(0xFFCDB98D),
     brightness: Brightness.light,
   );
 }
