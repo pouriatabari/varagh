@@ -38,7 +38,7 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   Future<void> _newTask() async {
-    final bool? made = await showDialog<bool>(
+    final made = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => _TaskDialog(repository: _tasks),
     );

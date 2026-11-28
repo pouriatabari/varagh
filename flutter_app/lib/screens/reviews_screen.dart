@@ -170,9 +170,7 @@ class _MusterScreenState extends State<MusterScreen> {
     if (_picked.isEmpty) return;
     await widget.database.insert('medal_proposals', <String, Object?>{
       'review_id': widget.reviewId,
-      'title': _picked.length == 1
-          ? '${_finished.length} کار'
-          : '${_picked.length} کار',
+      'title': '${_picked.length} کار',
       'tier': _tier,
       'virtue': _virtue,
       'evidence_task_ids': _picked.join(','),

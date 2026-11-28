@@ -37,7 +37,7 @@ class _LearningScreenState extends State<LearningScreen> {
   }
 
   Future<void> _newItem() async {
-    final bool? made = await showDialog<bool>(
+    final made = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => _LearningDialog(repository: _items),
     );

@@ -140,6 +140,27 @@ Future<void> _createShape(Database db) async {
       value TEXT NOT NULL
     )
   ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS realm_claims (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      realm_key TEXT NOT NULL UNIQUE,
+      domain_id INTEGER,
+      domain_name TEXT,
+      assigned_at TEXT NOT NULL,
+      claimed_at TEXT
+    )
+  ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS journal_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date_key TEXT NOT NULL,
+      text TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )
+  ''');
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS ix_journal_date ON journal_entries (date_key)',
+  );
   await db.execute(
     'CREATE INDEX IF NOT EXISTS ix_medals_month_key ON medals (month_key)',
   );

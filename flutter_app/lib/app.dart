@@ -8,7 +8,9 @@ import 'domain/rewards_config.dart';
 import 'i18n.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/honours_screen.dart';
+import 'screens/journal_screen.dart';
 import 'screens/learning_screen.dart';
+import 'screens/realms_screen.dart';
 import 'screens/reviews_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/tasks_screen.dart';
@@ -135,6 +137,16 @@ class _HomeShellState extends State<HomeShell> {
         ),
       ),
       _Page(
+        'realms',
+        Icons.public_outlined,
+        (BuildContext context) => RealmsScreen(database: widget.database),
+      ),
+      _Page(
+        'journal',
+        Icons.menu_outlined,
+        (BuildContext context) => JournalScreen(database: widget.database),
+      ),
+      _Page(
         'settings',
         Icons.settings_outlined,
         (BuildContext context) => SettingsScreen(
@@ -153,6 +165,18 @@ class _HomeShellState extends State<HomeShell> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(child: Text(Fa.t('nav.${pages[_index].key}'))),
           ),
+          if (pages.length > 5)
+            PopupMenuButton<int>(
+              tooltip: 'بیشتر',
+              onSelected: (int index) => setState(() => _index = index),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                for (int index = 5; index < pages.length; index++)
+                  PopupMenuItem<int>(
+                    value: index,
+                    child: Text(Fa.t('nav.${pages[index].key}')),
+                  ),
+              ],
+            ),
         ],
       ),
       body: SafeArea(child: pages[_index].builder(context)),
