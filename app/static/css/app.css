@@ -197,7 +197,7 @@ html[data-theme="parchment"] {
 }
 
 .court-chart .court-tier.locked path {
-  opacity: 0.45;
+  fill: var(--bg-sunken);
 }
 
 .court-chart .court-tier.locked text::after {
